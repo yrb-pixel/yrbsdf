@@ -497,9 +497,9 @@ function layoutGraph(nodes) {
 
   if (selNode) { selNode.x = cx; selNode.y = cy; }
 
-  const BASE_R   = Math.min(cw, ch) * 0.22;
-  const RING_STEP = Math.min(cw, ch) * 0.20;
-  const SPREAD   = (140 * Math.PI) / 180;
+const BASE_R   = Math.min(cw, ch) * 0.13;
+  const RING_STEP = Math.min(cw, ch) * 0.12;
+  const SPREAD   = (110 * Math.PI) / 180;
 
   function placeRing(layer, ringIndex, directionAngle) {
     const count  = layer.length;
