@@ -511,7 +511,6 @@ const xlHtml = xlMeta.length ? `
       </div>
     </div>
 
-    <div class="dp-field" style="margin-bottom:12px"><div class="l">Schedule / Trigger</div><div class="v"><code>${(w.sched||'—').trim()}</code></div></div>
     <div class="dp-acts-title">Pipeline — ${w.acts.length} steps</div>
     <div>${w.acts.map((a,i)=>`<span class="dp-act"><span style="color:var(--tx3)">${i+1}.</span> <span class="at">${a.t}</span> <span class="an">${a.n}</span></span>`).join(' → ')}</div>
     ${xlHtml}
