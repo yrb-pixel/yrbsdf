@@ -454,37 +454,46 @@ function buildGraph(id) {
   return {nodes, edges};
 }
 
-// Zigzag layout: nodes in the same depth column are offset alternately in X
-// to reduce label collisions
 function layoutGraph(nodes) {
-  const layers = {};
-  nodes.forEach(n => {
-    if(!layers[n.depth]) layers[n.depth] = [];
-    layers[n.depth].push(n);
-  });
-
   const rect = document.getElementById('graphZone').getBoundingClientRect();
   const cw = rect.width, ch = rect.height;
-  const depths = Object.keys(layers).map(Number).sort((a,b)=>a-b);
-  const layerCount = depths.length || 1;
+  const cx = cw / 2, cy = ch / 2;
 
-  const xSpacing  = Math.min(240, (cw - 80) / Math.max(layerCount, 1));
-  const xOffset   = cw/2 - (layerCount-1)*xSpacing/2;
-  const NODE_H    = 56; // minimum vertical spacing between nodes
+  const upLayers = {}, downLayers = {};
+  let selNode = null;
 
-  depths.forEach((d, i) => {
-    const layer = layers[d];
-    const count = layer.length;
-    const totalH = (count - 1) * NODE_H;
-    const yStart = ch/2 - totalH/2;
-
-    layer.forEach((n, j) => {
-      // Zigzag: odd-indexed nodes offset slightly right
-      const zigzag = (count > 1 && j % 2 === 1) ? 18 : 0;
-      n.x = xOffset + i * xSpacing + zigzag;
-      n.y = yStart  + j * NODE_H;
-    });
+  nodes.forEach(n => {
+    if (n.depth === 0) { selNode = n; return; }
+    if (n.depth < 0) {
+      const k = -n.depth;
+      if (!upLayers[k])   upLayers[k]   = [];
+      upLayers[k].push(n);
+    } else {
+      if (!downLayers[n.depth]) downLayers[n.depth] = [];
+      downLayers[n.depth].push(n);
+    }
   });
+
+  if (selNode) { selNode.x = cx; selNode.y = cy; }
+
+  const BASE_R   = Math.min(cw, ch) * 0.22;
+  const RING_STEP = Math.min(cw, ch) * 0.20;
+  const SPREAD   = (140 * Math.PI) / 180;
+
+  function placeRing(layer, ringIndex, directionAngle) {
+    const count  = layer.length;
+    const radius = BASE_R + (ringIndex - 1) * RING_STEP;
+    const startA = directionAngle - SPREAD / 2;
+    const stepA  = count > 1 ? SPREAD / (count - 1) : 0;
+    layer.forEach((n, i) => {
+      const angle = count === 1 ? directionAngle : startA + i * stepA;
+      n.x = cx + Math.cos(angle) * radius;
+      n.y = cy + Math.sin(angle) * radius;
+    });
+  }
+
+  Object.keys(upLayers).map(Number).sort().forEach(k => placeRing(upLayers[k],   k, Math.PI));
+  Object.keys(downLayers).map(Number).sort().forEach(k => placeRing(downLayers[k], k, 0));
 }
 
 function renderGraph(id) {
@@ -492,7 +501,22 @@ function renderGraph(id) {
   gNodes = g.nodes;
   gEdges = g.edges;
   layoutGraph(gNodes);
-  panX = 0; panY = 0; zoom = 1;
+  panX = 0; panY = 0;
+
+  if (gNodes.length > 1) {
+    const rect = document.getElementById('graphZone').getBoundingClientRect();
+    const xs = gNodes.map(n=>n.x), ys = gNodes.map(n=>n.y);
+    const minX = Math.min(...xs)-60, maxX = Math.max(...xs)+60;
+    const minY = Math.min(...ys)-40, maxY = Math.max(...ys)+40;
+    const scaleX = rect.width  / (maxX - minX);
+    const scaleY = rect.height / (maxY - minY);
+    zoom = Math.min(scaleX, scaleY, 1.2);
+    panX = (rect.width  - (maxX + minX) * zoom) / 2;
+    panY = (rect.height - (maxY + minY) * zoom) / 2;
+  } else {
+    zoom = 1;
+  }
+
   document.getElementById('graphLegend').style.display = gNodes.length > 1 ? 'flex' : 'none';
   drawGraph();
 }
@@ -570,12 +594,27 @@ function _drawGraph() {
     ctx.lineWidth   = n.isSel ? 2 : 1;
     ctx.stroke();
 
-    // Label
+// Label — align based on position relative to canvas centre
+    const rect2 = document.getElementById('graphZone').getBoundingClientRect();
     ctx.font      = `${n.isSel?'600':'400'} ${n.isSel?11:10}px 'IBM Plex Mono',monospace`;
     ctx.fillStyle = n.isSel ? '#fff' : (isHov ? '#fff' : '#8896aa');
-    ctx.textAlign = 'center';
-    const label = n.id.length > 28 ? n.id.substring(0,26)+'..' : n.id;
-    ctx.fillText(label, n.x, n.y + r + 14);
+    const label = n.id.length > 26 ? n.id.substring(0,24)+'..' : n.id;
+    if (n.isSel) {
+      ctx.textAlign = 'center';
+      ctx.fillText(label, n.x, n.y + r + 14);
+    } else {
+      const cxApprox = rect2.width / 2;
+      if (n.x < cxApprox - 20) {
+        ctx.textAlign = 'right';
+        ctx.fillText(label, n.x - r - 4, n.y + 3);
+      } else if (n.x > cxApprox + 20) {
+        ctx.textAlign = 'left';
+        ctx.fillText(label, n.x + r + 4, n.y + 3);
+      } else {
+        ctx.textAlign = 'center';
+        ctx.fillText(label, n.x, n.y + r + 14);
+      }
+    }
 
     // Step count badge
     if(n.isSel || isHov) {
