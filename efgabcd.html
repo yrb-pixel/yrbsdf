@@ -500,9 +500,17 @@ const xlHtml = xlMeta.length ? `
   dp.innerHTML = `
     <div class="dp-name">${w.id}</div>
     <div class="dp-desc">${w.desc||'No description'}</div>
-    <div class="dp-grid">
-      <div class="dp-field"><div class="l">Dependencies</div><div class="v">${(w.up||[]).length} up · ${(w.down||[]).length} down</div></div>
+    <div class="dp-grid" style="grid-template-columns:1fr 1fr;gap:12px 24px;margin-bottom:16px">
+      <div class="dp-field">
+        <div class="l">Schedule / Trigger</div>
+        <div class="v"><code>${(w.sched||'—').trim()}</code></div>
+      </div>
+      <div class="dp-field">
+        <div class="l">Dependencies</div>
+        <div class="v">${(w.up||[]).length} up · ${(w.down||[]).length} down</div>
+      </div>
     </div>
+
     <div class="dp-field" style="margin-bottom:12px"><div class="l">Schedule / Trigger</div><div class="v"><code>${(w.sched||'—').trim()}</code></div></div>
     <div class="dp-acts-title">Pipeline — ${w.acts.length} steps</div>
     <div>${w.acts.map((a,i)=>`<span class="dp-act"><span style="color:var(--tx3)">${i+1}.</span> <span class="at">${a.t}</span> <span class="an">${a.n}</span></span>`).join(' → ')}</div>
