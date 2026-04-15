@@ -497,28 +497,30 @@ function layoutGraph(nodes) {
 
   if (selNode) { selNode.x = cx; selNode.y = cy; }
 
-  // --- AJUSTEZ ces valeurs pour resserrer encore plus :
-  const BASE_R   = Math.min(cw, ch) * 0.08;   // Avant : 0.13
-  const RING_STEP= Math.min(cw, ch) * 0.09;   // Avant : 0.12
-  const MIN_SPREAD = (120 * Math.PI) / 180;   // Écartez plus
-  const MAX_SPREAD = (2.2 * Math.PI);         // Angle max (le cercle entier)
+  // --- LAYOUT EN GRILLE (LAYERED) ---
+  const LAYER_WIDTH = Math.min(cw, ch) * 0.20;  // espacement horizontal entre colonnes
+  const NODE_SPACING = 50;                       // espacement vertical entre nodes
 
-  function placeRing(layer, ringIndex, directionAngle) {
+  function placeLayer(layer, colIndex, direction) {
     const count = layer.length;
-    // Spread: plus de nodes => angle + large (évite chevauchement)
-    let spread = Math.max(MIN_SPREAD, Math.min(MAX_SPREAD, (count-1)*0.2 + MIN_SPREAD));
-    const radius = BASE_R + (ringIndex - 1) * RING_STEP;
-    const startA = directionAngle - spread/2;
-    const stepA = count > 1 ? spread / (count - 1) : 0;
+    const totalHeight = (count - 1) * NODE_SPACING;
+    const startY = cy - totalHeight / 2;
+    const xPos = direction === 'left' 
+      ? cx - colIndex * LAYER_WIDTH 
+      : cx + colIndex * LAYER_WIDTH;
+
     layer.forEach((n, i) => {
-      const angle = count === 1 ? directionAngle : startA + i * stepA;
-      n.x = cx + Math.cos(angle) * radius;
-      n.y = cy + Math.sin(angle) * radius;
+      n.x = xPos;
+      n.y = startY + i * NODE_SPACING;
     });
   }
 
-  Object.keys(upLayers).map(Number).sort().forEach(k => placeRing(upLayers[k], k, Math.PI));
-  Object.keys(downLayers).map(Number).sort().forEach(k => placeRing(downLayers[k], k, 0));
+  Object.keys(upLayers).map(Number).sort().forEach(k => 
+    placeLayer(upLayers[k], k, 'left')
+  );
+  Object.keys(downLayers).map(Number).sort().forEach(k => 
+    placeLayer(downLayers[k], k, 'right')
+  );
 }
 
 function renderGraph(id) {
