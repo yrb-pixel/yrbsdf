@@ -501,8 +501,6 @@ const xlHtml = xlMeta.length ? `
     <div class="dp-name">${w.id}</div>
     <div class="dp-desc">${w.desc||'No description'}</div>
     <div class="dp-grid">
-      <div class="dp-field"><div class="l">Owner</div><div class="v">${w.owner||'—'}</div></div>
-      <div class="dp-field"><div class="l">Type</div><div class="v">${w.wfType||'—'}</div></div>
       <div class="dp-field"><div class="l">Dependencies</div><div class="v">${(w.up||[]).length} up · ${(w.down||[]).length} down</div></div>
     </div>
     <div class="dp-field" style="margin-bottom:12px"><div class="l">Schedule / Trigger</div><div class="v"><code>${(w.sched||'—').trim()}</code></div></div>
