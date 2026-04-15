@@ -359,12 +359,12 @@ function renderDetail(id) {
         .filter(Boolean);
       if (!xlMeta.length) return '';
       return xlMeta.map(({key, meta}) => `
-        <div class="dp-acts-title" style="margin-top:14px">📊 ${key} — ${meta.cols.length} colonnes</div>
+<div class="dp-acts-title" style="margin-top:14px">📊 ${key} — ${meta.cols.length} columns</div>
         <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px">
           ${meta.cols.map(c => `<span style="font-size:10px;padding:2px 6px;background:var(--s3);border-radius:3px;color:var(--tx2)">${c}</span>`).join('')}
         </div>
-        <div style="margin-top:6px;font-size:10px;color:var(--tx3)">
-          FQL: ${meta.funcs.slice(0,8).join(', ')}${meta.funcs.length > 8 ? ` +${meta.funcs.length - 8} autres` : ''}
+<div style="margin-top:6px;font-size:10px;color:var(--tx3)">
+          FQL: ${meta.funcs.join(', ')}
         </div>
       `).join('');
     })()}
