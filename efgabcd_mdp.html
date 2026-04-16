@@ -421,7 +421,82 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
      PORTAL DATA (inline — unchanged from original)
      ═══════════════════════════════════════════════════════════════ -->
 <script>
-/* PORTAL_DATA_PLACEHOLDER */
+// ----- Mini logique pour le portail -----
+
+function pnav(viewId) {
+  // Activer le bouton cliqué
+  document.querySelectorAll('#portal-nav .pnav-btn').forEach(btn => {
+    const isTarget = (btn.getAttribute('onclick') || '').includes("'" + viewId + "'");
+    btn.classList.toggle('active', isTarget);
+  });
+  // Afficher la vue ciblée
+  document.querySelectorAll('#portal-main .pview').forEach(v => v.classList.remove('active'));
+  const target = document.getElementById('pview-' + viewId);
+  if (target) target.classList.add('active');
+}
+
+function pFilterSilo(siloName) {
+  // Exemple: basculer sur la vue 'explorer' et y injecter un filtre simple
+  pnav('explorer');
+  const el = document.getElementById('pview-explorer');
+  el.innerHTML = `
+    <div class="ptitle">Workflow explorer</div>
+    <div class="psub">Filtre: ${siloName}</div>
+    <div class="warn-banner">Ceci est une vue de démonstration. Implémentez ici votre liste filtrée.</div>
+  `;
+}
+
+function pOpenPanel(name, html) {
+  document.getElementById('pp-name').textContent = name || '';
+  document.getElementById('pp-body').innerHTML = html || '';
+  document.getElementById('ppanel').classList.add('open');
+}
+function pClosePanel() {
+  document.getElementById('ppanel').classList.remove('open');
+}
+
+// ----- Remplissage minimal des vues -----
+function renderPortalDefaults() {
+  const landscape = document.getElementById('pview-landscape');
+  const health    = document.getElementById('pview-health');
+  const cross     = document.getElementById('pview-crosssilo');
+  const owners    = document.getElementById('pview-owners');
+  const explorer  = document.getElementById('pview-explorer');
+  const chains    = document.getElementById('pview-chains');
+  const trace     = document.getElementById('pview-traceability');
+
+  if (landscape) {
+    landscape.innerHTML = `
+      <div class="ptitle">System landscape</div>
+      <div class="psub">Aperçu des domaines et flux</div>
+      <div class="hcards">
+        <div class="hcard">
+          <h3>Résumé</h3>
+          <div class="hrow"><span>Workflows</span><span class="hok">—</span></div>
+          <div class="hrow"><span>Domains</span><span class="hok">—</span></div>
+          <div class="hrow"><span>Gaps</span><span class="hwarn">—</span></div>
+        </div>
+        <div class="hcard">
+          <h3>Actions</h3>
+          <div class="hrow"><span>Ouvrir panneau</span><span><button class="tbtn" onclick="pOpenPanel('Demo panel','<div class=mono-blk>Contenu de démonstration</div>')">Open</button></span></div>
+        </div>
+        <div class="hcard">
+          <h3>Navigation</h3>
+          <div class="hrow"><button class="tbtn" onclick="pnav('explorer')">Aller à Explorer</button></div>
+        </div>
+      </div>
+    `;
+  }
+  if (health)   health.innerHTML   = `<div class="ptitle">Health & gaps</div><div class="psub">Démo — insérez vos métriques ici</div>`;
+  if (cross)    cross.innerHTML    = `<div class="ptitle">Cross-silo flows</div><div class="psub">Démo — cartographiez les flux transverses</div>`;
+  if (owners)   owners.innerHTML   = `<div class="ptitle">Ownership map</div><div class="psub">Démo — responsables par domaine</div>`;
+  if (explorer) explorer.innerHTML = `<div class="ptitle">Workflow explorer</div><div class="psub">Démo — liste et filtres</div>`;
+  if (chains)   chains.innerHTML   = `<div class="ptitle">Flow chains</div><div class="psub">Démo — chaînes et dépendances</div>`;
+  if (trace)    trace.innerHTML    = `<div class="ptitle">Screen → OFDB</div><div class="psub">Démo — traçabilité</div>`;
+}
+
+// Rendu initial du portail
+renderPortalDefaults();
 </script>
 
 <!-- ═══════════════════════════════════════════════════════════════
