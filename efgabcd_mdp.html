@@ -48,7 +48,7 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--tx);height
 .or-badge.visible{display:block;}
 
 /* ── VIEW TABS ── */
-.view-tabs{display:flex;gap:2px;margin-left:auto;}
+.view-tabs{display:flex;gap:2px;margin-left:0;}
 .view-tab{
   padding:6px 14px;border-radius:8px;font-size:12px;font-weight:500;
   cursor:pointer;background:transparent;border:1px solid transparent;
@@ -67,10 +67,15 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--tx);height
 }
 .pill:hover{border-color:var(--tx2);color:var(--tx);}
 .pill.on{border-color:var(--acc);background:var(--acc);color:var(--bg);font-weight:600;}
+  .pills-bar{
+  display:flex;align-items:center;gap:8px;padding:8px 28px;
+  border-bottom:1px solid var(--bd);background:var(--s1);
+  overflow-x:auto;
+}
 
 /* ── MAIN LAYOUT ── */
-.main{display:flex;height:calc(100vh - 64px);}
-
+.main{display:flex;height:calc(100vh - 64px - 44px);}
+  
 /* ── VIEW CONTAINERS ── */
 .view-explorer{display:flex;width:100%;height:100%;}
 .view-portal{display:none;width:100%;height:100%;overflow-y:auto;}
@@ -389,16 +394,17 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--tx);height
   </div>
 </div>
 
+<div class="pills-bar" id="pillsBar">
+  <div class="pills" id="pills"></div>
+</div>
+
 <div class="main">
   <!-- ═══ VIEW: EXPLORER (original) ═══ -->
   <div class="view-explorer active" id="viewExplorer">
     <div class="results">
-      <div class="results-header">
+<div class="results-header">
         <span id="count">— workflows</span>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:11px;color:var(--tx3)" id="modeLabel">AND mode</span>
-          <div class="pills" id="pills"></div>
-        </div>
+        <span style="font-size:11px;color:var(--tx3)" id="modeLabel">AND mode</span>
       </div>
       <div class="results-list" id="list"></div>
     </div>
