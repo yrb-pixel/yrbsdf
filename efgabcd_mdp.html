@@ -2,346 +2,403 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>EFG QNT — Workflow Documentation</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EFG QNT — Workflow GPS</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap');
 
-/* ═══════════════════════════════════════════════════════════════
-   SHARED RESET + BODY
-   ═══════════════════════════════════════════════════════════════ */
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#e6edf3;height:100vh;display:flex;flex-direction:column;overflow:hidden;font-size:13px}
-
-/* ═══════════════════════════════════════════════════════════════
-   MAIN TABBAR (shared, stays on top)
-   ═══════════════════════════════════════════════════════════════ */
-#main-tabbar{display:flex;align-items:center;background:#161b22;border-bottom:1px solid #30363d;flex-shrink:0;padding:0 14px}
-#main-tabbar .brand{font-size:12px;font-weight:600;color:#58a6ff;padding:9px 0;margin-right:20px;white-space:nowrap;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;}
-#main-tabbar .brand span{color:#8b949e;font-weight:400}
-#main-tabbar .mtab{padding:9px 14px;font-size:12px;cursor:pointer;color:#8b949e;border-bottom:2px solid transparent;transition:color .15s;white-space:nowrap;background:none;border-top:none;border-left:none;border-right:none;font-family:inherit;}
-#main-tabbar .mtab:hover{color:#e6edf3}
-#main-tabbar .mtab.active{color:#e6edf3;border-bottom-color:#58a6ff}
-.mview{display:none;flex:1;overflow:hidden;min-height:0}
-.mview.active{display:flex}
-
-/* ═══════════════════════════════════════════════════════════════
-   GPS VIEW STYLES (scoped to #mview-gps)
-   ═══════════════════════════════════════════════════════════════ */
-#mview-gps {
-  --g-bg:#0b0f19; --g-s1:#111827; --g-s2:#1a2236; --g-s3:#243044;
-  --g-bd:#2a3650; --g-tx:#e2e8f0; --g-tx2:#7b8ba3; --g-tx3:#4a5568;
-  --g-acc:#38bdf8; --g-acc2:#818cf8; --g-grn:#34d399; --g-red:#f87171;
-  --g-org:#fb923c; --g-ylw:#fbbf24; --g-pnk:#f472b6; --g-cyn:#22d3ee;
-  --g-eq:#60a5fa; --g-fi:#4ade80; --g-etf:#c084fc; --g-mf:#facc15;
-  --g-esg:#2dd4bf; --g-feed:#fb7185; --g-ref:#a78bfa; --g-recon:#fbbf24;
-  font-family:'Outfit',sans-serif;
-  background:var(--g-bg);
-  color:var(--g-tx);
-  flex-direction:column;
+:root {
+  --bg:#0b0f19; --s1:#111827; --s2:#1a2236; --s3:#243044;
+  --bd:#2a3650; --tx:#e2e8f0; --tx2:#7b8ba3; --tx3:#4a5568;
+  --acc:#38bdf8; --acc2:#818cf8; --grn:#34d399; --red:#f87171;
+  --org:#fb923c; --ylw:#fbbf24; --pnk:#f472b6; --cyn:#22d3ee;
+  --eq:#60a5fa; --fi:#4ade80; --etf:#c084fc; --mf:#facc15;
+  --esg:#2dd4bf; --feed:#fb7185; --ref:#a78bfa; --recon:#fbbf24;
 }
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--tx);height:100vh;overflow:hidden;}
 
-#mview-gps .gps-topbar{
+/* ── TOPBAR ── */
+.topbar{
   height:64px; display:flex; align-items:center; gap:20px;
-  padding:0 28px; border-bottom:1px solid var(--g-bd);
-  background:linear-gradient(180deg,#10162088,var(--g-bg));
-  flex-shrink:0;
+  padding:0 28px; border-bottom:1px solid var(--bd);
+  background:linear-gradient(180deg,#10162088,var(--bg));
 }
+.topbar .logo{font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:600;color:var(--acc);letter-spacing:-.5px;white-space:nowrap;cursor:pointer;}
+.topbar .logo span{color:var(--tx2);font-weight:400;}
 
-#mview-gps .search-wrap{flex:1;max-width:560px;position:relative;}
-#mview-gps .search-wrap input{
+.search-wrap{flex:1;max-width:560px;position:relative;}
+.search-wrap input{
   width:100%;height:40px;padding:0 16px 0 40px;border-radius:10px;
-  border:1.5px solid var(--g-bd);background:var(--g-s1);color:var(--g-tx);
+  border:1.5px solid var(--bd);background:var(--s1);color:var(--tx);
   font-family:'Outfit',sans-serif;font-size:15px;font-weight:400;
   outline:none;transition:border .15s;
 }
-#mview-gps .search-wrap input:focus{border-color:var(--g-acc);background:var(--g-s2);}
-#mview-gps .search-wrap input::placeholder{color:var(--g-tx3);}
-#mview-gps .search-wrap .icon{position:absolute;left:12px;top:10px;color:var(--g-tx3);font-size:18px;pointer-events:none;}
-#mview-gps .search-wrap .hint{position:absolute;right:12px;top:10px;font-size:11px;color:var(--g-tx3);font-family:'IBM Plex Mono',monospace;}
+.search-wrap input:focus{border-color:var(--acc);background:var(--s2);}
+.search-wrap input::placeholder{color:var(--tx3);}
+.search-wrap .icon{position:absolute;left:12px;top:10px;color:var(--tx3);font-size:18px;pointer-events:none;}
+.search-wrap .hint{position:absolute;right:12px;top:10px;font-size:11px;color:var(--tx3);font-family:'IBM Plex Mono',monospace;}
 
-#mview-gps .or-badge{
+.or-badge{
   display:none;position:absolute;right:32px;top:9px;
   font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;
-  background:rgba(251,146,60,.15);color:var(--g-org);border:1px solid rgba(251,146,60,.3);
+  background:rgba(251,146,60,.15);color:var(--org);border:1px solid rgba(251,146,60,.3);
   font-family:'IBM Plex Mono',monospace;
 }
-#mview-gps .or-badge.visible{display:block;}
+.or-badge.visible{display:block;}
 
-#mview-gps .gps-pills{display:flex;gap:6px;flex-wrap:nowrap;}
-#mview-gps .gps-pill{
-  padding:4px 12px;border-radius:20px;font-size:12px;font-weight:500;
-  cursor:pointer;border:1px solid var(--g-bd);background:transparent;
-  color:var(--g-tx2);transition:all .12s;white-space:nowrap;
+/* ── VIEW TABS ── */
+.view-tabs{display:flex;gap:2px;margin-left:auto;}
+.view-tab{
+  padding:6px 14px;border-radius:8px;font-size:12px;font-weight:500;
+  cursor:pointer;background:transparent;border:1px solid transparent;
+  color:var(--tx3);transition:all .15s;white-space:nowrap;
   font-family:'Outfit',sans-serif;
 }
-#mview-gps .gps-pill:hover{border-color:var(--g-tx2);color:var(--g-tx);}
-#mview-gps .gps-pill.on{border-color:var(--g-acc);background:var(--g-acc);color:var(--g-bg);font-weight:600;}
+.view-tab:hover{color:var(--tx2);background:var(--s2);}
+.view-tab.active{background:var(--s2);color:var(--acc);border-color:var(--bd);}
 
-#mview-gps .gps-main{display:flex;flex:1;overflow:hidden;min-height:0;}
-
-#mview-gps .results{
-  width:380px;min-width:380px;border-right:1px solid var(--g-bd);
-  display:flex;flex-direction:column;background:var(--g-s1);
+.pills{display:flex;gap:6px;flex-wrap:nowrap;}
+.pill{
+  padding:4px 12px;border-radius:20px;font-size:12px;font-weight:500;
+  cursor:pointer;border:1px solid var(--bd);background:transparent;
+  color:var(--tx2);transition:all .12s;white-space:nowrap;
+  font-family:'Outfit',sans-serif;
 }
-#mview-gps .results-header{
-  padding:12px 20px;border-bottom:1px solid var(--g-bd);
-  font-size:12px;color:var(--g-tx2);font-weight:500;
+.pill:hover{border-color:var(--tx2);color:var(--tx);}
+.pill.on{border-color:var(--acc);background:var(--acc);color:var(--bg);font-weight:600;}
+
+/* ── MAIN LAYOUT ── */
+.main{display:flex;height:calc(100vh - 64px);}
+
+/* ── VIEW CONTAINERS ── */
+.view-explorer{display:flex;width:100%;height:100%;}
+.view-portal{display:none;width:100%;height:100%;overflow-y:auto;}
+.view-portal.active{display:block;}
+.view-explorer.active{display:flex;}
+
+/* ── RESULTS PANEL (Explorer) ── */
+.results{
+  width:380px;min-width:380px;border-right:1px solid var(--bd);
+  display:flex;flex-direction:column;background:var(--s1);
+}
+.results-header{
+  padding:12px 20px;border-bottom:1px solid var(--bd);
+  font-size:12px;color:var(--tx2);font-weight:500;
   display:flex;justify-content:space-between;align-items:center;
 }
-#mview-gps .results-list{flex:1;overflow-y:auto;padding:6px 0;}
+.results-list{flex:1;overflow-y:auto;padding:6px 0;}
 
-#mview-gps .wf-card{
+.wf-card{
   padding:10px 20px;cursor:pointer;border-left:3px solid transparent;
   transition:all .1s;
 }
-#mview-gps .wf-card:hover{background:var(--g-s2);}
-#mview-gps .wf-card.sel{background:var(--g-s2);border-left-color:var(--g-acc);}
-#mview-gps .wf-card .name{
+.wf-card:hover{background:var(--s2);}
+.wf-card.sel{background:var(--s2);border-left-color:var(--acc);}
+.wf-card .name{
   font-family:'IBM Plex Mono',monospace;font-size:12.5px;font-weight:500;
-  color:var(--g-tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
 }
-#mview-gps .wf-card .desc{font-size:11.5px;color:var(--g-tx2);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-#mview-gps .wf-card .badges{display:flex;gap:6px;margin-top:5px;align-items:center;flex-wrap:wrap;}
-#mview-gps .badge{font-size:10px;padding:2px 7px;border-radius:4px;font-weight:600;}
-#mview-gps .b-EQ{background:#1e293b;color:var(--g-eq);}
-#mview-gps .b-FI{background:#122217;color:var(--g-fi);}
-#mview-gps .b-ETF{background:#231729;color:var(--g-etf);}
-#mview-gps .b-MF{background:#272517;color:var(--g-mf);}
-#mview-gps .b-ESG{background:#122525;color:var(--g-esg);}
-#mview-gps .b-FEED{background:#251717;color:var(--g-feed);}
-#mview-gps .b-REF{background:#1d1729;color:var(--g-ref);}
-#mview-gps .b-RECON{background:#252117;color:var(--g-ylw);}
-#mview-gps .b-TEST{background:#1a1a1a;color:#888;}
-#mview-gps .b-OTHER{background:#1a1a1a;color:#888;}
-#mview-gps .b-tag{font-size:9px;text-transform:uppercase;letter-spacing:.3px;}
-#mview-gps .b-prod{background:#0d2818;color:var(--g-grn);}
-#mview-gps .b-test{background:#2a1c0d;color:var(--g-org);}
-#mview-gps .b-shadow{background:#1a0d2a;color:var(--g-acc2);}
-#mview-gps .b-old{background:#1a1a1a;color:#666;}
+.wf-card .desc{font-size:11.5px;color:var(--tx2);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.wf-card .badges{display:flex;gap:6px;margin-top:5px;align-items:center;flex-wrap:wrap;}
+.badge{font-size:10px;padding:2px 7px;border-radius:4px;font-weight:600;}
+.b-EQ{background:#1e293b;color:var(--eq);} .b-FI{background:#122217;color:var(--fi);}
+.b-ETF{background:#231729;color:var(--etf);} .b-MF{background:#272517;color:var(--mf);}
+.b-ESG{background:#122525;color:var(--esg);} .b-FEED{background:#251717;color:var(--feed);}
+.b-REF{background:#1d1729;color:var(--ref);} .b-RECON{background:#252117;color:var(--ylw);}
+.b-TEST{background:#1a1a1a;color:#888;} .b-OTHER{background:#1a1a1a;color:#888;}
+.b-tag{font-size:9px;text-transform:uppercase;letter-spacing:.3px;}
+.b-prod{background:#0d2818;color:var(--grn);} .b-test{background:#2a1c0d;color:var(--org);}
+.b-shadow{background:#1a0d2a;color:var(--acc2);} .b-old{background:#1a1a1a;color:#666;}
 
-#mview-gps .match-hl{background:rgba(56,189,248,.2);color:var(--g-acc);border-radius:2px;padding:0 1px;}
+/* Status pills (reusable) */
+.st-pill{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600;display:inline-flex;align-items:center;gap:4px;}
+.st-success{background:#0d281833;color:var(--grn);border:1px solid #34d39933;}
+.st-fail{background:#28111133;color:var(--red);border:1px solid #f8717133;}
+.st-ghost{background:#1a1a1a33;color:#666;border:1px solid #44444433;}
+.st-orphan{background:#2a1c0d33;color:var(--org);border:1px solid #fb923c33;}
+.st-cross{background:#1a0d2a33;color:var(--acc2);border:1px solid #818cf833;}
 
-#mview-gps .detail-area{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.match-hl{background:rgba(56,189,248,.2);color:var(--acc);border-radius:2px;padding:0 1px;}
 
-#mview-gps .graph-zone{
+.detail-area{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+
+.graph-zone{
   flex:1;position:relative;overflow:hidden;background:
-    radial-gradient(circle at 50% 50%, #111d2e 0%, var(--g-bg) 70%);
+    radial-gradient(circle at 50% 50%, #111d2e 0%, var(--bg) 70%);
 }
-#mview-gps .graph-zone canvas{display:block;}
+.graph-zone canvas{display:block;}
 
-#mview-gps .graph-legend{
+.graph-legend{
   position:absolute;bottom:28px;left:16px;
   display:flex;gap:14px;align-items:center;
-  font-size:10px;color:var(--g-tx3);font-family:'IBM Plex Mono',monospace;
+  font-size:10px;color:var(--tx3);font-family:'IBM Plex Mono',monospace;
   pointer-events:none;
 }
-#mview-gps .gl-item{display:flex;align-items:center;gap:5px;}
-#mview-gps .gl-dot{width:8px;height:8px;border-radius:50%;}
+.gl-item{display:flex;align-items:center;gap:5px;}
+.gl-dot{width:8px;height:8px;border-radius:50%;}
 
-#mview-gps .detail-panel{
-  height:300px;min-height:160px;border-top:1px solid var(--g-bd);
-  overflow-y:auto;padding:20px 28px;background:var(--g-s1);
+.detail-panel{
+  height:300px;min-height:160px;border-top:1px solid var(--bd);
+  overflow-y:auto;padding:20px 28px;background:var(--s1);
 }
-#mview-gps .dp-name{font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600;color:var(--g-acc);}
-#mview-gps .dp-desc{font-size:13px;color:var(--g-tx2);margin:4px 0 12px;}
-#mview-gps .dp-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
-#mview-gps .dp-field{background:var(--g-s2);border-radius:6px;padding:8px 12px;}
-#mview-gps .dp-field .l{font-size:10px;color:var(--g-tx3);text-transform:uppercase;letter-spacing:.5px;}
-#mview-gps .dp-field .v{font-size:12px;color:var(--g-tx);margin-top:2px;word-break:break-all;}
-#mview-gps .dp-field .v code{font-family:'IBM Plex Mono',monospace;font-size:11px;}
+.dp-name{font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600;color:var(--acc);}
+.dp-desc{font-size:13px;color:var(--tx2);margin:4px 0 12px;}
+.dp-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+.dp-field{background:var(--s2);border-radius:6px;padding:8px 12px;}
+.dp-field .l{font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px;}
+.dp-field .v{font-size:12px;color:var(--tx);margin-top:2px;word-break:break-all;}
+.dp-field .v code{font-family:'IBM Plex Mono',monospace;font-size:11px;}
 
-#mview-gps .dp-acts-title{font-size:11px;font-weight:600;color:var(--g-acc);text-transform:uppercase;letter-spacing:.8px;margin:12px 0 6px;}
-#mview-gps .dp-act{
+.dp-acts-title{font-size:11px;font-weight:600;color:var(--acc);text-transform:uppercase;letter-spacing:.8px;margin:12px 0 6px;}
+.dp-act{
   display:inline-flex;align-items:center;gap:6px;padding:4px 10px;
-  background:var(--g-s2);border-radius:5px;border:1px solid var(--g-bd);
+  background:var(--s2);border-radius:5px;border:1px solid var(--bd);
   margin:2px 3px 2px 0;font-size:11px;
 }
-#mview-gps .dp-act .at{color:var(--g-cyn);font-weight:500;}
-#mview-gps .dp-act .an{color:var(--g-tx2);font-family:'IBM Plex Mono',monospace;font-size:10px;}
+.dp-act .at{color:var(--cyn);font-weight:500;}
+.dp-act .an{color:var(--tx2);font-family:'IBM Plex Mono',monospace;font-size:10px;}
 
-#mview-gps .pill-col{
+.pill-col{
   display:inline-block;font-size:10px;padding:2px 7px;border-radius:4px;
-  background:var(--g-s3);color:var(--g-tx2);margin:2px 2px 2px 0;
+  background:var(--s3);color:var(--tx2);margin:2px 2px 2px 0;
 }
-#mview-gps .pill-fql{
+.pill-fql{
   display:inline-block;font-size:10px;padding:2px 7px;border-radius:4px;
-  background:rgba(34,211,238,.08);color:var(--g-cyn);border:1px solid rgba(34,211,238,.2);
+  background:rgba(34,211,238,.08);color:var(--cyn);border:1px solid rgba(34,211,238,.2);
   margin:2px 2px 2px 0;font-family:'IBM Plex Mono',monospace;
 }
-#mview-gps .pill-ofdb{
+.pill-ofdb{
   display:inline-block;font-size:10px;padding:2px 7px;border-radius:4px;
-  background:rgba(129,140,248,.08);color:var(--g-acc2);border:1px solid rgba(129,140,248,.2);
+  background:rgba(129,140,248,.08);color:var(--acc2);border:1px solid rgba(129,140,248,.2);
   margin:2px 2px 2px 0;font-family:'IBM Plex Mono',monospace;font-size:9px;
 }
 
-#mview-gps .empty-msg{
+.empty-msg{
   display:flex;align-items:center;justify-content:center;height:100%;
-  color:var(--g-tx3);font-size:14px;text-align:center;flex-direction:column;gap:8px;
+  color:var(--tx3);font-size:14px;text-align:center;flex-direction:column;gap:8px;
 }
-#mview-gps .empty-msg .em-icon{font-size:40px;opacity:.3;}
+.empty-msg .em-icon{font-size:40px;opacity:.3;}
 
-#mview-gps .resize-handle{height:4px;cursor:ns-resize;background:var(--g-bd);transition:background .15s;}
-#mview-gps .resize-handle:hover{background:var(--g-acc);}
+.resize-handle{height:4px;cursor:ns-resize;background:var(--bd);transition:background .15s;}
+.resize-handle:hover{background:var(--acc);}
 
-#mview-gps .formula-toggle {
-  display: inline-flex; align-items: center; gap: 8px;
-  font-size: 11px; color: var(--g-tx2); margin-left: 12px;
-  cursor: pointer; user-select: none;
+.formula-toggle {
+  display: inline-flex;align-items: center;gap: 8px;
+  font-size: 11px;color: var(--tx2);margin-left: 12px;cursor: pointer;user-select: none;
 }
-#mview-gps .formula-toggle input {
-  width: 32px; height: 16px; appearance: none;
-  background: var(--g-s3); border-radius: 8px;
-  position: relative; cursor: pointer; transition: background .2s;
+.formula-toggle input {
+  width: 32px;height: 16px;appearance: none;
+  background: var(--s3);border-radius: 8px;position: relative;cursor: pointer;transition: background .2s;
 }
-#mview-gps .formula-toggle input:checked { background: var(--g-acc); }
-#mview-gps .formula-toggle input::before {
-  content: ''; position: absolute; width: 12px; height: 12px;
-  border-radius: 50%; background: var(--g-tx);
-  top: 2px; left: 2px; transition: transform .2s;
+.formula-toggle input:checked { background: var(--acc); }
+.formula-toggle input::before {
+  content: '';position: absolute;width: 12px;height: 12px;border-radius: 50%;
+  background: var(--tx);top: 2px;left: 2px;transition: transform .2s;
 }
-#mview-gps .formula-toggle input:checked::before { transform: translateX(16px); }
+.formula-toggle input:checked::before { transform: translateX(16px); }
 
-#mview-gps .pill-col.expanded {
-  display: block; max-width: 100%; white-space: normal;
-  word-break: break-all; margin: 4px 0; padding: 6px 10px;
-  background: var(--g-s2); border-left: 2px solid var(--g-cyn);
+.pill-col.expanded {
+  display: block;max-width: 100%;white-space: normal;word-break: break-all;
+  margin: 4px 0;padding: 6px 10px;background: var(--s2);border-left: 2px solid var(--cyn);
 }
-#mview-gps .pill-col.expanded .formula-full {
-  display: block; font-family: 'IBM Plex Mono', monospace;
-  font-size: 9px; color: var(--g-tx3); margin-top: 4px; line-height: 1.4;
+.pill-col.expanded .formula-full {
+  display: block;font-family: 'IBM Plex Mono', monospace;font-size: 9px;
+  color: var(--tx3);margin-top: 4px;line-height: 1.4;
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   PORTAL VIEW STYLES (unchanged from original)
-   ═══════════════════════════════════════════════════════════════ */
-#mview-portal {
-  --bg0:#0d1117;--bg1:#161b22;--bg2:#21262d;--bg3:#30363d;
-  --t0:#e6edf3;--t1:#8b949e;--t2:#484f58;
-  --blue:#58a6ff;--green:#3fb950;--red:#f85149;--yellow:#d29922;--orange:#f0883e;
-  --bdr:#30363d;
-  background:var(--bg0); color:var(--t0);
-  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-  font-size:13px;
-}
+/* ════════════════════════════════════════════════════════
+   DOCUMENTATION PORTAL STYLES
+   ════════════════════════════════════════════════════════ */
 
-#portal-wrap{display:flex;flex:1;overflow:hidden}
-#portal-sidebar{width:210px;min-width:210px;background:var(--bg1);border-right:1px solid var(--bdr);display:flex;flex-direction:column;overflow:hidden}
-#portal-sidebar p{padding:8px 14px;font-size:11px;color:var(--t1);border-bottom:1px solid var(--bdr)}
-#portal-nav{overflow-y:auto;flex:1;padding:5px 0}
-.pnav-grp{padding:7px 14px 2px;font-size:10px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.06em}
-.pnav-btn{display:flex;align-items:center;gap:7px;width:100%;padding:5px 14px;font-size:12px;color:var(--t1);cursor:pointer;border:none;background:none;text-align:left;transition:background .1s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:inherit;}
-.pnav-btn:hover{background:var(--bg2);color:var(--t0)}
-.pnav-btn.active{background:#1f6feb22;color:var(--blue);font-weight:500}
-.pnav-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
-#portal-main{flex:1;overflow-y:auto;padding:20px 24px 40px}
-.pview{display:none}.pview.active{display:block}
-.ptitle{font-size:18px;font-weight:600;margin-bottom:3px}
-.psub{font-size:12px;color:var(--t1);margin-bottom:18px}
-.psec{font-size:11px;font-weight:600;color:var(--t1);text-transform:uppercase;letter-spacing:.05em;margin:18px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--bdr)}
-.pstats{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-bottom:20px}
-.pstat{background:var(--bg1);border:1px solid var(--bdr);border-radius:7px;padding:10px 13px}
-.pstat-n{font-size:20px;font-weight:600;line-height:1}.pstat-l{font-size:11px;color:var(--t1);margin-top:3px}
-.pstat.ok .pstat-n{color:var(--green)}.pstat.warn .pstat-n{color:var(--yellow)}.pstat.info .pstat-n{color:var(--blue)}
-.silo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:7px;margin-bottom:6px}
-.scard{background:var(--bg1);border:1px solid var(--bdr);border-radius:7px;padding:10px 12px;cursor:pointer;transition:border-color .15s}
-.scard:hover{border-color:var(--blue)}
-.sc-name{font-size:11px;font-weight:500;margin-bottom:4px;line-height:1.3}.sc-count{font-size:20px;font-weight:600;color:var(--blue);line-height:1}
-.sc-meta{font-size:10px;color:var(--t1);margin-top:2px}.sc-bar{margin-top:6px;height:2px;background:var(--bg3);border-radius:1px}
-.sc-bar-fill{height:2px;border-radius:1px}.tbadges{display:flex;gap:3px;flex-wrap:wrap;margin-top:6px}
-.tbadge{font-size:10px;padding:1px 5px;border-radius:3px;font-weight:500}
-.tb-s{background:#1f3a5f;color:#79c0ff}.tb-e{background:#0e3323;color:#56d364}.tb-n{background:#3d2500;color:#d29922}
-.hcards{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px}
-.hcard{background:var(--bg1);border:1px solid var(--bdr);border-radius:7px;padding:12px 14px}
-.hcard h3{font-size:10px;font-weight:600;color:var(--t1);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
-.hrow{display:flex;justify-content:space-between;align-items:center;padding:3px 0;border-bottom:1px solid #21262d88;font-size:11px;color:var(--t1)}
-.hrow:last-child{border-bottom:none}
-.hok{color:var(--green);font-weight:500}.hwarn{color:var(--yellow);font-weight:500}.hbad{color:var(--red);font-weight:500}
-.toolbar{display:flex;gap:7px;margin-bottom:10px;align-items:center;flex-wrap:wrap}
-.toolbar input{flex:1;min-width:160px;padding:5px 10px;background:var(--bg1);border:1px solid var(--bdr);border-radius:5px;color:var(--t0);font-size:12px;outline:none;font-family:inherit;}
-.toolbar input:focus{border-color:var(--blue)}
-.toolbar select{padding:5px 9px;background:var(--bg1);border:1px solid var(--bdr);border-radius:5px;color:var(--t0);font-size:11px;outline:none;cursor:pointer;font-family:inherit;}
-.tbtn{padding:5px 10px;background:var(--bg1);border:1px solid var(--bdr);border-radius:5px;color:var(--t1);font-size:11px;cursor:pointer;transition:all .1s;white-space:nowrap;font-family:inherit;}
-.tbtn:hover{background:var(--bg2)}.tbtn.on{background:#1f6feb22;border-color:var(--blue);color:var(--blue)}
-.tbl-info{font-size:11px;color:var(--t1);margin-bottom:6px}
-.ptable{width:100%;border-collapse:collapse;background:var(--bg1);border-radius:7px;overflow:hidden;border:1px solid var(--bdr);font-size:11px}
-.ptable th{text-align:left;padding:6px 10px;background:var(--bg2);border-bottom:1px solid var(--bdr);font-weight:500;font-size:10px;color:var(--t1);white-space:nowrap;text-transform:uppercase;letter-spacing:.04em}
-.ptable td{padding:6px 10px;border-bottom:1px solid #21262d88;vertical-align:middle;max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.ptable tr:last-child td{border-bottom:none}.ptable tr.click:hover td{background:#21262d44;cursor:pointer}
-.ppill{display:inline-block;font-size:10px;padding:1px 6px;border-radius:8px;font-weight:500;border:1px solid}
-.p-ok{background:#0e442922;color:#3fb950;border-color:#23863644}.p-fail{background:#49020222;color:#f85149;border-color:#6e131344}
-.p-none{background:var(--bg2);color:var(--t1);border-color:var(--bdr)}.p-ghost{background:#3d250022;color:#d29922;border-color:#5a3e0044}
-.p-xs{background:#5c331722;color:#f0883e;border-color:#9e551344}
-.cpill{font-size:10px;padding:1px 5px;border-radius:3px;font-weight:500}
-.cc{background:#1a163344;color:#bc8cff}.cs{background:#1a2a3d44;color:var(--blue)}.cn{background:#3d250044;color:var(--yellow)}
-.ce{background:#0e231544;color:var(--green)}.ci{background:#3d100044;color:var(--orange)}.cr{background:#2d002244;color:#f9a8d4}.cd{background:var(--bg2);color:var(--t1)}
-.vp{font-size:10px;padding:1px 5px;border-radius:3px;font-weight:500}
-.vp-production{background:#1a163344;color:#bc8cff}.vp-test{background:#490202;color:var(--red)}.vp-manual{background:#3d2500;color:var(--orange)}
-.vp-sga{background:#1a2a3d44;color:var(--blue)}.vp-gen_shadow,.vp-pop_shadow{background:var(--bg2);color:var(--t2)}
-.vp-new{background:#0e2b1544;color:var(--green)}.vp-adhoc{background:#3d100044;color:var(--orange)}
-.vp-deprecated{background:#490202;color:var(--red);text-decoration:line-through}
-.vp-display,.vp-mstar,.vp-ni{background:#1a2a3d44;color:#39c5cf}
-.xs-tag{font-size:9px;padding:1px 4px;border-radius:3px;background:#3d250088;color:var(--orange)}
-.cbar{height:4px;background:var(--bg3);border-radius:2px;margin-top:3px;min-width:60px}
-.cbar-fill{height:4px;background:var(--blue);border-radius:2px}
-.chain-blk{background:var(--bg1);border:1px solid var(--bdr);border-radius:7px;padding:12px 14px;margin-bottom:8px}
-.chain-root{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:5px;font-size:11px;font-family:monospace;cursor:pointer;border:1px solid;margin-bottom:7px}
-.chain-ch{padding-left:14px;border-left:2px solid var(--bdr);margin-left:10px}
-.ch-row{display:flex;align-items:center;gap:5px;margin:2px 0}
-.ch-node{display:inline-flex;align-items:center;padding:2px 8px;border-radius:4px;font-size:10px;font-family:monospace;cursor:pointer;border:1px solid}
-.ch-node:hover{opacity:.75}
-.flag{display:flex;align-items:flex-start;gap:8px;padding:7px 11px;background:var(--bg1);border:1px solid var(--bdr);border-radius:5px;margin-bottom:5px;cursor:pointer;transition:border-color .12s}
-.flag:hover{border-color:var(--blue)}.flag-ico{font-size:13px;flex-shrink:0;margin-top:1px}
-.flag-name{font-family:monospace;font-weight:500;font-size:11px}.flag-meta{font-size:10px;color:var(--t1);margin-top:2px}
-.cs-link{display:flex;align-items:center;gap:8px;padding:7px 12px;background:var(--bg1);border:1px solid var(--bdr);border-radius:5px;margin-bottom:5px}
-.ocard{background:var(--bg1);border:1px solid var(--bdr);border-radius:7px;padding:11px 13px}
-.ocard h3{font-size:12px;font-weight:600;font-family:monospace;margin-bottom:3px}
-.oc-meta{font-size:10px;color:var(--t1);margin-bottom:7px}.osilo{font-size:10px;padding:2px 7px;background:var(--bg2);border-radius:3px;display:inline-block;margin:2px 2px 2px 0;color:var(--t1)}
-.warn-banner{background:#3d250044;border:1px solid #5a3e0088;border-radius:6px;padding:10px 14px;font-size:12px;color:#d29922;margin-bottom:14px;line-height:1.5}
-#ppanel{position:fixed;top:0;right:0;height:100vh;width:380px;background:var(--bg1);border-left:1px solid var(--bdr);box-shadow:-4px 0 20px rgba(0,0,0,.5);transform:translateX(100%);transition:transform .2s;overflow-y:auto;z-index:500}
-#ppanel.open{transform:translateX(0)}
-.pp-hdr{padding:13px 16px;border-bottom:1px solid var(--bdr);position:sticky;top:0;background:var(--bg1);z-index:1;display:flex;justify-content:space-between;align-items:flex-start}
-.pp-hdr h2{font-size:11px;font-weight:600;font-family:monospace;line-height:1.4;word-break:break-all;padding-right:6px;color:var(--blue)}
-.pp-close{border:none;background:none;font-size:17px;cursor:pointer;color:var(--t1);padding:0 3px;flex-shrink:0}
-.pp-close:hover{color:var(--t0)}.pp-body{padding:13px 16px}
-.pps{margin-bottom:13px}.pps h3{font-size:10px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
-.ppr{display:flex;gap:7px;margin-bottom:4px;font-size:11px}.ppr .l{color:var(--t1);min-width:84px;flex-shrink:0}
-.ppr .v{font-size:10px;word-break:break-all;font-family:monospace;color:var(--t0)}
-.cl{display:block;padding:3px 0 3px 9px;border-left:2px solid var(--bdr);font-size:11px;font-family:monospace;cursor:pointer;color:var(--blue);margin:2px 0}
-.cl:hover{color:#79c0ff;border-left-color:var(--blue)}.cl.up{border-left-color:var(--green);color:var(--green)}.cl.xs{border-left-color:var(--orange);color:var(--orange)}
-.mono-blk{font-size:10px;font-family:monospace;background:var(--bg0);padding:3px 7px;border-radius:3px;margin-bottom:3px;word-break:break-all;line-height:1.4;color:var(--t0)}
-.lbl-s{font-size:10px;color:var(--t1);margin-bottom:2px;margin-top:5px}
-.badges{display:flex;gap:3px;margin-top:4px}
+.portal{padding:32px 40px 60px;max-width:1600px;margin:0 auto;}
+
+/* Shared toggle */
+.prod-toggle{
+  display:inline-flex;align-items:center;gap:8px;font-size:12px;color:var(--tx2);
+  cursor:pointer;user-select:none;margin-left:16px;
+}
+.prod-toggle input{
+  width:34px;height:18px;appearance:none;background:var(--s3);border-radius:9px;
+  position:relative;cursor:pointer;transition:background .2s;
+}
+.prod-toggle input:checked{background:var(--grn);}
+.prod-toggle input::before{
+  content:'';position:absolute;width:14px;height:14px;border-radius:50%;
+  background:var(--tx);top:2px;left:2px;transition:transform .2s;
+}
+.prod-toggle input:checked::before{transform:translateX(16px);}
+
+/* Section headers */
+.portal-section{margin-bottom:40px;}
+.portal-section h2{
+  font-size:18px;font-weight:600;color:var(--tx);margin-bottom:4px;
+  display:flex;align-items:center;gap:10px;
+}
+.portal-section h2 .sec-num{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;
+  color:var(--acc);background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.2);
+  padding:2px 8px;border-radius:4px;
+}
+.portal-section .sec-sub{font-size:13px;color:var(--tx3);margin-bottom:16px;}
+
+/* KPI row */
+.kpi-row{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:24px;}
+.kpi-card{
+  background:var(--s1);border:1px solid var(--bd);border-radius:10px;
+  padding:16px 20px;min-width:140px;flex:1;
+  transition:border-color .15s;
+}
+.kpi-card:hover{border-color:var(--acc);}
+.kpi-card .kv{font-size:28px;font-weight:700;color:var(--acc);font-family:'IBM Plex Mono',monospace;line-height:1;}
+.kpi-card .kl{font-size:11px;color:var(--tx3);margin-top:4px;text-transform:uppercase;letter-spacing:.5px;}
+.kpi-card.warn .kv{color:var(--org);}
+.kpi-card.danger .kv{color:var(--red);}
+.kpi-card.ok .kv{color:var(--grn);}
+
+/* Macro group cards */
+.macro-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;}
+.macro-card{
+  background:var(--s1);border:1px solid var(--bd);border-radius:10px;padding:16px 20px;
+  cursor:pointer;transition:all .15s;position:relative;overflow:hidden;
+}
+.macro-card:hover{border-color:var(--acc);background:var(--s2);}
+.macro-card .mc-name{font-size:14px;font-weight:600;color:var(--tx);margin-bottom:6px;}
+.macro-card .mc-bar{height:4px;border-radius:2px;background:var(--s3);margin:8px 0;}
+.macro-card .mc-bar-fill{height:100%;border-radius:2px;transition:width .4s ease;}
+.macro-card .mc-stats{display:flex;gap:12px;font-size:11px;color:var(--tx3);}
+.macro-card .mc-stat{display:flex;align-items:center;gap:4px;}
+.macro-card .mc-silos{margin-top:8px;display:flex;gap:4px;flex-wrap:wrap;}
+
+/* Health table */
+.health-table{width:100%;border-collapse:separate;border-spacing:0;font-size:12px;}
+.health-table thead th{
+  text-align:left;padding:8px 12px;font-size:10px;color:var(--tx3);
+  text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--bd);
+  position:sticky;top:0;background:var(--bg);z-index:2;
+}
+.health-table tbody tr{cursor:pointer;transition:background .1s;}
+.health-table tbody tr:hover{background:var(--s2);}
+.health-table tbody td{padding:6px 12px;border-bottom:1px solid var(--bd);color:var(--tx2);}
+.health-table tbody td:first-child{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--tx);font-weight:500;
+}
+.health-scroll{max-height:360px;overflow-y:auto;border:1px solid var(--bd);border-radius:8px;background:var(--s1);}
+
+/* Ownership bar */
+.own-bar-wrap{margin-top:8px;}
+.own-row{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+.own-name{width:120px;font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--tx2);text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.own-bar{flex:1;height:18px;background:var(--s2);border-radius:4px;overflow:hidden;position:relative;}
+.own-bar-fill{height:100%;border-radius:4px;transition:width .5s ease;display:flex;align-items:center;padding-left:6px;font-size:9px;font-weight:600;color:var(--bg);}
+.own-count{font-size:11px;color:var(--tx3);width:40px;font-family:'IBM Plex Mono',monospace;}
+
+/* Cross-silo list */
+.xsilo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:10px;}
+.xsilo-card{
+  background:var(--s1);border:1px solid var(--bd);border-radius:8px;
+  padding:10px 14px;display:flex;align-items:center;gap:10px;
+  font-size:11px;cursor:pointer;transition:all .12s;
+}
+.xsilo-card:hover{border-color:var(--ylw);background:var(--s2);}
+.xsilo-arrow{color:var(--ylw);font-size:14px;flex-shrink:0;}
+.xsilo-from,.xsilo-to{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--tx);}
+.xsilo-silo{font-size:9px;padding:1px 5px;border-radius:3px;}
+
+/* Flow chains */
+.chain-tree{margin-top:12px;}
+.chain-root{margin-bottom:16px;background:var(--s1);border:1px solid var(--bd);border-radius:10px;padding:14px 18px;}
+.chain-node{
+  display:inline-flex;align-items:center;gap:4px;padding:3px 10px;
+  border-radius:5px;font-size:11px;font-family:'IBM Plex Mono',monospace;
+  cursor:pointer;transition:all .12s;
+}
+.chain-node:hover{filter:brightness(1.2);}
+.chain-node.cn-sel{background:var(--s3);color:var(--tx);}
+.chain-node.cn-up{background:rgba(96,165,250,.1);color:var(--eq);}
+.chain-node.cn-down{background:rgba(52,211,153,.1);color:var(--grn);}
+.chain-node.cn-cross{outline:1.5px dashed var(--ylw);outline-offset:1px;}
+.chain-arrow{color:var(--tx3);font-size:11px;margin:0 4px;}
+.chain-hop{display:flex;align-items:center;flex-wrap:wrap;gap:2px;margin:4px 0 4px 20px;}
+
+/* Screen→OFDB */
+.sofdb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:10px;}
+.sofdb-card{
+  background:var(--s1);border:1px solid var(--bd);border-radius:8px;
+  padding:10px 14px;font-size:11px;cursor:pointer;transition:all .12s;
+}
+.sofdb-card:hover{border-color:var(--acc2);background:var(--s2);}
+.sofdb-card .sofdb-wf{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--acc);margin-bottom:4px;}
+.sofdb-card .sofdb-row{display:flex;align-items:center;gap:6px;margin:2px 0;}
+.sofdb-card .sofdb-label{font-size:9px;color:var(--tx3);width:52px;text-transform:uppercase;}
+.sofdb-card .sofdb-val{font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--tx2);word-break:break-all;}
+.sofdb-card.gap-card{border-color:rgba(251,146,60,.3);border-style:dashed;}
+.sofdb-card.gap-card .sofdb-val{color:var(--org);}
+
+/* Tab bar for portal sub-sections */
+.portal-tabs{display:flex;gap:4px;margin-bottom:20px;border-bottom:1px solid var(--bd);padding-bottom:8px;flex-wrap:wrap;}
+.portal-tab{
+  padding:6px 14px;border-radius:8px 8px 0 0;font-size:12px;font-weight:500;
+  cursor:pointer;background:transparent;border:none;
+  color:var(--tx3);transition:all .12s;font-family:'Outfit',sans-serif;
+}
+.portal-tab:hover{color:var(--tx2);}
+.portal-tab.active{color:var(--acc);background:var(--s2);border-bottom:2px solid var(--acc);}
+
+/* Slide-in detail panel (portal mode) */
+.slide-panel{
+  position:fixed;top:64px;right:-460px;width:460px;height:calc(100vh - 64px);
+  background:var(--s1);border-left:1px solid var(--bd);z-index:100;
+  transition:right .25s cubic-bezier(.4,0,.2,1);overflow-y:auto;padding:24px;
+  box-shadow:-8px 0 40px rgba(0,0,0,.4);
+}
+.slide-panel.open{right:0;}
+.slide-close{
+  position:absolute;top:12px;right:16px;background:var(--s3);border:none;
+  color:var(--tx2);width:28px;height:28px;border-radius:6px;cursor:pointer;
+  font-size:16px;display:flex;align-items:center;justify-content:center;
+  transition:all .12s;
+}
+.slide-close:hover{background:var(--acc);color:var(--bg);}
+
+/* Chain links in slide panel */
+.slide-chain{margin-top:12px;}
+.slide-chain-link{
+  display:inline-block;padding:3px 8px;border-radius:4px;font-size:10px;
+  font-family:'IBM Plex Mono',monospace;cursor:pointer;margin:2px 3px 2px 0;
+  transition:all .1s;
+}
+.slide-chain-link:hover{filter:brightness(1.3);}
+.slide-chain-link.up{background:rgba(96,165,250,.1);color:var(--eq);}
+.slide-chain-link.down{background:rgba(52,211,153,.1);color:var(--grn);}
 </style>
 </head>
 <body>
 
-<!-- ═══ MAIN TABBAR (shared) ═══ -->
-<div id="main-tabbar">
-  <div class="brand">EFG_QNT <span>/ Workflow Documentation</span></div>
-  <button class="mtab active" onclick="switchTab('gps')">Workflow GPS</button>
-  <button class="mtab" onclick="switchTab('portal')">Documentation portal</button>
+<div class="topbar">
+  <div class="logo" onclick="switchView('explorer')">EFG_QNT <span>/ Workflow GPS</span></div>
+  <div class="search-wrap">
+    <span class="icon">⌕</span>
+    <input id="q" placeholder="Search: display, country | delta, risk | country..." autofocus />
+    <span class="or-badge" id="orBadge">OR</span>
+    <span class="hint">↵</span>
+  </div>
+  <div class="view-tabs">
+    <div class="view-tab active" data-view="explorer" onclick="switchView('explorer')">Explorer</div>
+    <div class="view-tab" data-view="portal" onclick="switchView('portal')">Documentation Portal</div>
+  </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════════
-     GPS VIEW
-     ═══════════════════════════════════════════════════════════════ -->
-<div id="mview-gps" class="mview active">
-  <div class="gps-topbar">
-    <div class="search-wrap">
-      <span class="icon">⌕</span>
-      <input id="q" placeholder="Search: display, country | delta, risk | country..." autofocus />
-      <span class="or-badge" id="orBadge">OR</span>
-      <span class="hint">↵</span>
-    </div>
-    <div class="gps-pills" id="pills"></div>
-  </div>
-
-  <div class="gps-main">
+<div class="main">
+  <!-- ═══ VIEW: EXPLORER (original) ═══ -->
+  <div class="view-explorer active" id="viewExplorer">
     <div class="results">
       <div class="results-header">
         <span id="count">— workflows</span>
-        <span style="font-size:11px;color:var(--g-tx3)" id="modeLabel">AND mode</span>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:11px;color:var(--tx3)" id="modeLabel">AND mode</span>
+          <div class="pills" id="pills"></div>
+        </div>
       </div>
       <div class="results-list" id="list"></div>
     </div>
@@ -352,7 +409,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
           <div class="gl-item"><div class="gl-dot" style="background:#60a5fa;opacity:.5"></div>Upstream</div>
           <div class="gl-item"><div class="gl-dot" style="background:#fff"></div>Selected</div>
           <div class="gl-item"><div class="gl-dot" style="background:#34d399;opacity:.7"></div>Downstream</div>
-          <div class="gl-item" style="margin-left:8px;color:var(--g-tx3)">scroll=zoom · drag=pan · click=navigate</div>
+          <div class="gl-item" style="margin-left:8px;color:var(--tx3)">scroll=zoom · drag=pan · click=navigate</div>
         </div>
       </div>
       <div class="resize-handle" id="resizeH"></div>
@@ -361,166 +418,57 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       </div>
     </div>
   </div>
-</div>
 
-<!-- ═══════════════════════════════════════════════════════════════
-     PORTAL VIEW (unchanged)
-     ═══════════════════════════════════════════════════════════════ -->
-<div id="mview-portal" class="mview" style="flex-direction:row">
-  <div id="portal-wrap">
-    <div id="portal-sidebar">
-      <p>2026-04-14 · 361 workflows</p>
-      <div id="portal-nav">
-        <div class="pnav-grp">Overview</div>
-        <button class="pnav-btn active" onclick="pnav('landscape')"><span class="pnav-dot" style="background:#7f77dd"></span>System landscape</button>
-        <button class="pnav-btn" onclick="pnav('health')"><span class="pnav-dot" style="background:#f85149"></span>Health &amp; gaps</button>
-        <button class="pnav-btn" onclick="pnav('crosssilo')"><span class="pnav-dot" style="background:#3fb950"></span>Cross-silo flows</button>
-        <button class="pnav-btn" onclick="pnav('owners')"><span class="pnav-dot" style="background:#d29922"></span>Ownership map</button>
-        <div class="pnav-grp">Browse</div>
-        <button class="pnav-btn" onclick="pnav('explorer')"><span class="pnav-dot" style="background:#888"></span>Workflow explorer</button>
-        <button class="pnav-btn" onclick="pnav('chains')"><span class="pnav-dot" style="background:#58a6ff"></span>Flow chains</button>
-        <button class="pnav-btn" onclick="pnav('traceability')"><span class="pnav-dot" style="background:#56d364"></span>Screen → OFDB</button>
-        <div class="pnav-grp">Domains</div>
-        <button class="pnav-btn" onclick="pFilterSilo('ADV — Equity Advisory')">Equity advisory</button>
-        <button class="pnav-btn" onclick="pFilterSilo('ADV — Fixed Income Advisory')">Fixed income advisory</button>
-        <button class="pnav-btn" onclick="pFilterSilo('ADV — Mutual Fund Advisory')">Mutual fund advisory</button>
-        <button class="pnav-btn" onclick="pFilterSilo('ADV — ETF Advisory')">ETF advisory</button>
-        <button class="pnav-btn" onclick="pFilterSilo('DD / FIAB — Data Delivery')">DD / FIAB</button>
-        <button class="pnav-btn" onclick="pFilterSilo('Fixed Income — Bond Universe')">Bond universe</button>
-        <button class="pnav-btn" onclick="pFilterSilo('FIPA — Target Market')">FIPA target market</button>
-        <button class="pnav-btn" onclick="pFilterSilo('IRN — Internal Research')">IRN research</button>
-        <button class="pnav-btn" onclick="pFilterSilo('ESG — Sustainability')">ESG</button>
-        <button class="pnav-btn" onclick="pFilterSilo('Test / QA')">Test / QA</button>
+  <!-- ═══ VIEW: DOCUMENTATION PORTAL ═══ -->
+  <div class="view-portal" id="viewPortal">
+    <div class="portal">
+      <!-- Portal header -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+        <div>
+          <h1 style="font-size:22px;font-weight:700;color:var(--tx);letter-spacing:-.3px;">Documentation Portal</h1>
+          <p style="font-size:13px;color:var(--tx3);margin-top:2px;">Operational control tower — <span id="portalTotal">361</span> workflows deployed at EFG</p>
+        </div>
+        <label class="prod-toggle">
+          <input type="checkbox" id="prodOnly" />
+          <span>Production only</span>
+        </label>
       </div>
-    </div>
-    <div id="portal-main">
-      <div id="pview-landscape" class="pview active"></div>
-      <div id="pview-health"     class="pview"></div>
-      <div id="pview-crosssilo"  class="pview"></div>
-      <div id="pview-owners"     class="pview"></div>
-      <div id="pview-explorer"   class="pview"></div>
-      <div id="pview-chains"     class="pview"></div>
-      <div id="pview-traceability" class="pview"></div>
+
+      <!-- Portal sub-nav -->
+      <div class="portal-tabs" id="portalTabs">
+        <div class="portal-tab active" data-sec="landscape">System Landscape</div>
+        <div class="portal-tab" data-sec="health">Health & Gaps</div>
+        <div class="portal-tab" data-sec="crosssilo">Cross-Silo Flows</div>
+        <div class="portal-tab" data-sec="ownership">Ownership Map</div>
+        <div class="portal-tab" data-sec="wfexplorer">Workflow Explorer</div>
+        <div class="portal-tab" data-sec="chains">Flow Chains</div>
+        <div class="portal-tab" data-sec="screenofdb">Screen → OFDB</div>
+      </div>
+
+      <!-- Sections -->
+      <div id="secLandscape" class="portal-section"></div>
+      <div id="secHealth" class="portal-section" style="display:none"></div>
+      <div id="secCrosssilo" class="portal-section" style="display:none"></div>
+      <div id="secOwnership" class="portal-section" style="display:none"></div>
+      <div id="secWfexplorer" class="portal-section" style="display:none"></div>
+      <div id="secChains" class="portal-section" style="display:none"></div>
+      <div id="secScreenofdb" class="portal-section" style="display:none"></div>
     </div>
   </div>
 </div>
 
-<!-- Portal detail panel (slide-in) -->
-<div id="ppanel">
-  <div class="pp-hdr"><h2 id="pp-name"></h2><button class="pp-close" onclick="pClosePanel()">×</button></div>
-  <div class="pp-body" id="pp-body"></div>
+<!-- Slide-in detail panel (shared) -->
+<div class="slide-panel" id="slidePanel">
+  <button class="slide-close" onclick="closeSlide()">✕</button>
+  <div id="slideContent"></div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════════
-     EXTERNAL DATA (GPS)
-     ═══════════════════════════════════════════════════════════════ -->
 <script src="excel_meta.js"></script>
 <script src="workflows.js"></script>
-
-<!-- ═══════════════════════════════════════════════════════════════
-     PORTAL DATA (inline — unchanged from original)
-     ═══════════════════════════════════════════════════════════════ -->
 <script>
-// ----- Mini logique pour le portail -----
-
-function pnav(viewId) {
-  // Activer le bouton cliqué
-  document.querySelectorAll('#portal-nav .pnav-btn').forEach(btn => {
-    const isTarget = (btn.getAttribute('onclick') || '').includes("'" + viewId + "'");
-    btn.classList.toggle('active', isTarget);
-  });
-  // Afficher la vue ciblée
-  document.querySelectorAll('#portal-main .pview').forEach(v => v.classList.remove('active'));
-  const target = document.getElementById('pview-' + viewId);
-  if (target) target.classList.add('active');
-}
-
-function pFilterSilo(siloName) {
-  // Exemple: basculer sur la vue 'explorer' et y injecter un filtre simple
-  pnav('explorer');
-  const el = document.getElementById('pview-explorer');
-  el.innerHTML = `
-    <div class="ptitle">Workflow explorer</div>
-    <div class="psub">Filtre: ${siloName}</div>
-    <div class="warn-banner">Ceci est une vue de démonstration. Implémentez ici votre liste filtrée.</div>
-  `;
-}
-
-function pOpenPanel(name, html) {
-  document.getElementById('pp-name').textContent = name || '';
-  document.getElementById('pp-body').innerHTML = html || '';
-  document.getElementById('ppanel').classList.add('open');
-}
-function pClosePanel() {
-  document.getElementById('ppanel').classList.remove('open');
-}
-
-// ----- Remplissage minimal des vues -----
-function renderPortalDefaults() {
-  const landscape = document.getElementById('pview-landscape');
-  const health    = document.getElementById('pview-health');
-  const cross     = document.getElementById('pview-crosssilo');
-  const owners    = document.getElementById('pview-owners');
-  const explorer  = document.getElementById('pview-explorer');
-  const chains    = document.getElementById('pview-chains');
-  const trace     = document.getElementById('pview-traceability');
-
-  if (landscape) {
-    landscape.innerHTML = `
-      <div class="ptitle">System landscape</div>
-      <div class="psub">Aperçu des domaines et flux</div>
-      <div class="hcards">
-        <div class="hcard">
-          <h3>Résumé</h3>
-          <div class="hrow"><span>Workflows</span><span class="hok">—</span></div>
-          <div class="hrow"><span>Domains</span><span class="hok">—</span></div>
-          <div class="hrow"><span>Gaps</span><span class="hwarn">—</span></div>
-        </div>
-        <div class="hcard">
-          <h3>Actions</h3>
-          <div class="hrow"><span>Ouvrir panneau</span><span><button class="tbtn" onclick="pOpenPanel('Demo panel','<div class=mono-blk>Contenu de démonstration</div>')">Open</button></span></div>
-        </div>
-        <div class="hcard">
-          <h3>Navigation</h3>
-          <div class="hrow"><button class="tbtn" onclick="pnav('explorer')">Aller à Explorer</button></div>
-        </div>
-      </div>
-    `;
-  }
-  if (health)   health.innerHTML   = `<div class="ptitle">Health & gaps</div><div class="psub">Démo — insérez vos métriques ici</div>`;
-  if (cross)    cross.innerHTML    = `<div class="ptitle">Cross-silo flows</div><div class="psub">Démo — cartographiez les flux transverses</div>`;
-  if (owners)   owners.innerHTML   = `<div class="ptitle">Ownership map</div><div class="psub">Démo — responsables par domaine</div>`;
-  if (explorer) explorer.innerHTML = `<div class="ptitle">Workflow explorer</div><div class="psub">Démo — liste et filtres</div>`;
-  if (chains)   chains.innerHTML   = `<div class="ptitle">Flow chains</div><div class="psub">Démo — chaînes et dépendances</div>`;
-  if (trace)    trace.innerHTML    = `<div class="ptitle">Screen → OFDB</div><div class="psub">Démo — traçabilité</div>`;
-}
-
-// Rendu initial du portail
-renderPortalDefaults();
-</script>
-
-<!-- ═══════════════════════════════════════════════════════════════
-     TAB SWITCHING
-     ═══════════════════════════════════════════════════════════════ -->
-<script>
-function switchTab(id) {
-  document.querySelectorAll('.mview').forEach(v => v.classList.remove('active'));
-  document.querySelectorAll('#main-tabbar .mtab').forEach(t => t.classList.remove('active'));
-  document.getElementById('mview-' + id).classList.add('active');
-  document.querySelectorAll('#main-tabbar .mtab').forEach(t => {
-    if ((t.getAttribute('onclick')||'').includes("'"+id+"'")) t.classList.add('active');
-  });
-  if (id === 'gps' && typeof resizeCanvas === 'function') {
-    setTimeout(() => { resizeCanvas(); if (typeof drawGraph === 'function') drawGraph(); }, 20);
-  }
-}
-</script>
-
-<!-- ═══════════════════════════════════════════════════════════════
-     GPS LOGIC (new)
-     ═══════════════════════════════════════════════════════════════ -->
-<script>
-// Enrich search with EXCEL_META
+/* ═══════════════════════════════════════════════════════
+   DATA ENRICHMENT & INDEXES
+   ═══════════════════════════════════════════════════════ */
 W.forEach(w => {
   w.acts.forEach(a => {
     if (a.t !== "Excel Batch" || !a.d) return;
@@ -537,25 +485,628 @@ W.forEach(w => {
 const IDX = {}; W.forEach((w,i) => IDX[w.id]=i);
 const SILO = {EQ:'Equity',FI:'Fixed Income',ETF:'ETF',MF:'Mutual Funds',ESG:'ESG',FEED:'Data Feeds',REF:'Reference',RECON:'Recon',TEST:'Test',OTHER:'Other'};
 const SCOL = {EQ:'#60a5fa',FI:'#4ade80',ETF:'#c084fc',MF:'#facc15',ESG:'#2dd4bf',FEED:'#fb7185',REF:'#a78bfa',RECON:'#fbbf24',TEST:'#666',OTHER:'#666'};
-
-const GCOL_UP   = '#60a5fa';
-const GCOL_SEL  = '#ffffff';
-const GCOL_DOWN = '#34d399';
+const GCOL_UP = '#60a5fa', GCOL_SEL = '#ffffff', GCOL_DOWN = '#34d399';
 
 let sel = null, siloF = null, qStr = '';
+let currentView = 'explorer';
+let portalSection = 'landscape';
+let prodOnlyMode = false;
 
+/* ═══════════════════════════════════════════════════════
+   MACRO GROUPS DEFINITION
+   ═══════════════════════════════════════════════════════ */
+const MACRO_GROUPS = {
+  'Advisory': { silos: ['EQ','MF','ETF'], desc: 'Client-facing advisory portfolio workflows', color: '#60a5fa' },
+  'Fixed Income Pipeline': { silos: ['FI'], desc: 'Bond analytics, pricing, and curve generation', color: '#4ade80' },
+  'Research & Uploads': { silos: ['ESG'], desc: 'ESG scoring, research data imports, bulk uploads', color: '#2dd4bf' },
+  'Outbound & Feeds': { silos: ['FEED','RECON'], desc: 'Data distribution, reconciliation, SFTP feeds', color: '#fb7185' },
+  'Reference': { silos: ['REF','OTHER','TEST'], desc: 'Reference data, maintenance, test workflows', color: '#a78bfa' },
+};
+
+/* ═══════════════════════════════════════════════════════
+   VIEW SWITCHING
+   ═══════════════════════════════════════════════════════ */
+function switchView(v) {
+  currentView = v;
+  document.querySelectorAll('.view-tab').forEach(t => t.classList.toggle('active', t.dataset.view === v));
+  document.getElementById('viewExplorer').style.display = v === 'explorer' ? 'flex' : 'none';
+  document.getElementById('viewExplorer').classList.toggle('active', v === 'explorer');
+  document.getElementById('viewPortal').style.display = v === 'portal' ? 'block' : 'none';
+  document.getElementById('viewPortal').classList.toggle('active', v === 'portal');
+  if (v === 'portal') { buildPortal(); }
+  if (v === 'explorer') { resizeCanvas(); drawGraph(); }
+}
+
+/* ═══════════════════════════════════════════════════════
+   PORTAL TAB SWITCHING
+   ═══════════════════════════════════════════════════════ */
+document.getElementById('portalTabs').onclick = e => {
+  const tab = e.target.closest('.portal-tab');
+  if (!tab) return;
+  portalSection = tab.dataset.sec;
+  document.querySelectorAll('.portal-tab').forEach(t => t.classList.toggle('active', t.dataset.sec === portalSection));
+  showPortalSection(portalSection);
+};
+
+function showPortalSection(sec) {
+  const map = {landscape:'secLandscape',health:'secHealth',crosssilo:'secCrosssilo',ownership:'secOwnership',wfexplorer:'secWfexplorer',chains:'secChains',screenofdb:'secScreenofdb'};
+  Object.values(map).forEach(id => document.getElementById(id).style.display = 'none');
+  document.getElementById(map[sec]).style.display = 'block';
+  buildPortalSection(sec);
+}
+
+/* Production only toggle */
+document.getElementById('prodOnly').onchange = e => {
+  prodOnlyMode = e.target.checked;
+  buildPortal();
+};
+
+function getFiltered() {
+  return prodOnlyMode ? W.filter(w => w.tag === 'prod') : W;
+}
+
+/* ═══════════════════════════════════════════════════════
+   PORTAL BUILDERS
+   ═══════════════════════════════════════════════════════ */
+function buildPortal() {
+  const fw = getFiltered();
+  document.getElementById('portalTotal').textContent = fw.length;
+  buildPortalSection(portalSection);
+}
+
+function buildPortalSection(sec) {
+  const fw = getFiltered();
+  switch(sec) {
+    case 'landscape': buildLandscape(fw); break;
+    case 'health': buildHealth(fw); break;
+    case 'crosssilo': buildCrossSilo(fw); break;
+    case 'ownership': buildOwnership(fw); break;
+    case 'wfexplorer': buildWfExplorer(fw); break;
+    case 'chains': buildChains(fw); break;
+    case 'screenofdb': buildScreenOfdb(fw); break;
+  }
+}
+
+/* ── 1. SYSTEM LANDSCAPE ── */
+function buildLandscape(fw) {
+  const el = document.getElementById('secLandscape');
+  const totalActive = fw.filter(w => w.tag === 'prod').length;
+  const ghosts = fw.filter(w => w.acts.length === 0 || w.tag === 'old').length;
+  const triggerChains = fw.filter(w => (w.down||[]).length > 0).length;
+  const crossLinks = countCrossSiloLinks(fw);
+  const orphans = fw.filter(w => !w.sched && (w.up||[]).length === 0).length;
+
+  let html = `
+    <h2><span class="sec-num">01</span>System Landscape</h2>
+    <div class="sec-sub">Macro-group aggregation with head KPIs — answer "what's running" in 5 seconds.</div>
+    <div class="kpi-row">
+      <div class="kpi-card"><div class="kv">${fw.length}</div><div class="kl">Total Workflows</div></div>
+      <div class="kpi-card ok"><div class="kv">${totalActive}</div><div class="kl">Active (prod)</div></div>
+      <div class="kpi-card warn"><div class="kv">${ghosts}</div><div class="kl">Ghost / Old</div></div>
+      <div class="kpi-card"><div class="kv">${triggerChains}</div><div class="kl">Trigger Chains</div></div>
+      <div class="kpi-card danger"><div class="kv">${crossLinks}</div><div class="kl">Cross-Silo Links</div></div>
+      <div class="kpi-card warn"><div class="kv">${orphans}</div><div class="kl">Orphans</div></div>
+    </div>
+    <div class="macro-grid">`;
+
+  Object.entries(MACRO_GROUPS).forEach(([name, grp]) => {
+    const groupWfs = fw.filter(w => grp.silos.includes(w.s));
+    const active = groupWfs.filter(w => w.tag === 'prod').length;
+    const ghost = groupWfs.filter(w => w.acts.length === 0 || w.tag === 'old').length;
+    const xsilo = groupWfs.filter(w => (w.down||[]).some(d => { const dw = W[IDX[d]]; return dw && !grp.silos.includes(dw.s); })).length;
+    const pct = fw.length ? Math.round(groupWfs.length / fw.length * 100) : 0;
+
+    html += `
+      <div class="macro-card" onclick="macroClick('${name}')">
+        <div class="mc-name">${name}</div>
+        <div style="font-size:11px;color:var(--tx3)">${grp.desc}</div>
+        <div class="mc-bar"><div class="mc-bar-fill" style="width:${pct}%;background:${grp.color}"></div></div>
+        <div class="mc-stats">
+          <div class="mc-stat"><span style="color:${grp.color};font-weight:600;">${groupWfs.length}</span> total</div>
+          <div class="mc-stat"><span style="color:var(--grn)">${active}</span> active</div>
+          <div class="mc-stat"><span style="color:var(--tx3)">${ghost}</span> ghost</div>
+          ${xsilo ? `<div class="mc-stat"><span style="color:var(--ylw)">${xsilo}</span> cross-silo</div>` : ''}
+        </div>
+        <div class="mc-silos">${grp.silos.map(s=>`<span class="badge b-${s}" style="font-size:9px">${s}</span>`).join('')}</div>
+      </div>`;
+  });
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+function macroClick(name) {
+  const grp = MACRO_GROUPS[name];
+  if (!grp) return;
+  // Jump to wfexplorer pre-filtered
+  portalSection = 'wfexplorer';
+  document.querySelectorAll('.portal-tab').forEach(t => t.classList.toggle('active', t.dataset.sec === 'wfexplorer'));
+  showPortalSection('wfexplorer');
+  // Pre-select the first matching silo
+  const selEl = document.getElementById('portalSiloFilter');
+  if (selEl) selEl.value = grp.silos[0];
+  buildWfExplorer(getFiltered(), grp.silos);
+}
+
+/* ── 2. HEALTH & GAPS ── */
+function buildHealth(fw) {
+  const el = document.getElementById('secHealth');
+  const orphans = fw.filter(w => !w.sched && (w.up||[]).length === 0);
+  const ghosts = fw.filter(w => w.acts.length === 0 || w.tag === 'old');
+  const noTrigger = fw.filter(w => !w.sched && (w.up||[]).length === 0 && w.tag === 'prod');
+
+  // Screen steps without OFDB path
+  const screenGaps = [];
+  fw.forEach(w => {
+    w.acts.forEach(a => {
+      if (a.t === 'Screen' && a.d) {
+        const hasOfdb = a.d.match(/PERSONAL:|CLIENT:/i);
+        if (!hasOfdb) screenGaps.push({ wf: w.id, step: a.n, detail: a.d });
+      }
+    });
+  });
+
+  let html = `
+    <h2><span class="sec-num">02</span>Health & Gaps</h2>
+    <div class="sec-sub">Automatic detection of orphans, ghosts, persistent failures, and documentation gaps.</div>
+    <div class="kpi-row">
+      <div class="kpi-card warn"><div class="kv">${orphans.length}</div><div class="kl">Orphan Workflows</div></div>
+      <div class="kpi-card"><div class="kv">${ghosts.length}</div><div class="kl">Ghost / Never Run</div></div>
+      <div class="kpi-card danger"><div class="kv">${noTrigger.length}</div><div class="kl">Prod — No Trigger</div></div>
+      <div class="kpi-card warn"><div class="kv">${screenGaps.length}</div><div class="kl">Screen→OFDB Gaps</div></div>
+    </div>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;">
+      <div style="flex:1;min-width:300px;">
+        <div style="font-size:13px;font-weight:600;color:var(--org);margin-bottom:8px;">⚠ Orphan Workflows <span style="color:var(--tx3);font-weight:400">(no trigger, no schedule)</span></div>
+        <div class="health-scroll">
+          <table class="health-table"><thead><tr><th>Workflow</th><th>Silo</th><th>Tag</th><th>Steps</th></tr></thead><tbody>`;
+  orphans.slice(0, 50).forEach(w => {
+    html += `<tr onclick="openSlide('${w.id}')"><td>${w.id}</td><td><span class="badge b-${w.s}" style="font-size:9px">${w.s}</span></td><td><span class="badge b-tag b-${w.tag}">${w.tag}</span></td><td>${w.acts.length}</td></tr>`;
+  });
+  html += `</tbody></table></div></div>
+      <div style="flex:1;min-width:300px;">
+        <div style="font-size:13px;font-weight:600;color:var(--tx3);margin-bottom:8px;">👻 Ghost Workflows <span style="color:var(--tx3);font-weight:400">(0 steps or old)</span></div>
+        <div class="health-scroll">
+          <table class="health-table"><thead><tr><th>Workflow</th><th>Silo</th><th>Tag</th></tr></thead><tbody>`;
+  ghosts.slice(0, 50).forEach(w => {
+    html += `<tr onclick="openSlide('${w.id}')"><td>${w.id}</td><td><span class="badge b-${w.s}" style="font-size:9px">${w.s}</span></td><td><span class="badge b-tag b-${w.tag}">${w.tag}</span></td></tr>`;
+  });
+  html += `</tbody></table></div></div></div>`;
+  el.innerHTML = html;
+}
+
+/* ── 3. CROSS-SILO FLOWS ── */
+function countCrossSiloLinks(fw) {
+  let count = 0;
+  fw.forEach(w => {
+    (w.down||[]).forEach(d => {
+      const dw = W[IDX[d]];
+      if (dw && dw.s !== w.s) count++;
+    });
+  });
+  return count;
+}
+
+function buildCrossSilo(fw) {
+  const el = document.getElementById('secCrosssilo');
+  const links = [];
+  fw.forEach(w => {
+    (w.down||[]).forEach(d => {
+      const dw = W[IDX[d]];
+      if (dw && dw.s !== w.s) links.push({ from: w.id, fromSilo: w.s, to: dw.id, toSilo: dw.s });
+    });
+  });
+
+  // Group by silo pair
+  const pairMap = {};
+  links.forEach(l => {
+    const k = `${l.fromSilo}→${l.toSilo}`;
+    if (!pairMap[k]) pairMap[k] = [];
+    pairMap[k].push(l);
+  });
+
+  let html = `
+    <h2><span class="sec-num">03</span>Cross-Silo Flows</h2>
+    <div class="sec-sub">${links.length} trigger relationships crossing domain boundaries — fragility hotspots where failures propagate beyond the owner's perimeter.</div>
+    <div class="kpi-row">
+      <div class="kpi-card danger"><div class="kv">${links.length}</div><div class="kl">Cross-Silo Links</div></div>
+      <div class="kpi-card warn"><div class="kv">${Object.keys(pairMap).length}</div><div class="kl">Silo Pairs</div></div>
+    </div>`;
+
+  // Summary by pair
+  html += '<div style="margin-bottom:16px;display:flex;gap:8px;flex-wrap:wrap;">';
+  Object.entries(pairMap).sort((a,b)=>b[1].length-a[1].length).forEach(([pair, items]) => {
+    const [from, to] = pair.split('→');
+    html += `<div style="background:var(--s1);border:1px solid var(--bd);border-radius:6px;padding:6px 12px;font-size:11px;display:flex;align-items:center;gap:6px;">
+      <span class="badge b-${from}" style="font-size:9px">${from}</span>
+      <span style="color:var(--ylw)">→</span>
+      <span class="badge b-${to}" style="font-size:9px">${to}</span>
+      <span style="color:var(--tx3);font-family:'IBM Plex Mono',monospace">${items.length}</span>
+    </div>`;
+  });
+  html += '</div>';
+
+  html += '<div class="xsilo-grid">';
+  links.slice(0, 80).forEach(l => {
+    html += `
+      <div class="xsilo-card" onclick="openSlide('${l.from}')">
+        <span class="badge b-${l.fromSilo}" style="font-size:9px">${l.fromSilo}</span>
+        <span class="xsilo-from">${l.from.length > 28 ? l.from.substring(0,26)+'..' : l.from}</span>
+        <span class="xsilo-arrow">→</span>
+        <span class="badge b-${l.toSilo}" style="font-size:9px">${l.toSilo}</span>
+        <span class="xsilo-to">${l.to.length > 28 ? l.to.substring(0,26)+'..' : l.to}</span>
+      </div>`;
+  });
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+/* ── 4. OWNERSHIP MAP ── */
+function buildOwnership(fw) {
+  const el = document.getElementById('secOwnership');
+  // Extract owner from workflow naming convention (first segment before _ or /)
+  const ownerMap = {};
+  fw.forEach(w => {
+    // Try to extract owner from naming pattern — crude heuristic
+    const parts = w.id.split(/[_/]/);
+    const owner = parts.length > 1 ? parts[0].toUpperCase() : 'UNKNOWN';
+    if (!ownerMap[owner]) ownerMap[owner] = { count: 0, silos: new Set(), wfs: [] };
+    ownerMap[owner].count++;
+    ownerMap[owner].silos.add(w.s);
+    ownerMap[owner].wfs.push(w);
+  });
+
+  const sorted = Object.entries(ownerMap).sort((a,b) => b[1].count - a[1].count);
+  const max = sorted.length ? sorted[0][1].count : 1;
+
+  // Concentration risk
+  const top1Pct = fw.length ? Math.round(sorted[0]?.[1].count / fw.length * 100) : 0;
+
+  let html = `
+    <h2><span class="sec-num">04</span>Ownership Map</h2>
+    <div class="sec-sub">Ownership concentration analysis — identify SPOFs before they bite.</div>
+    <div class="kpi-row">
+      <div class="kpi-card"><div class="kv">${sorted.length}</div><div class="kl">Distinct Owners</div></div>
+      <div class="kpi-card ${top1Pct > 25 ? 'danger' : ''}"><div class="kv">${top1Pct}%</div><div class="kl">Top Owner Share</div></div>
+      <div class="kpi-card warn"><div class="kv">${sorted[0]?.[0] || '—'}</div><div class="kl">Largest Owner</div></div>
+      <div class="kpi-card"><div class="kv">${sorted[0]?.[1].count || 0}</div><div class="kl">Workflows</div></div>
+    </div>
+    <div class="own-bar-wrap">`;
+
+  sorted.slice(0, 20).forEach(([owner, data]) => {
+    const pct = Math.round(data.count / max * 100);
+    const col = data.count / fw.length > 0.2 ? 'var(--red)' : data.count / fw.length > 0.1 ? 'var(--org)' : 'var(--acc)';
+    html += `
+      <div class="own-row">
+        <div class="own-name" title="${owner}">${owner}</div>
+        <div class="own-bar">
+          <div class="own-bar-fill" style="width:${pct}%;background:${col}">${data.count > 5 ? data.count : ''}</div>
+        </div>
+        <div class="own-count">${data.count}</div>
+        <div style="display:flex;gap:3px;">${[...data.silos].map(s=>`<span class="badge b-${s}" style="font-size:8px;padding:1px 4px">${s}</span>`).join('')}</div>
+      </div>`;
+  });
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+/* ── 5. WORKFLOW EXPLORER (portal version) ── */
+function buildWfExplorer(fw, preFilterSilos) {
+  const el = document.getElementById('secWfexplorer');
+  const silos = [...new Set(fw.map(w=>w.s))].sort();
+  const tags = [...new Set(fw.map(w=>w.tag))].sort();
+
+  let html = `
+    <h2><span class="sec-num">05</span>Workflow Explorer</h2>
+    <div class="sec-sub">Full-text search + multi-filter sortable table — replaces manual FactSet navigation.</div>
+    <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center;">
+      <input id="portalSearch" placeholder="Full-text search…" style="
+        height:36px;padding:0 14px;border-radius:8px;border:1.5px solid var(--bd);
+        background:var(--s1);color:var(--tx);font-size:13px;font-family:'Outfit',sans-serif;
+        outline:none;width:300px;transition:border .15s;
+      " oninput="filterPortalExplorer()" />
+      <select id="portalSiloFilter" style="
+        height:36px;padding:0 10px;border-radius:8px;border:1.5px solid var(--bd);
+        background:var(--s1);color:var(--tx);font-size:12px;font-family:'Outfit',sans-serif;cursor:pointer;
+      " onchange="filterPortalExplorer()">
+        <option value="">All silos</option>
+        ${silos.map(s=>`<option value="${s}" ${preFilterSilos && preFilterSilos.includes(s)?'selected':''}>${SILO[s]||s}</option>`).join('')}
+      </select>
+      <select id="portalTagFilter" style="
+        height:36px;padding:0 10px;border-radius:8px;border:1.5px solid var(--bd);
+        background:var(--s1);color:var(--tx);font-size:12px;font-family:'Outfit',sans-serif;cursor:pointer;
+      " onchange="filterPortalExplorer()">
+        <option value="">All tags</option>
+        ${tags.map(t=>`<option value="${t}">${t}</option>`).join('')}
+      </select>
+      <span id="portalExCount" style="font-size:12px;color:var(--tx3);margin-left:8px;"></span>
+    </div>
+    <div class="health-scroll" style="max-height:500px;" id="portalExScroll">
+      <table class="health-table" id="portalExTable">
+        <thead><tr>
+          <th style="cursor:pointer" onclick="sortPortalEx('id')">Workflow ↕</th>
+          <th>Description</th>
+          <th style="cursor:pointer" onclick="sortPortalEx('s')">Silo ↕</th>
+          <th style="cursor:pointer" onclick="sortPortalEx('tag')">Tag ↕</th>
+          <th style="cursor:pointer" onclick="sortPortalEx('acts')">Steps ↕</th>
+          <th>Schedule</th>
+          <th style="cursor:pointer" onclick="sortPortalEx('deps')">Deps ↕</th>
+        </tr></thead>
+        <tbody id="portalExBody"></tbody>
+      </table>
+    </div>`;
+  el.innerHTML = html;
+  filterPortalExplorer();
+}
+
+let portalExSort = { key: 'id', asc: true };
+function sortPortalEx(key) {
+  if (portalExSort.key === key) portalExSort.asc = !portalExSort.asc;
+  else { portalExSort.key = key; portalExSort.asc = true; }
+  filterPortalExplorer();
+}
+
+function filterPortalExplorer() {
+  const fw = getFiltered();
+  const q = (document.getElementById('portalSearch')?.value || '').toLowerCase();
+  const silo = document.getElementById('portalSiloFilter')?.value || '';
+  const tag = document.getElementById('portalTagFilter')?.value || '';
+  let results = fw.filter(w => {
+    if (silo && w.s !== silo) return false;
+    if (tag && w.tag !== tag) return false;
+    if (q && !w.search.includes(q)) return false;
+    return true;
+  });
+
+  // Sort
+  const sk = portalExSort.key;
+  results.sort((a,b) => {
+    let va, vb;
+    if (sk === 'acts') { va = a.acts.length; vb = b.acts.length; }
+    else if (sk === 'deps') { va = (a.up||[]).length+(a.down||[]).length; vb = (b.up||[]).length+(b.down||[]).length; }
+    else { va = a[sk]||''; vb = b[sk]||''; }
+    if (typeof va === 'number') return portalExSort.asc ? va-vb : vb-va;
+    return portalExSort.asc ? String(va).localeCompare(String(vb)) : String(vb).localeCompare(String(va));
+  });
+
+  document.getElementById('portalExCount').textContent = results.length + ' workflows';
+  const body = document.getElementById('portalExBody');
+  body.innerHTML = results.slice(0, 200).map(w => {
+    const deps = (w.up||[]).length + (w.down||[]).length;
+    return `<tr onclick="openSlide('${w.id}')">
+      <td>${w.id}</td>
+      <td style="max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--tx3)">${w.desc||'—'}</td>
+      <td><span class="badge b-${w.s}" style="font-size:9px">${w.s}</span></td>
+      <td><span class="badge b-tag b-${w.tag}">${w.tag}</span></td>
+      <td>${w.acts.length}</td>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:10px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${w.sched||'—'}</td>
+      <td>${deps ? `<span style="color:var(--acc)">${deps}</span>` : '—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+/* ── 6. FLOW CHAINS ── */
+function buildChains(fw) {
+  const el = document.getElementById('secChains');
+  // Find root nodes (no upstream) that have downstream chains
+  const roots = fw.filter(w => (w.up||[]).length === 0 && (w.down||[]).length > 0);
+  // Sort by chain depth (longest first)
+  function getChainDepth(wid, visited = new Set()) {
+    if (visited.has(wid)) return 0;
+    visited.add(wid);
+    const w = W[IDX[wid]]; if (!w) return 0;
+    let maxD = 0;
+    (w.down||[]).forEach(d => { maxD = Math.max(maxD, 1 + getChainDepth(d, visited)); });
+    return maxD;
+  }
+  roots.sort((a,b) => getChainDepth(b.id) - getChainDepth(a.id));
+
+  const crossCount = roots.filter(r => hasCrossSiloInChain(r.id)).length;
+
+  let html = `
+    <h2><span class="sec-num">06</span>Flow Chains</h2>
+    <div class="sec-sub">Trigger trees with cross-silo hops highlighted in amber — diagnose "if I break X, what falls downstream."</div>
+    <div class="kpi-row">
+      <div class="kpi-card"><div class="kv">${roots.length}</div><div class="kl">Root Chains</div></div>
+      <div class="kpi-card warn"><div class="kv">${crossCount}</div><div class="kl">With Cross-Silo</div></div>
+    </div>
+    <div class="chain-tree">`;
+
+  roots.slice(0, 40).forEach(r => {
+    html += `<div class="chain-root">${renderChainNode(r.id, new Set(), 0)}</div>`;
+  });
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+function hasCrossSiloInChain(wid, visited = new Set()) {
+  if (visited.has(wid)) return false;
+  visited.add(wid);
+  const w = W[IDX[wid]]; if (!w) return false;
+  for (const d of (w.down||[])) {
+    const dw = W[IDX[d]];
+    if (dw && dw.s !== w.s) return true;
+    if (hasCrossSiloInChain(d, visited)) return true;
+  }
+  return false;
+}
+
+function renderChainNode(wid, visited, depth) {
+  if (visited.has(wid) || depth > 8) return '';
+  visited.add(wid);
+  const w = W[IDX[wid]]; if (!w) return '';
+  const downs = (w.down||[]).filter(d => W[IDX[d]]);
+  const cls = depth === 0 ? 'cn-sel' : 'cn-down';
+
+  let h = `<div class="chain-hop">
+    <span class="chain-node ${cls}" onclick="openSlide('${w.id}')" style="margin-left:${depth*16}px">
+      <span class="badge b-${w.s}" style="font-size:8px;padding:1px 4px;margin-right:2px">${w.s}</span>
+      ${w.id.length > 30 ? w.id.substring(0,28)+'..' : w.id}
+    </span>`;
+
+  if (downs.length) {
+    downs.forEach(d => {
+      const dw = W[IDX[d]];
+      const isCross = dw && dw.s !== w.s;
+      h += `<span class="chain-arrow">${isCross ? '<span style="color:var(--ylw)">⚡→</span>' : '→'}</span>`;
+      h += renderChainNode(d, visited, depth + 1);
+    });
+  }
+  h += '</div>';
+  return h;
+}
+
+/* ── 7. SCREEN → OFDB ── */
+function buildScreenOfdb(fw) {
+  const el = document.getElementById('secScreenofdb');
+  const mappings = [];
+  const gaps = [];
+
+  fw.forEach(w => {
+    w.acts.forEach((a, i) => {
+      if (a.t === 'Screen' || (a.t === 'Excel Batch' && a.d)) {
+        const detail = a.d || a.n || '';
+        const ofdbMatch = detail.match(/(PERSONAL:|CLIENT:)[^\s,;]*/gi);
+        if (ofdbMatch) {
+          ofdbMatch.forEach(path => {
+            mappings.push({ wf: w.id, silo: w.s, step: a.n, type: a.t, ofdb: path });
+          });
+        } else if (a.t === 'Screen') {
+          gaps.push({ wf: w.id, silo: w.s, step: a.n, type: a.t, detail: detail.substring(0, 80) });
+        }
+      }
+    });
+  });
+
+  let showGaps = false;
+
+  let html = `
+    <h2><span class="sec-num">07</span>Screen → OFDB Traceability</h2>
+    <div class="sec-sub">Explicit mapping from Screen source to OFDB archive destination — base for audit and migration documentation.</div>
+    <div class="kpi-row">
+      <div class="kpi-card ok"><div class="kv">${mappings.length}</div><div class="kl">Mapped Paths</div></div>
+      <div class="kpi-card warn"><div class="kv">${gaps.length}</div><div class="kl">Gaps (No Path)</div></div>
+    </div>
+    <div style="margin-bottom:14px;">
+      <button onclick="toggleOfdbGaps(this)" style="
+        padding:6px 14px;border-radius:8px;font-size:12px;cursor:pointer;
+        background:var(--s2);border:1px solid var(--bd);color:var(--tx2);
+        font-family:'Outfit',sans-serif;transition:all .12s;
+      ">Show Gaps</button>
+    </div>
+    <div class="sofdb-grid" id="sofdbGrid">`;
+
+  mappings.slice(0, 100).forEach(m => {
+    html += `
+      <div class="sofdb-card" onclick="openSlide('${m.wf}')">
+        <div class="sofdb-wf">${m.wf}</div>
+        <div class="sofdb-row"><span class="sofdb-label">Step</span><span class="sofdb-val">${m.step}</span></div>
+        <div class="sofdb-row"><span class="sofdb-label">OFDB</span><span class="sofdb-val" style="color:var(--acc2)">${m.ofdb}</span></div>
+      </div>`;
+  });
+  html += '</div>';
+
+  // Hidden gaps section
+  html += `<div id="ofdbGapsSection" style="display:none;margin-top:16px;">
+    <div style="font-size:13px;font-weight:600;color:var(--org);margin-bottom:8px;">⚠ Screen Steps Without Extracted OFDB Path</div>
+    <div class="sofdb-grid">`;
+  gaps.slice(0, 100).forEach(g => {
+    html += `
+      <div class="sofdb-card gap-card" onclick="openSlide('${g.wf}')">
+        <div class="sofdb-wf">${g.wf}</div>
+        <div class="sofdb-row"><span class="sofdb-label">Step</span><span class="sofdb-val">${g.step}</span></div>
+        <div class="sofdb-row"><span class="sofdb-label">Detail</span><span class="sofdb-val">${g.detail || '—'}</span></div>
+      </div>`;
+  });
+  html += '</div></div>';
+  el.innerHTML = html;
+}
+
+function toggleOfdbGaps(btn) {
+  const sec = document.getElementById('ofdbGapsSection');
+  const showing = sec.style.display !== 'none';
+  sec.style.display = showing ? 'none' : 'block';
+  btn.textContent = showing ? 'Show Gaps' : 'Hide Gaps';
+  btn.style.borderColor = showing ? 'var(--bd)' : 'var(--org)';
+  btn.style.color = showing ? 'var(--tx2)' : 'var(--org)';
+}
+
+/* ═══════════════════════════════════════════════════════
+   SLIDE-IN DETAIL PANEL
+   ═══════════════════════════════════════════════════════ */
+function openSlide(id) {
+  const w = W[IDX[id]]; if (!w) return;
+  const panel = document.getElementById('slidePanel');
+  const content = document.getElementById('slideContent');
+
+  const upHtml = (w.up||[]).map(u => `<span class="slide-chain-link up" onclick="openSlide('${u}')">${u}</span>`).join('');
+  const downHtml = (w.down||[]).map(d => `<span class="slide-chain-link down" onclick="openSlide('${d}')">${d}</span>`).join('');
+
+  // Detect statuses
+  const statuses = [];
+  if (w.tag === 'prod') statuses.push('<span class="st-pill st-success">● prod</span>');
+  if (w.tag === 'test') statuses.push('<span class="st-pill st-ghost">● test</span>');
+  if (w.tag === 'old') statuses.push('<span class="st-pill st-ghost">● old/ghost</span>');
+  if (!w.sched && (w.up||[]).length === 0) statuses.push('<span class="st-pill st-orphan">● orphan</span>');
+  const hasCross = (w.down||[]).some(d => { const dw = W[IDX[d]]; return dw && dw.s !== w.s; });
+  if (hasCross) statuses.push('<span class="st-pill st-cross">● cross-silo</span>');
+
+  content.innerHTML = `
+    <div class="dp-name" style="padding-right:32px;">${w.id}</div>
+    <div style="margin:6px 0 10px;display:flex;gap:6px;flex-wrap:wrap;">
+      <span class="badge b-${w.s}">${SILO[w.s]||w.s}</span>
+      ${statuses.join('')}
+    </div>
+    <div class="dp-desc">${w.desc || 'No description'}</div>
+    <div class="dp-grid">
+      <div class="dp-field"><div class="l">Schedule / Trigger</div><div class="v"><code>${(w.sched||'—').trim()}</code></div></div>
+      <div class="dp-field"><div class="l">Dependencies</div><div class="v">${(w.up||[]).length} up · ${(w.down||[]).length} down</div></div>
+    </div>
+    ${(w.up||[]).length ? `<div class="dp-acts-title">⬆ Upstream</div><div class="slide-chain">${upHtml}</div>` : ''}
+    ${(w.down||[]).length ? `<div class="dp-acts-title">⬇ Downstream</div><div class="slide-chain">${downHtml}</div>` : ''}
+    <div class="dp-acts-title">Pipeline — ${w.acts.length} steps</div>
+    <div>${w.acts.map((a,i)=>`<span class="dp-act"><span style="color:var(--tx3)">${i+1}.</span> <span class="at">${a.t}</span> <span class="an">${a.n}</span></span>`).join(' → ')}</div>
+    <div style="margin-top:16px;">
+      <button onclick="jumpToExplorer('${w.id}')" style="
+        padding:6px 14px;border-radius:8px;font-size:12px;cursor:pointer;
+        background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.3);color:var(--acc);
+        font-family:'Outfit',sans-serif;transition:all .12s;
+      ">Open in Explorer →</button>
+    </div>
+  `;
+  panel.classList.add('open');
+}
+
+function closeSlide() {
+  document.getElementById('slidePanel').classList.remove('open');
+}
+
+function jumpToExplorer(id) {
+  closeSlide();
+  switchView('explorer');
+  qEl.value = id;
+  qStr = id.toLowerCase();
+  renderList();
+  setTimeout(() => selectWf(id), 100);
+}
+
+// Close slide on Escape
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSlide(); });
+
+/* ═══════════════════════════════════════════════════════
+   EXPLORER: PILLS / SEARCH / LIST (original logic)
+   ═══════════════════════════════════════════════════════ */
 const pillsEl = document.getElementById('pills');
 const siloCounts = {};
 W.forEach(w => siloCounts[w.s]=(siloCounts[w.s]||0)+1);
-let ph = '<button class="gps-pill on" data-s="all">All</button>';
+let ph = '<button class="pill on" data-s="all">All</button>';
 Object.entries(siloCounts).sort((a,b)=>b[1]-a[1]).forEach(([s,c])=>{
-  ph += `<button class="gps-pill" data-s="${s}">${SILO[s]||s} ${c}</button>`;
+  ph += `<button class="pill" data-s="${s}">${SILO[s]||s} ${c}</button>`;
 });
 pillsEl.innerHTML = ph;
 pillsEl.onclick = e => {
-  const b=e.target.closest('.gps-pill'); if(!b) return;
+  const b=e.target.closest('.pill'); if(!b) return;
   siloF = b.dataset.s==='all'?null:b.dataset.s;
-  pillsEl.querySelectorAll('.gps-pill').forEach(p=>p.classList.remove('on'));
+  pillsEl.querySelectorAll('.pill').forEach(p=>p.classList.remove('on'));
   b.classList.add('on');
   renderList();
 };
@@ -563,7 +1114,6 @@ pillsEl.onclick = e => {
 const qEl = document.getElementById('q');
 const orBadge = document.getElementById('orBadge');
 const modeLabel = document.getElementById('modeLabel');
-
 qEl.oninput = () => { qStr = qEl.value.trim().toLowerCase(); renderList(); };
 
 function parseQuery(raw) {
@@ -598,14 +1148,12 @@ function renderList() {
   const el = document.getElementById('list');
   const { groups, isOR } = parseQuery(qStr);
   const terms = groups.flat();
-
   let filtered = W.filter(w => {
     if(siloF && w.s!==siloF) return false;
     return matchesQuery(w, groups, isOR);
   });
   filtered.sort((a,b) => score(b,groups,isOR) - score(a,groups,isOR));
   document.getElementById('count').textContent = filtered.length + ' workflows';
-
   el.innerHTML = filtered.slice(0,120).map(w => {
     let name = w.id, desc = w.desc||'';
     if(terms.length) {
@@ -622,8 +1170,8 @@ function renderList() {
       <div class="badges">
         <span class="badge b-${w.s}">${SILO[w.s]||w.s}</span>
         <span class="badge b-tag b-${w.tag}">${w.tag}</span>
-        ${depCount?`<span style="font-size:10px;color:var(--g-tx3)">⛓ ${depCount}</span>`:''}
-        <span style="font-size:10px;color:var(--g-tx3)">${w.acts.length} steps</span>
+        ${depCount?`<span style="font-size:10px;color:var(--tx3)">⛓ ${depCount}</span>`:''}
+        <span style="font-size:10px;color:var(--tx3)">${w.acts.length} steps</span>
       </div>
     </div>`;
   }).join('');
@@ -641,10 +1189,12 @@ function selectWf(id) {
   renderGraph(id);
 }
 
+/* ═══════════════════════════════════════════════════════
+   EXPLORER: DETAIL PANEL (original)
+   ═══════════════════════════════════════════════════════ */
 function renderDetail(id) {
   const dp = document.getElementById('detailPanel');
   const w = W[IDX[id]]; if(!w) return;
-
   const xlMeta = w.acts
     .filter(a => a.t === 'Excel Batch' && a.d)
     .map(a => {
@@ -668,57 +1218,51 @@ function renderDetail(id) {
     const colsHtml = meta.cols.map(c => {
       const mapped = colMap[c];
       const fqlBadge = mapped && mapped.fql
-        ? `<span style="font-size:9px;padding:1px 5px;border-radius:3px;background:rgba(34,211,238,.12);color:var(--g-cyn);margin-left:4px;font-family:'IBM Plex Mono',monospace;vertical-align:middle">${mapped.fql}</span>`
+        ? `<span style="font-size:9px;padding:1px 5px;border-radius:3px;background:rgba(34,211,238,.12);color:var(--cyn);margin-left:4px;font-family:'IBM Plex Mono',monospace;vertical-align:middle">${mapped.fql}</span>`
         : '';
       const formula = mapped && mapped.formula
         ? mapped.formula.replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
         : '';
-      const formulaHtml = formula ? `<span class="formula-full" style="display:none;">${formula}</span>` : '';
+      const formulaHtml = formula
+        ? `<span class="formula-full" style="display:none;">${formula}</span>`
+        : '';
       return `<span class="pill-col" data-col="${c}">${c}${fqlBadge}${formulaHtml}</span>`;
     }).join('');
-
     const ofdbHtml = meta.ofdb.length ? `
       <div style="margin-top:8px">
-        <div style="font-size:10px;color:var(--g-acc2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">OFDB Paths</div>
+        <div style="font-size:10px;color:var(--acc2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">OFDB Paths</div>
         <div>${meta.ofdb.map(o=>`<span class="pill-ofdb">${o}</span>`).join('')}</div>
       </div>` : '';
-
     return `
       <div style="margin-top:12px;">
-        <div style="font-size:11px;color:var(--g-acc);font-weight:600;margin-bottom:6px;">
+        <div style="font-size:11px;color:var(--acc);font-weight:600;margin-bottom:6px;">
           ${key}
-          <span style="font-weight:400;color:var(--g-tx3);font-size:10px;margin-left:8px">${meta.cols.length} columns · ${Object.keys(colMap).length} mapped · ${meta.ofdb.length} OFDB paths</span>
+          <span style="font-weight:400;color:var(--tx3);font-size:10px;margin-left:8px">${meta.cols.length} columns · ${Object.keys(colMap).length} mapped · ${meta.ofdb.length} OFDB paths</span>
         </div>
-        <div style="font-size:10px;color:var(--g-tx3);margin-bottom:6px;font-style:italic">
+        <div style="font-size:10px;color:var(--tx3);margin-bottom:6px;font-style:italic">
           Toggle above to show/hide full formulas · cyan badge = FQL function
         </div>
         <div class="cols-container" style="margin-bottom:6px">${colsHtml}</div>
         ${ofdbHtml}
-      </div>
-    `;
+      </div>`;
   }).join('') : '';
 
   dp.innerHTML = `
     <div class="dp-name">${w.id}</div>
     <div class="dp-desc">${w.desc||'No description'}</div>
     <div class="dp-grid" style="grid-template-columns:1fr 1fr;gap:12px 24px;margin-bottom:16px">
-      <div class="dp-field">
-        <div class="l">Schedule / Trigger</div>
-        <div class="v"><code>${(w.sched||'—').trim()}</code></div>
-      </div>
-      <div class="dp-field">
-        <div class="l">Dependencies</div>
-        <div class="v">${(w.up||[]).length} up · ${(w.down||[]).length} down</div>
-      </div>
+      <div class="dp-field"><div class="l">Schedule / Trigger</div><div class="v"><code>${(w.sched||'—').trim()}</code></div></div>
+      <div class="dp-field"><div class="l">Dependencies</div><div class="v">${(w.up||[]).length} up · ${(w.down||[]).length} down</div></div>
     </div>
-
     <div class="dp-acts-title">Pipeline — ${w.acts.length} steps</div>
-    <div>${w.acts.map((a,i)=>`<span class="dp-act"><span style="color:var(--g-tx3)">${i+1}.</span> <span class="at">${a.t}</span> <span class="an">${a.n}</span></span>`).join(' → ')}</div>
+    <div>${w.acts.map((a,i)=>`<span class="dp-act"><span style="color:var(--tx3)">${i+1}.</span> <span class="at">${a.t}</span> <span class="an">${a.n}</span></span>`).join(' → ')}</div>
     ${xlHtml}
   `;
 }
 
-// ── GRAPH ──
+/* ═══════════════════════════════════════════════════════
+   GRAPH ENGINE (original)
+   ═══════════════════════════════════════════════════════ */
 const cv = document.getElementById('cv');
 const ctx = cv.getContext('2d');
 let gNodes = [], gEdges = [], animFrame = null;
@@ -739,7 +1283,6 @@ resizeCanvas();
 function buildGraph(id) {
   const visited = new Set();
   const nodes = [], edges = [];
-
   function walk(wid, depth, dir) {
     if(visited.has(wid) || Math.abs(depth) > 6) return;
     visited.add(wid);
@@ -757,62 +1300,35 @@ function layoutGraph(nodes) {
   const rect = document.getElementById('graphZone').getBoundingClientRect();
   const cw = rect.width, ch = rect.height;
   const cx = cw / 2, cy = ch / 2;
-
   const upLayers = {}, downLayers = {};
   let selNode = null;
-
   nodes.forEach(n => {
     if (n.depth === 0) { selNode = n; return; }
-    if (n.depth < 0) {
-      const k = -n.depth;
-      if (!upLayers[k]) upLayers[k] = [];
-      upLayers[k].push(n);
-    } else {
-      if (!downLayers[n.depth]) downLayers[n.depth] = [];
-      downLayers[n.depth].push(n);
-    }
+    if (n.depth < 0) { const k = -n.depth; if (!upLayers[k]) upLayers[k] = []; upLayers[k].push(n); }
+    else { if (!downLayers[n.depth]) downLayers[n.depth] = []; downLayers[n.depth].push(n); }
   });
-
   if (selNode) { selNode.x = cx; selNode.y = cy; }
-
   const LAYER_WIDTH = Math.min(cw, ch) * 0.20;
   const NODE_SPACING = 70;
-
   function placeLayer(layer, colIndex, direction) {
     const count = layer.length;
     const totalHeight = (count - 1) * NODE_SPACING;
     const startY = cy - totalHeight / 2;
-    const xPos = direction === 'left'
-      ? cx - colIndex * LAYER_WIDTH
-      : cx + colIndex * LAYER_WIDTH;
-
-    layer.forEach((n, i) => {
-      n.x = xPos;
-      n.y = startY + i * NODE_SPACING;
-    });
+    const xPos = direction === 'left' ? cx - colIndex * LAYER_WIDTH : cx + colIndex * LAYER_WIDTH;
+    layer.forEach((n, i) => { n.x = xPos; n.y = startY + i * NODE_SPACING; });
   }
-
-  Object.keys(upLayers).map(Number).sort().forEach(k =>
-    placeLayer(upLayers[k], k, 'left')
-  );
-  Object.keys(downLayers).map(Number).sort().forEach(k =>
-    placeLayer(downLayers[k], k, 'right')
-  );
+  Object.keys(upLayers).map(Number).sort().forEach(k => placeLayer(upLayers[k], k, 'left'));
+  Object.keys(downLayers).map(Number).sort().forEach(k => placeLayer(downLayers[k], k, 'right'));
 }
 
 document.getElementById('detailPanel').addEventListener('change', (e) => {
   if (e.target.id === 'formulaToggle') {
     const isExpanded = e.target.checked;
-    document.querySelectorAll('#mview-gps .pill-col').forEach(pill => {
+    document.querySelectorAll('.pill-col').forEach(pill => {
       const formula = pill.querySelector('.formula-full');
       if (formula) {
-        if (isExpanded) {
-          pill.classList.add('expanded');
-          formula.style.display = 'block';
-        } else {
-          pill.classList.remove('expanded');
-          formula.style.display = 'none';
-        }
+        if (isExpanded) { pill.classList.add('expanded'); formula.style.display = 'block'; }
+        else { pill.classList.remove('expanded'); formula.style.display = 'none'; }
       }
     });
   }
@@ -820,25 +1336,20 @@ document.getElementById('detailPanel').addEventListener('change', (e) => {
 
 function renderGraph(id) {
   const g = buildGraph(id);
-  gNodes = g.nodes;
-  gEdges = g.edges;
+  gNodes = g.nodes; gEdges = g.edges;
   layoutGraph(gNodes);
   panX = 0; panY = 0;
-
   if (gNodes.length > 1) {
     const rect = document.getElementById('graphZone').getBoundingClientRect();
     const xs = gNodes.map(n=>n.x), ys = gNodes.map(n=>n.y);
     const minX = Math.min(...xs)-60, maxX = Math.max(...xs)+60;
     const minY = Math.min(...ys)-40, maxY = Math.max(...ys)+40;
-    const scaleX = rect.width  / (maxX - minX);
+    const scaleX = rect.width / (maxX - minX);
     const scaleY = rect.height / (maxY - minY);
     zoom = Math.min(scaleX, scaleY, 1.2);
     panX = (rect.width  - (maxX + minX) * zoom) / 2;
     panY = (rect.height - (maxY + minY) * zoom) / 2;
-  } else {
-    zoom = 1;
-  }
-
+  } else { zoom = 1; }
   document.getElementById('graphLegend').style.display = gNodes.length > 1 ? 'flex' : 'none';
   drawGraph();
 }
@@ -855,7 +1366,6 @@ function _drawGraph() {
   ctx.save();
   ctx.translate(panX, panY);
   ctx.scale(zoom, zoom);
-
   const nodeMap = {};
   gNodes.forEach(n => nodeMap[n.id] = n);
 
@@ -872,7 +1382,7 @@ function _drawGraph() {
     const angle = Math.atan2(to.y - from.y, to.x - from.x);
     const ax = to.x - Math.cos(angle)*16, ay = to.y - Math.sin(angle)*16;
     ctx.beginPath();
-    ctx.moveTo(ax + Math.cos(angle)*8,   ay + Math.sin(angle)*8);
+    ctx.moveTo(ax + Math.cos(angle)*8, ay + Math.sin(angle)*8);
     ctx.lineTo(ax + Math.cos(angle+2.6)*5, ay + Math.sin(angle+2.6)*5);
     ctx.lineTo(ax + Math.cos(angle-2.6)*5, ay + Math.sin(angle-2.6)*5);
     ctx.fillStyle = 'rgba(56,189,248,.25)';
@@ -882,33 +1392,25 @@ function _drawGraph() {
   gNodes.forEach(n => {
     const isHov = hoveredNode === n.id;
     let col;
-    if(n.isSel)         col = GCOL_SEL;
-    else if(n.role==='up')   col = GCOL_UP;
-    else                col = GCOL_DOWN;
-
+    if(n.isSel) col = GCOL_SEL;
+    else if(n.role==='up') col = GCOL_UP;
+    else col = GCOL_DOWN;
     const r = n.isSel ? 14 : (isHov ? 12 : 10);
-
     if(n.isSel) {
       ctx.beginPath(); ctx.arc(n.x, n.y, 24, 0, Math.PI*2);
       const grd = ctx.createRadialGradient(n.x,n.y,8,n.x,n.y,24);
       grd.addColorStop(0, col+'33'); grd.addColorStop(1,'transparent');
       ctx.fillStyle = grd; ctx.fill();
     }
-
     ctx.beginPath(); ctx.arc(n.x, n.y, r, 0, Math.PI*2);
-    if(n.isSel) {
-      ctx.fillStyle = col;
-    } else {
-      ctx.fillStyle = (n.tag==='test'||n.tag==='old') ? col+'33' : col+'66';
-    }
+    if(n.isSel) { ctx.fillStyle = col; }
+    else { ctx.fillStyle = (n.tag==='test'||n.tag==='old') ? col+'33' : col+'66'; }
     ctx.fill();
-
     ctx.strokeStyle = n.isSel ? col : col+'55';
-    ctx.lineWidth   = n.isSel ? 2 : 1;
+    ctx.lineWidth = n.isSel ? 2 : 1;
     ctx.stroke();
-
     const rect2 = document.getElementById('graphZone').getBoundingClientRect();
-    ctx.font      = `${n.isSel?'600':'400'} ${n.isSel?11:10}px 'IBM Plex Mono',monospace`;
+    ctx.font = `${n.isSel?'600':'400'} ${n.isSel?11:10}px 'IBM Plex Mono',monospace`;
     ctx.fillStyle = n.isSel ? '#fff' : (isHov ? '#fff' : '#8896aa');
     const label = n.id.length > 26 ? n.id.substring(0,24)+'..' : n.id;
     if (n.isSel) {
@@ -916,53 +1418,29 @@ function _drawGraph() {
       ctx.fillText(label, n.x, n.y + r + 14);
     } else {
       const cxApprox = rect2.width / 2;
-      if (n.x < cxApprox - 20) {
-        ctx.textAlign = 'right';
-        ctx.fillText(label, n.x - r - 4, n.y + 3);
-      } else if (n.x > cxApprox + 20) {
-        ctx.textAlign = 'left';
-        ctx.fillText(label, n.x + r + 4, n.y + 3);
-      } else {
-        ctx.textAlign = 'center';
-        ctx.fillText(label, n.x, n.y + r + 14);
-      }
+      if (n.x < cxApprox - 20) { ctx.textAlign = 'right'; ctx.fillText(label, n.x - r - 4, n.y + 3); }
+      else if (n.x > cxApprox + 20) { ctx.textAlign = 'left'; ctx.fillText(label, n.x + r + 4, n.y + 3); }
+      else { ctx.textAlign = 'center'; ctx.fillText(label, n.x, n.y + r + 14); }
     }
-
     if(n.isSel || isHov) {
-      ctx.font      = '500 9px Outfit,sans-serif';
+      ctx.font = '500 9px Outfit,sans-serif';
       ctx.fillStyle = n.isSel ? '#0b0f19' : '#fff';
       ctx.fillText(n.acts, n.x, n.y + 3.5);
     }
   });
-
   ctx.restore();
 }
 
-cv.onwheel = e => {
-  e.preventDefault();
-  zoom = Math.max(0.3, Math.min(3, zoom * (e.deltaY > 0 ? 0.9 : 1.1)));
-  drawGraph();
-};
-cv.onmousedown = e => {
-  dragging=true; dragStart={x:e.clientX,y:e.clientY}; panStart={x:panX,y:panY};
-  cv.style.cursor='grabbing';
-};
+cv.onwheel = e => { e.preventDefault(); zoom = Math.max(0.3, Math.min(3, zoom * (e.deltaY > 0 ? 0.9 : 1.1))); drawGraph(); };
+cv.onmousedown = e => { dragging=true; dragStart={x:e.clientX,y:e.clientY}; panStart={x:panX,y:panY}; cv.style.cursor='grabbing'; };
 cv.onmousemove = e => {
-  if(dragging) {
-    panX = panStart.x + (e.clientX - dragStart.x);
-    panY = panStart.y + (e.clientY - dragStart.y);
-    drawGraph(); return;
-  }
+  if(dragging) { panX = panStart.x + (e.clientX - dragStart.x); panY = panStart.y + (e.clientY - dragStart.y); drawGraph(); return; }
   const rect = cv.getBoundingClientRect();
   const mx = (e.clientX - rect.left - panX) / zoom;
-  const my = (e.clientY - rect.top  - panY) / zoom;
+  const my = (e.clientY - rect.top - panY) / zoom;
   let found = null;
   for(const n of gNodes) { if(Math.hypot(n.x-mx,n.y-my)<16){found=n.id;break;} }
-  if(found !== hoveredNode) {
-    hoveredNode = found;
-    cv.style.cursor = found ? 'pointer' : 'grab';
-    drawGraph();
-  }
+  if(found !== hoveredNode) { hoveredNode = found; cv.style.cursor = found ? 'pointer' : 'grab'; drawGraph(); }
 };
 cv.onmouseup = e => {
   if(dragging && Math.hypot(e.clientX-dragStart.x,e.clientY-dragStart.y)<5 && hoveredNode) selectWf(hoveredNode);
@@ -971,28 +1449,13 @@ cv.onmouseup = e => {
 
 const resizeH = document.getElementById('resizeH');
 let resizing=false, startY=0, startH=0;
-resizeH.onmousedown = e => {
-  resizing=true; startY=e.clientY;
-  startH=document.getElementById('detailPanel').offsetHeight;
-  document.body.style.cursor='ns-resize'; e.preventDefault();
-};
-document.onmousemove = e => {
-  if(!resizing) return;
-  document.getElementById('detailPanel').style.height = Math.max(100, startH-(e.clientY-startY))+'px';
-  resizeCanvas(); drawGraph();
-};
+resizeH.onmousedown = e => { resizing=true; startY=e.clientY; startH=document.getElementById('detailPanel').offsetHeight; document.body.style.cursor='ns-resize'; e.preventDefault(); };
+document.onmousemove = e => { if(!resizing) return; document.getElementById('detailPanel').style.height = Math.max(100, startH-(e.clientY-startY))+'px'; resizeCanvas(); drawGraph(); };
 document.onmouseup = () => { resizing=false; document.body.style.cursor=''; };
 
+// Init
 renderList();
 cv.style.cursor = 'grab';
 </script>
-
-<!-- ═══════════════════════════════════════════════════════════════
-     PORTAL LOGIC (unchanged from original)
-     ═══════════════════════════════════════════════════════════════ -->
-<script>
-/* PORTAL_LOGIC_PLACEHOLDER */
-</script>
-
 </body>
 </html>
