@@ -1,1 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>EFG QNT — Workflow Documentation</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap');
 
+/* ═══════════════════════════════════════════════════════════════
+   SHARED RESET + BODY
+   ═══════════════════════════════════════════════════════════════ */
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#e6edf3;height:100vh;display:flex;flex-direction:column;overflow:hidden;font-size:13px}
+
+/* ═══════════════════════════════════════════════════════════════
+   MAIN TABBAR (shared, stays on top)
+   ═══════════════════════════════════════════════════════════════ */
+#main-tabbar{display:flex;align-items:center;background:#161b22;border-bottom:1px solid #30363d;flex-shrink:0;padding:0 14px}
+#main-tabbar .brand{font-size:12px;font-weight:600;color:#58a6ff;padding:9px 0;margin-right:20px;white-space:nowrap;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;}
+#main-tabbar .brand span{color:#8b949e;font-weight:400}
+#main-tabbar .mtab{padding:9px 14px;font-size:12px;cursor:pointer;color:#8b949e;border-bottom:2px solid transparent;transition:color .15s;white-space:nowrap;background:none;border-top:none;border-left:none;border-right:none;font-family:inherit;}
+#main-tabbar .mtab:hover{color:#e6edf3}
+#main-tabbar .mtab.active{color:#e6edf3;border-bottom-color:#58a6ff}
+.mview{display:none;flex:1;overflow:hidden;min-height:0}
+.mview.active{display:flex}
+
+/* ═══════════════════════════════════════════════════════════════
+   GPS VIEW STYLES (scoped to #mview-gps)
+   ═══════════════════════════════════════════════════════════════ */
+#mview-gps {
+  --g-bg:#0b0f19; --g-s1:#111827; --g-s2:#1a2236; --g-s3:#243044;
+  --g-bd:#2a3650; --g-tx:#e2e8f0; --g-tx2:#7b8ba3; --g-tx3:#4a5568;
+  --g-acc:#38bdf8; --g-acc2:#818cf8; --g-grn:#34d399; --g-red:#f87171;
+  --g-org:#fb923c; --g-ylw:#fbbf24; --g-pnk:#f472b6; --g-cyn:#22d3ee;
+  --g-eq:#60a5fa; --g-fi:#4ade80; --g-etf:#c084fc; --g-mf:#facc15;
+  --g-esg:#2dd4bf; --g-feed:#fb7185; --g-ref:#a78bfa; --g-recon:#fbbf24;
+  font-family:'Outfit',sans-serif;
+  background:var(--g-bg);
+  color:var(--g-tx);
+  flex-direction:column;
+}
+
+#mview-gps .gps-topbar{
+  height:64px; display:flex; align-items:center; gap:20px;
+  padding:0 28px; border-bottom:1px solid var(--g-bd);
+  background:linear-gradient(180deg,#10162088,var(--g-bg));
+  flex-shrink:0;
+}
+
+#mview-gps .search-wrap{flex:1;max-width:560px;position:relative;}
+#mview-gps .search-wrap input{
+  width:100%;height:40px;padding:0 16px 0 40px;border-radius:10px;
+  border:1.5px solid var(--g-bd);background:var(--g-s1);color:var(--g-tx);
+  font-family:'Outfit',sans-serif;font-size:15px;font-weight:400;
+  outline:none;transition:border .15s;
+}
+#mview-gps .search-wrap input:focus{border-color:var(--g-acc);background:var(--g-s2);}
+#mview-gps .search-wrap input::placeholder{color:var(--g-tx3);}
+#mview-gps .search-wrap .icon{position:absolute;left:12px;top:10px;color:var(--g-tx3);font-size:18px;pointer-events:none;}
+#mview-gps .search-wrap .hint{position:absolute;right:12px;top:10px;font-size:11px;color:var(--g-tx3);font-family:'IBM Plex Mono',monospace;}
+
+#mview-gps .or-badge{
+  display:none;position:absolute;right:32px;top:9px;
+  font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;
+  background:rgba(251,146,60,.15);color:var(--g-org);border:1px solid rgba(251,146,60,.3);
+  font-family:'IBM Plex Mono',monospace;
+}
+#mview-gps .or-badge.visible{display:block;}
+
+#mview-gps .gps-pills{display:flex;gap:6px;flex-wrap:nowrap;}
+#mview-gps .gps-pill{
+  padding:4px 12px;border-radius:20px;font-size:12px;font-weight:500;
+  cursor:pointer;border:1px solid var(--g-bd);background:transparent;
+  color:var(--g-tx2);transition:all .12s;white-space:nowrap;
+  font-family:'Outfit',sans-serif;
+}
+#mview-gps .gps-pill:hover{border-color:var(--g-tx2);color:var(--g-tx);}
+#mview-gps .gps-pill.on{border-color:var(--g-acc);background:var(--g-acc);color:var(--g-bg);font-weight:600;}
+
+#mview-gps .gps-main{display:flex;flex:1;overflow:hidden;min-height:0;}
+
+#mview-gps .results{
+  width:380px;min-width:380px;border-right:1px solid var(--g-bd);
+  display:flex;flex-direction:column;background:var(--g-s1);
+}
+#mview-gps .results-header{
+  padding:12px 20px;border-bottom:1px solid var(--g-bd);
+  font-size:12px;color:var(--g-tx2);font-weight:500;
+  display:flex;justify-content:space-between;align-items:center;
+}
+#mview-gps .results-list{flex:1;overflow-y:auto;padding:6px 0;}
+
+#mview-gps .wf-card{
+  padding:10px 20px;cursor:pointer;border-left:3px solid transparent;
+  transition:all .1s;
+}
+#mview-gps .wf-card:hover{background:var(--g-s2);}
+#mview-gps .wf-card.sel{background:var(--g-s2);border-left-color:var(--g-acc);}
+#mview-gps .wf-card .name{
+  font-family:'IBM Plex Mono',monospace;font-size:12.5px;font-weight:500;
+  color:var(--g-tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+#mview-gps .wf-card .desc{font-size:11.5px;color:var(--g-tx2);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+#mview-gps .wf-card .badges{display:flex;gap:6px;margin-top:5px;align-items:center;flex-wrap:wrap;}
+#mview-gps .badge{font-size:10px;padding:2px 7px;border-radius:4px;font-weight:600;}
+#mview-gps .b-EQ{background:#1e293b;color:var(--g-eq);}
+#mview-gps .b-FI{background:#122217;color:var(--g-fi);}
+#mview-gps .b-ETF{background:#231729;color:var(--g-etf);}
+#mview-gps .b-MF{background:#272517;color:var(--g-mf);}
+#mview-gps .b-ESG{background:#122525;color:var(--g-esg);}
+#mview-gps .b-FEED{background:#251717;color:var(--g-feed);}
+#mview-gps .b-REF{background:#1d1729;color:var(--g-ref);}
+#mview-gps .b-RECON{background:#252117;color:var(--g-ylw);}
+#mview-gps .b-TEST{background:#1a1a1a;color:#888;}
+#mview-gps .b-OTHER{background:#1a1a1a;color:#888;}
+#mview-gps .b-tag{font-size:9px;text-transform:uppercase;letter-spacing:.3px;}
+#mview-gps .b-prod{background:#0d2818;color:var(--g-grn);}
+#mview-gps .b-test{background:#2a1c0d;color:var(--g-org);}
+#mview-gps .b-shadow{background:#1a0d2a;color:var(--g-acc2);}
+#mview-gps .b-old{background:#1a1a1a;color:#666;}
+
+#mview-gps .match-hl{background:rgba(56,189,248,.2);color:var(--g-acc);border-radius:2px;padding:0 1px;}
+
+#mview-gps .detail-area{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+
+#mview-gps .graph-zone{
+  flex:1;position:relative;overflow:hidden;background:
+    radial-gradient(circle at 50% 50%, #111d2e 0%, var(--g-bg) 70%);
+}
+#mview-gps .graph-zone canvas{display:block;}
+
+#mview-gps .graph-legend{
+  position:absolute;bottom:28px;left:16px;
+  display:flex;gap:14px;align-items:center;
+  font-size:10px;color:var(--g-tx3);font-family:'IBM Plex Mono',monospace;
+  pointer-events:none;
+}
+#mview-gps .gl-item{display:flex;align-items:center;gap:5px;}
+#mview-gps .gl-dot{width:8px;height:8px;border-radius:50%;}
+
+#mview-gps .detail-panel{
+  height:300px;min-height:160px;border-top:1px solid var(--g-bd);
+  overflow-y:auto;padding:20px 28px;background:var(--g-s1);
+}
+#mview-gps .dp-name{font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600;color:var(--g-acc);}
+#mview-gps .dp-desc{font-size:13px;color:var(--g-tx2);margin:4px 0 12px;}
+#mview-gps .dp-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+#mview-gps .dp-field{background:var(--g-s2);border-radius:6px;padding:8px 12px;}
+#mview-gps .dp-field .l{font-size:10px;color:var(--g-tx3);text-transform:uppercase;letter-spacing:.5px;}
+#mview-gps .dp-field .v{font-size:12px;color:var(--g-tx);margin-top:2px;word-break:break-all;}
+#mview-gps .dp-field .v code{font-family:'IBM Plex Mono',monospace;font-size:11px;}
+
+#mview-gps .dp-acts-title{font-size:11px;font-weight:600;color:var(--g-acc);text-transform:uppercase;letter-spacing:.8px;margin:12px 0 6px;}
+#mview-gps .dp-act{
+  display:inline-flex;align-items:center;gap:6px;padding:4px 10px;
+  background:var(--g-s2);border-radius:5px;border:1px solid var(--g-bd);
+  margin:2px 3px 2px 0;font-size:11px;
+}
+#mview-gps .dp-act .at{color:var(--g-cyn);font-weight:500;}
+#mview-gps .dp-act .an{color:var(--g-tx2);font-family:'IBM Plex Mono',monospace;font-size:10px;}
+
+#mview-gps .pill-col{
+  display:inline-block;font-size:10px;padding:2px 7px;border-radius:4px;
+  background:var(--g-s3);color:var(--g-tx2);margin:2px 2px 2px 0;
+}
+#mview-gps .pill-fql{
+  display:inline-block;font-size:10px;padding:2px 7px;border-radius:4px;
+  background:rgba(34,211,238,.08);color:var(--g-cyn);border:1px solid rgba(34,211,238,.2);
+  margin:2px 2px 2px 0;font-family:'IBM Plex Mono',monospace;
+}
+#mview-gps .pill-ofdb{
+  display:inline-block;font-size:10px;padding:2px 7px;border-radius:4px;
+  background:rgba(129,140,248,.08);color:var(--g-acc2);border:1px solid rgba(129,140,248,.2);
+  margin:2px 2px 2px 0;font-family:'IBM Plex Mono',monospace;font-size:9px;
+}
+
+#mview-gps .empty-msg{
+  display:flex;align-items:center;justify-content:center;height:100%;
+  color:var(--g-tx3);font-size:14px;text-align:center;flex-direction:column;gap:8px;
+}
+#mview-gps .empty-msg .em-icon{font-size:40px;opacity:.3;}
+
+#mview-gps .resize-handle{height:4px;cursor:ns-resize;background:var(--g-bd);transition:background .15s;}
+#mview-gps .resize-handle:hover{background:var(--g-acc);}
+
+#mview-gps .formula-toggle {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 11px; color: var(--g-tx2); margin-left: 12px;
+  cursor: pointer; user-select: none;
+}
+#mview-gps .formula-toggle input {
+  width: 32px; height: 16px; appearance: none;
+  background: var(--g-s3); border-radius: 8px;
+  position: relative; cursor: pointer; transition: background .2s;
+}
+#mview-gps .formula-toggle input:checked { background: var(--g-acc); }
+#mview-gps .formula-toggle input::before {
+  content: ''; position: absolute; width: 12px; height: 12px;
+  border-radius: 50%; background: var(--g-tx);
+  top: 2px; left: 2px; transition: transform .2s;
+}
+#mview-gps .formula-toggle input:checked::before { transform: translateX(16px); }
+
+#mview-gps .pill-col.expanded {
+  display: block; max-width: 100%; white-space: normal;
+  word-break: break-all; margin: 4px 0; padding: 6px 10px;
+  background: var(--g-s2); border-left: 2px solid var(--g-cyn);
+}
+#mview-gps .pill-col.expanded .formula-full {
+  display: block; font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px; color: var(--g-tx3); margin-top: 4px; line-height: 1.4;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PORTAL VIEW STYLES (unchanged from original)
+   ═══════════════════════════════════════════════════════════════ */
+#mview-portal {
+  --bg0:#0d1117;--bg1:#161b22;--bg2:#21262d;--bg3:#30363d;
+  --t0:#e6edf3;--t1:#8b949e;--t2:#484f58;
+  --blue:#58a6ff;--green:#3fb950;--red:#f85149;--yellow:#d29922;--orange:#f0883e;
+  --bdr:#30363d;
+  background:var(--bg0); color:var(--t0);
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  font-size:13px;
+}
+
+#portal-wrap{display:flex;flex:1;overflow:hidden}
+#portal-sidebar{width:210px;min-width:210px;background:var(--bg1);border-right:1px solid var(--bdr);display:flex;flex-direction:column;overflow:hidden}
+#portal-sidebar p{padding:8px 14px;font-size:11px;color:var(--t1);border-bottom:1px solid var(--bdr)}
+#portal-nav{overflow-y:auto;flex:1;padding:5px 0}
+.pnav-grp{padding:7px 14px 2px;font-size:10px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.06em}
+.pnav-btn{display:flex;align-items:center;gap:7px;width:100%;padding:5px 14px;font-size:12px;color:var(--t1);cursor:pointer;border:none;background:none;text-align:left;transition:background .1s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:inherit;}
+.pnav-btn:hover{background:var(--bg2);color:var(--t0)}
+.pnav-btn.active{background:#1f6feb22;color:var(--blue);font-weight:500}
+.pnav-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+#portal-main{flex:1;overflow-y:auto;padding:20px 24px 40px}
+.pview{display:none}.pview.active{display:block}
+.ptitle{font-size:18px;font-weight:600;margin-bottom:3px}
+.psub{font-size:12px;color:var(--t1);margin-bottom:18px}
+.psec{font-size:11px;font-weight:600;color:var(--t1);text-transform:uppercase;letter-spacing:.05em;margin:18px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--bdr)}
+.pstats{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-bottom:20px}
+.pstat{background:var(--bg1);border:1px solid var(--bdr);border-radius:7px;padding:10px 13px}
+.pstat-n{font-size:20px;font-weight:600;line-height:1}.pstat-l{font-size:11px;color:var(--t1);margin-top:3px}
+.pstat.ok .pstat-n{color:var(--green)}.pstat.warn .pstat-n{color:var(--yellow)}.pstat.info .pstat-n{color:var(--blue)}
+.silo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:7px;margin-bottom:6px}
+.scard{background:var(--bg1);border:1px solid var(--bdr);border-radius:7px;padding:10px 12px;cursor:pointer;transition:border-color .15s}
+.scard:hover{border-color:var(--blue)}
+.sc-name{font-size:11px;font-weight:500;margin-bottom:4px;line-height:1.3}.sc-count{font-size:20px;font-weight:600;color:var(--blue);line-height:1}
+.sc-meta{font-size:10px;color:var(--t1);margin-top:2px}.sc-bar{margin-top:6px;height:2px;background:var(--bg3);border-radius:1px}
+.sc-bar-fill{height:2px;border-radius:1px}.tbadges{display:flex;gap:3px;flex-wrap:wrap;margin-top:6px}
+.tbadge{font-size:10px;padding:1px 5px;border-radius:3px;font-weight:500}
+.tb-s{background:#1f3a5f;color:#79c0ff}.tb-e{background:#0e3323;color:#56d364}.tb-n{background:#3d2500;color:#d29922}
+.hcards{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px}
+.hcard{background:var(--bg1);border:1px solid var(--bdr);border-radius:7px;padding:12px 14px}
+.hcard h3{font-size:10px;font-weight:600;color:var(--t1);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+.hrow{display:flex;justify-content:space-between;align-items:center;padding:3px 0;border-bottom:1px solid #21262d88;font-size:11px;color:var(--t1)}
+.hrow:last-child{border-bottom:none}
+.hok{color:var(--green);font-weight:500}.hwarn{color:var(--yellow);font-weight:500}.hbad{color:var(--red);font-weight:500}
+.toolbar{display:flex;gap:7px;margin-bottom:10px;align-items:center;flex-wrap:wrap}
+.toolbar input{flex:1;min-width:160px;padding:5px 10px;background:var(--bg1);border:1px solid var(--bdr);border-radius:5px;color:var(--t0);font-size:12px;outline:none;font-family:inherit;}
+.toolbar input:focus{border-color:var(--blue)}
+.toolbar select{padding:5px 9px;background:var(--bg1);border:1px solid var(--bdr);border-radius:5px;color:var(--t0);font-size:11px;outline:none;cursor:pointer;font-family:inherit;}
+.tbtn{padding:5px 10px;background:var(--bg1);border:1px solid var(--bdr);border-radius:5px;color:var(--t1);font-size:11px;cursor:pointer;transition:all .1s;white-space:nowrap;font-family:inherit;}
+.tbtn:hover{background:var(--bg2)}.tbtn.on{background:#1f6feb22;border-color:var(--blue);color:var(--blue)}
+.tbl-info{font-size:11px;color:var(--t1);margin-bottom:6px}
+.ptable{width:100%;border-collapse:collapse;background:var(--bg1);border-radius:7px;overflow:hidden;border:1px solid var(--bdr);font-size:11px}
+.ptable th{text-align:left;padding:6px 10px;background:var(--bg2);border-bottom:1px solid var(--bdr);font-weight:500;font-size:10px;color:var(--t1);white-space:nowrap;text-transform:uppercase;letter-spacing:.04em}
+.ptable td{padding:6px 10px;border-bottom:1px solid #21262d88;vertical-align:middle;max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ptable tr:last-child td{border-bottom:none}.ptable tr.click:hover td{background:#21262d44;cursor:pointer}
+.ppill{display:inline-block;font-size:10px;padding:1px 6px;border-radius:8px;font-weight:500;border:1px solid}
+.p-ok{background:#0e442922;color:#3fb950;border-color:#23863644}.p-fail{background:#49020222;color:#f85149;border-color:#6e131344}
+.p-none{background:var(--bg2);color:var(--t1);border-color:var(--bdr)}.p-ghost{background:#3d250022;color:#d29922;border-color:#5a3e0044}
+.p-xs{background:#5c331722;color:#f0883e;border-color:#9e551344}
+.cpill{font-size:10px;padding:1px 5px;border-radius:3px;font-weight:500}
+.cc{background:#1a163344;color:#bc8cff}.cs{background:#1a2a3d44;color:var(--blue)}.cn{background:#3d250044;color:var(--yellow)}
+.ce{background:#0e231544;color:var(--green)}.ci{background:#3d100044;color:var(--orange)}.cr{background:#2d002244;color:#f9a8d4}.cd{background:var(--bg2);color:var(--t1)}
+.vp{font-size:10px;padding:1px 5px;border-radius:3px;font-weight:500}
+.vp-production{background:#1a163344;color:#bc8cff}.vp-test{background:#490202;color:var(--red)}.vp-manual{background:#3d2500;color:var(--orange)}
+.vp-sga{background:#1a2a3d44;color:var(--blue)}.vp-gen_shadow,.vp-pop_shadow{background:var(--bg2);color:var(--t2)}
+.vp-new{background:#0e2b1544;color:var(--green)}.vp-adhoc{background:#3d100044;color:var(--orange)}
+.vp-deprecated{background:#490202;color:var(--red);text-decoration:line-through}
+.vp-display,.vp-mstar,.vp-ni{background:#1a2a3d44;color:#39c5cf}
+.xs-tag{font-size:9px;padding:1px 4px;border-radius:3px;background:#3d250088;color:var(--orange)}
+.cbar{height:4px;background:var(--bg3);border-radius:2px;margin-top:3px;min-width:60px}
+.cbar-fill{height:4px;background:var(--blue);border-radius:2px}
+.chain-blk{background:var(--bg1);border:1px solid var(--bdr);border-radius:7px;padding:12px 14px;margin-bottom:8px}
+.chain-root{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:5px;font-size:11px;font-family:monospace;cursor:pointer;border:1px solid;margin-bottom:7px}
+.chain-ch{padding-left:14px;border-left:2px solid var(--bdr);margin-left:10px}
+.ch-row{display:flex;align-items:center;gap:5px;margin:2px 0}
+.ch-node{display:inline-flex;align-items:center;padding:2px 8px;border-radius:4px;font-size:10px;font-family:monospace;cursor:pointer;border:1px solid}
+.ch-node:hover{opacity:.75}
+.flag{display:flex;align-items:flex-start;gap:8px;padding:7px 11px;background:var(--bg1);border:1px solid var(--bdr);border-radius:5px;margin-bottom:5px;cursor:pointer;transition:border-color .12s}
+.flag:hover{border-color:var(--blue)}.flag-ico{font-size:13px;flex-shrink:0;margin-top:1px}
+.flag-name{font-family:monospace;font-weight:500;font-size:11px}.flag-meta{font-size:10px;color:var(--t1);margin-top:2px}
+.cs-link{display:flex;align-items:center;gap:8px;padding:7px 12px;background:var(--bg1);border:1px solid var(--bdr);border-radius:5px;margin-bottom:5px}
+.ocard{background:var(--bg1);border:1px solid var(--bdr);border-radius:7px;padding:11px 13px}
+.ocard h3{font-size:12px;font-weight:600;font-family:monospace;margin-bottom:3px}
+.oc-meta{font-size:10px;color:var(--t1);margin-bottom:7px}.osilo{font-size:10px;padding:2px 7px;background:var(--bg2);border-radius:3px;display:inline-block;margin:2px 2px 2px 0;color:var(--t1)}
+.warn-banner{background:#3d250044;border:1px solid #5a3e0088;border-radius:6px;padding:10px 14px;font-size:12px;color:#d29922;margin-bottom:14px;line-height:1.5}
+#ppanel{position:fixed;top:0;right:0;height:100vh;width:380px;background:var(--bg1);border-left:1px solid var(--bdr);box-shadow:-4px 0 20px rgba(0,0,0,.5);transform:translateX(100%);transition:transform .2s;overflow-y:auto;z-index:500}
+#ppanel.open{transform:translateX(0)}
+.pp-hdr{padding:13px 16px;border-bottom:1px solid var(--bdr);position:sticky;top:0;background:var(--bg1);z-index:1;display:flex;justify-content:space-between;align-items:flex-start}
+.pp-hdr h2{font-size:11px;font-weight:600;font-family:monospace;line-height:1.4;word-break:break-all;padding-right:6px;color:var(--blue)}
+.pp-close{border:none;background:none;font-size:17px;cursor:pointer;color:var(--t1);padding:0 3px;flex-shrink:0}
+.pp-close:hover{color:var(--t0)}.pp-body{padding:13px 16px}
+.pps{margin-bottom:13px}.pps h3{font-size:10px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.ppr{display:flex;gap:7px;margin-bottom:4px;font-size:11px}.ppr .l{color:var(--t1);min-width:84px;flex-shrink:0}
+.ppr .v{font-size:10px;word-break:break-all;font-family:monospace;color:var(--t0)}
+.cl{display:block;padding:3px 0 3px 9px;border-left:2px solid var(--bdr);font-size:11px;font-family:monospace;cursor:pointer;color:var(--blue);margin:2px 0}
+.cl:hover{color:#79c0ff;border-left-color:var(--blue)}.cl.up{border-left-color:var(--green);color:var(--green)}.cl.xs{border-left-color:var(--orange);color:var(--orange)}
+.mono-blk{font-size:10px;font-family:monospace;background:var(--bg0);padding:3px 7px;border-radius:3px;margin-bottom:3px;word-break:break-all;line-height:1.4;color:var(--t0)}
+.lbl-s{font-size:10px;color:var(--t1);margin-bottom:2px;margin-top:5px}
+.badges{display:flex;gap:3px;margin-top:4px}
+</style>
+</head>
+<body>
+
+<!-- ═══ MAIN TABBAR (shared) ═══ -->
+<div id="main-tabbar">
+  <div class="brand">EFG_QNT <span>/ Workflow Documentation</span></div>
+  <button class="mtab active" onclick="switchTab('gps')">Workflow GPS</button>
+  <button class="mtab" onclick="switchTab('portal')">Documentation portal</button>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     GPS VIEW
+     ═══════════════════════════════════════════════════════════════ -->
+<div id="mview-gps" class="mview active">
+  <div class="gps-topbar">
+    <div class="search-wrap">
+      <span class="icon">⌕</span>
+      <input id="q" placeholder="Search: display, country | delta, risk | country..." autofocus />
+      <span class="or-badge" id="orBadge">OR</span>
+      <span class="hint">↵</span>
+    </div>
+    <div class="gps-pills" id="pills"></div>
+  </div>
+
+  <div class="gps-main">
+    <div class="results">
+      <div class="results-header">
+        <span id="count">— workflows</span>
+        <span style="font-size:11px;color:var(--g-tx3)" id="modeLabel">AND mode</span>
+      </div>
+      <div class="results-list" id="list"></div>
+    </div>
+    <div class="detail-area">
+      <div class="graph-zone" id="graphZone">
+        <canvas id="cv"></canvas>
+        <div class="graph-legend" id="graphLegend" style="display:none">
+          <div class="gl-item"><div class="gl-dot" style="background:#60a5fa;opacity:.5"></div>Upstream</div>
+          <div class="gl-item"><div class="gl-dot" style="background:#fff"></div>Selected</div>
+          <div class="gl-item"><div class="gl-dot" style="background:#34d399;opacity:.7"></div>Downstream</div>
+          <div class="gl-item" style="margin-left:8px;color:var(--g-tx3)">scroll=zoom · drag=pan · click=navigate</div>
+        </div>
+      </div>
+      <div class="resize-handle" id="resizeH"></div>
+      <div class="detail-panel" id="detailPanel">
+        <div class="empty-msg"><div class="em-icon">⌕</div>Search or click a workflow to see its dependency graph and details.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PORTAL VIEW (unchanged)
+     ═══════════════════════════════════════════════════════════════ -->
+<div id="mview-portal" class="mview" style="flex-direction:row">
+  <div id="portal-wrap">
+    <div id="portal-sidebar">
+      <p>2026-04-14 · 361 workflows</p>
+      <div id="portal-nav">
+        <div class="pnav-grp">Overview</div>
+        <button class="pnav-btn active" onclick="pnav('landscape')"><span class="pnav-dot" style="background:#7f77dd"></span>System landscape</button>
+        <button class="pnav-btn" onclick="pnav('health')"><span class="pnav-dot" style="background:#f85149"></span>Health &amp; gaps</button>
+        <button class="pnav-btn" onclick="pnav('crosssilo')"><span class="pnav-dot" style="background:#3fb950"></span>Cross-silo flows</button>
+        <button class="pnav-btn" onclick="pnav('owners')"><span class="pnav-dot" style="background:#d29922"></span>Ownership map</button>
+        <div class="pnav-grp">Browse</div>
+        <button class="pnav-btn" onclick="pnav('explorer')"><span class="pnav-dot" style="background:#888"></span>Workflow explorer</button>
+        <button class="pnav-btn" onclick="pnav('chains')"><span class="pnav-dot" style="background:#58a6ff"></span>Flow chains</button>
+        <button class="pnav-btn" onclick="pnav('traceability')"><span class="pnav-dot" style="background:#56d364"></span>Screen → OFDB</button>
+        <div class="pnav-grp">Domains</div>
+        <button class="pnav-btn" onclick="pFilterSilo('ADV — Equity Advisory')">Equity advisory</button>
+        <button class="pnav-btn" onclick="pFilterSilo('ADV — Fixed Income Advisory')">Fixed income advisory</button>
+        <button class="pnav-btn" onclick="pFilterSilo('ADV — Mutual Fund Advisory')">Mutual fund advisory</button>
+        <button class="pnav-btn" onclick="pFilterSilo('ADV — ETF Advisory')">ETF advisory</button>
+        <button class="pnav-btn" onclick="pFilterSilo('DD / FIAB — Data Delivery')">DD / FIAB</button>
+        <button class="pnav-btn" onclick="pFilterSilo('Fixed Income — Bond Universe')">Bond universe</button>
+        <button class="pnav-btn" onclick="pFilterSilo('FIPA — Target Market')">FIPA target market</button>
+        <button class="pnav-btn" onclick="pFilterSilo('IRN — Internal Research')">IRN research</button>
+        <button class="pnav-btn" onclick="pFilterSilo('ESG — Sustainability')">ESG</button>
+        <button class="pnav-btn" onclick="pFilterSilo('Test / QA')">Test / QA</button>
+      </div>
+    </div>
+    <div id="portal-main">
+      <div id="pview-landscape" class="pview active"></div>
+      <div id="pview-health"     class="pview"></div>
+      <div id="pview-crosssilo"  class="pview"></div>
+      <div id="pview-owners"     class="pview"></div>
+      <div id="pview-explorer"   class="pview"></div>
+      <div id="pview-chains"     class="pview"></div>
+      <div id="pview-traceability" class="pview"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Portal detail panel (slide-in) -->
+<div id="ppanel">
+  <div class="pp-hdr"><h2 id="pp-name"></h2><button class="pp-close" onclick="pClosePanel()">×</button></div>
+  <div class="pp-body" id="pp-body"></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     EXTERNAL DATA (GPS)
+     ═══════════════════════════════════════════════════════════════ -->
+<script src="excel_meta.js"></script>
+<script src="workflows.js"></script>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PORTAL DATA (inline — unchanged from original)
+     ═══════════════════════════════════════════════════════════════ -->
+<script>
+/* PORTAL_DATA_PLACEHOLDER */
+</script>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB SWITCHING
+     ═══════════════════════════════════════════════════════════════ -->
+<script>
+function switchTab(id) {
+  document.querySelectorAll('.mview').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('#main-tabbar .mtab').forEach(t => t.classList.remove('active'));
+  document.getElementById('mview-' + id).classList.add('active');
+  document.querySelectorAll('#main-tabbar .mtab').forEach(t => {
+    if ((t.getAttribute('onclick')||'').includes("'"+id+"'")) t.classList.add('active');
+  });
+  if (id === 'gps' && typeof resizeCanvas === 'function') {
+    setTimeout(() => { resizeCanvas(); if (typeof drawGraph === 'function') drawGraph(); }, 20);
+  }
+}
+</script>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     GPS LOGIC (new)
+     ═══════════════════════════════════════════════════════════════ -->
+<script>
+// Enrich search with EXCEL_META
+W.forEach(w => {
+  w.acts.forEach(a => {
+    if (a.t !== "Excel Batch" || !a.d) return;
+    const match = a.d.match(/Template\s+([\w./:$#-]+)/i);
+    if (!match) return;
+    const tplKey = match[1].split('/').pop().toUpperCase();
+    const meta = EXCEL_META[tplKey];
+    if (!meta) return;
+    const extra = [...(meta.cols||[]),...(meta.funcs||[]),...(meta.ofdb||[]),...(meta.vars||[])].join(' ').toLowerCase();
+    w.search += ' ' + extra;
+  });
+});
+
+const IDX = {}; W.forEach((w,i) => IDX[w.id]=i);
+const SILO = {EQ:'Equity',FI:'Fixed Income',ETF:'ETF',MF:'Mutual Funds',ESG:'ESG',FEED:'Data Feeds',REF:'Reference',RECON:'Recon',TEST:'Test',OTHER:'Other'};
+const SCOL = {EQ:'#60a5fa',FI:'#4ade80',ETF:'#c084fc',MF:'#facc15',ESG:'#2dd4bf',FEED:'#fb7185',REF:'#a78bfa',RECON:'#fbbf24',TEST:'#666',OTHER:'#666'};
+
+const GCOL_UP   = '#60a5fa';
+const GCOL_SEL  = '#ffffff';
+const GCOL_DOWN = '#34d399';
+
+let sel = null, siloF = null, qStr = '';
+
+const pillsEl = document.getElementById('pills');
+const siloCounts = {};
+W.forEach(w => siloCounts[w.s]=(siloCounts[w.s]||0)+1);
+let ph = '<button class="gps-pill on" data-s="all">All</button>';
+Object.entries(siloCounts).sort((a,b)=>b[1]-a[1]).forEach(([s,c])=>{
+  ph += `<button class="gps-pill" data-s="${s}">${SILO[s]||s} ${c}</button>`;
+});
+pillsEl.innerHTML = ph;
+pillsEl.onclick = e => {
+  const b=e.target.closest('.gps-pill'); if(!b) return;
+  siloF = b.dataset.s==='all'?null:b.dataset.s;
+  pillsEl.querySelectorAll('.gps-pill').forEach(p=>p.classList.remove('on'));
+  b.classList.add('on');
+  renderList();
+};
+
+const qEl = document.getElementById('q');
+const orBadge = document.getElementById('orBadge');
+const modeLabel = document.getElementById('modeLabel');
+
+qEl.oninput = () => { qStr = qEl.value.trim().toLowerCase(); renderList(); };
+
+function parseQuery(raw) {
+  const groups = raw.split('|').map(g => g.trim().split(/\s+/).filter(t=>t.length>=2));
+  const isOR = groups.length > 1;
+  orBadge.classList.toggle('visible', isOR);
+  modeLabel.textContent = isOR ? 'OR mode' : 'AND mode';
+  return { groups, isOR };
+}
+
+function matchesQuery(w, groups, isOR) {
+  if (groups.length === 0 || groups.every(g=>g.length===0)) return true;
+  const check = g => g.every(t => w.search.includes(t));
+  return isOR ? groups.some(check) : groups.every(g => check(g));
+}
+
+function score(w, groups, isOR) {
+  const terms = groups.flat();
+  if(!terms.length) return w.tag==='prod' ? 1 : 0;
+  let s = 0;
+  const id = w.id.toLowerCase(), desc = (w.desc||'').toLowerCase();
+  for(const t of terms) {
+    if(id.includes(t)) s += 10;
+    if(desc.includes(t)) s += 5;
+    if(w.search.includes(t)) s += 2;
+  }
+  if(w.tag==='prod') s += .5;
+  return s;
+}
+
+function renderList() {
+  const el = document.getElementById('list');
+  const { groups, isOR } = parseQuery(qStr);
+  const terms = groups.flat();
+
+  let filtered = W.filter(w => {
+    if(siloF && w.s!==siloF) return false;
+    return matchesQuery(w, groups, isOR);
+  });
+  filtered.sort((a,b) => score(b,groups,isOR) - score(a,groups,isOR));
+  document.getElementById('count').textContent = filtered.length + ' workflows';
+
+  el.innerHTML = filtered.slice(0,120).map(w => {
+    let name = w.id, desc = w.desc||'';
+    if(terms.length) {
+      for(const t of terms) {
+        const re = new RegExp(`(${t.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`,'gi');
+        name = name.replace(re,'<span class="match-hl">$1</span>');
+        desc = desc.replace(re,'<span class="match-hl">$1</span>');
+      }
+    }
+    const depCount = (w.up||[]).length + (w.down||[]).length;
+    return `<div class="wf-card ${sel===w.id?'sel':''}" data-id="${w.id}">
+      <div class="name">${name}</div>
+      <div class="desc">${desc||'—'}</div>
+      <div class="badges">
+        <span class="badge b-${w.s}">${SILO[w.s]||w.s}</span>
+        <span class="badge b-tag b-${w.tag}">${w.tag}</span>
+        ${depCount?`<span style="font-size:10px;color:var(--g-tx3)">⛓ ${depCount}</span>`:''}
+        <span style="font-size:10px;color:var(--g-tx3)">${w.acts.length} steps</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+document.getElementById('list').onclick = e => {
+  const c = e.target.closest('.wf-card'); if(!c) return;
+  selectWf(c.dataset.id);
+};
+
+function selectWf(id) {
+  sel = id;
+  renderList();
+  renderDetail(id);
+  renderGraph(id);
+}
+
+function renderDetail(id) {
+  const dp = document.getElementById('detailPanel');
+  const w = W[IDX[id]]; if(!w) return;
+
+  const xlMeta = w.acts
+    .filter(a => a.t === 'Excel Batch' && a.d)
+    .map(a => {
+      const match = a.d.match(/Template\s+([\w./:$#-]+)/i);
+      if(!match) return null;
+      const key = match[1].split('/').pop().toUpperCase();
+      return EXCEL_META[key] ? {key, meta: EXCEL_META[key]} : null;
+    })
+    .filter(Boolean);
+
+  const xlHtml = xlMeta.length ? `
+    <div style="display: flex; align-items: center; margin-top: 16px;">
+      <div class="dp-acts-title" style="margin: 0;">📊 Excel Batch File</div>
+      <label class="formula-toggle">
+        <input type="checkbox" id="formulaToggle">
+        <span>Show full formulas</span>
+      </label>
+    </div>
+  ` + xlMeta.map(({key, meta}) => {
+    const colMap = meta.col_map || {};
+    const colsHtml = meta.cols.map(c => {
+      const mapped = colMap[c];
+      const fqlBadge = mapped && mapped.fql
+        ? `<span style="font-size:9px;padding:1px 5px;border-radius:3px;background:rgba(34,211,238,.12);color:var(--g-cyn);margin-left:4px;font-family:'IBM Plex Mono',monospace;vertical-align:middle">${mapped.fql}</span>`
+        : '';
+      const formula = mapped && mapped.formula
+        ? mapped.formula.replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        : '';
+      const formulaHtml = formula ? `<span class="formula-full" style="display:none;">${formula}</span>` : '';
+      return `<span class="pill-col" data-col="${c}">${c}${fqlBadge}${formulaHtml}</span>`;
+    }).join('');
+
+    const ofdbHtml = meta.ofdb.length ? `
+      <div style="margin-top:8px">
+        <div style="font-size:10px;color:var(--g-acc2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">OFDB Paths</div>
+        <div>${meta.ofdb.map(o=>`<span class="pill-ofdb">${o}</span>`).join('')}</div>
+      </div>` : '';
+
+    return `
+      <div style="margin-top:12px;">
+        <div style="font-size:11px;color:var(--g-acc);font-weight:600;margin-bottom:6px;">
+          ${key}
+          <span style="font-weight:400;color:var(--g-tx3);font-size:10px;margin-left:8px">${meta.cols.length} columns · ${Object.keys(colMap).length} mapped · ${meta.ofdb.length} OFDB paths</span>
+        </div>
+        <div style="font-size:10px;color:var(--g-tx3);margin-bottom:6px;font-style:italic">
+          Toggle above to show/hide full formulas · cyan badge = FQL function
+        </div>
+        <div class="cols-container" style="margin-bottom:6px">${colsHtml}</div>
+        ${ofdbHtml}
+      </div>
+    `;
+  }).join('') : '';
+
+  dp.innerHTML = `
+    <div class="dp-name">${w.id}</div>
+    <div class="dp-desc">${w.desc||'No description'}</div>
+    <div class="dp-grid" style="grid-template-columns:1fr 1fr;gap:12px 24px;margin-bottom:16px">
+      <div class="dp-field">
+        <div class="l">Schedule / Trigger</div>
+        <div class="v"><code>${(w.sched||'—').trim()}</code></div>
+      </div>
+      <div class="dp-field">
+        <div class="l">Dependencies</div>
+        <div class="v">${(w.up||[]).length} up · ${(w.down||[]).length} down</div>
+      </div>
+    </div>
+
+    <div class="dp-acts-title">Pipeline — ${w.acts.length} steps</div>
+    <div>${w.acts.map((a,i)=>`<span class="dp-act"><span style="color:var(--g-tx3)">${i+1}.</span> <span class="at">${a.t}</span> <span class="an">${a.n}</span></span>`).join(' → ')}</div>
+    ${xlHtml}
+  `;
+}
+
+// ── GRAPH ──
+const cv = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+let gNodes = [], gEdges = [], animFrame = null;
+let panX=0, panY=0, zoom=1, dragging=false, dragStart={x:0,y:0}, panStart={x:0,y:0};
+let hoveredNode = null;
+
+function resizeCanvas() {
+  const rect = document.getElementById('graphZone').getBoundingClientRect();
+  cv.width  = rect.width  * devicePixelRatio;
+  cv.height = rect.height * devicePixelRatio;
+  cv.style.width  = rect.width  + 'px';
+  cv.style.height = rect.height + 'px';
+  ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+}
+window.addEventListener('resize', () => { resizeCanvas(); drawGraph(); });
+resizeCanvas();
+
+function buildGraph(id) {
+  const visited = new Set();
+  const nodes = [], edges = [];
+
+  function walk(wid, depth, dir) {
+    if(visited.has(wid) || Math.abs(depth) > 6) return;
+    visited.add(wid);
+    const w = W[IDX[wid]]; if(!w) return;
+    const role = wid === id ? 'sel' : depth < 0 ? 'up' : 'down';
+    nodes.push({id:wid, s:w.s, role, isSel:wid===id, depth, acts:w.acts.length, tag:w.tag});
+    if(dir !== 'up')   (w.down||[]).forEach(d => { edges.push({from:wid,to:d}); walk(d, depth+1, 'down'); });
+    if(dir !== 'down') (w.up  ||[]).forEach(u => { edges.push({from:u,to:wid}); walk(u, depth-1, 'up');   });
+  }
+  walk(id, 0, 'both');
+  return {nodes, edges};
+}
+
+function layoutGraph(nodes) {
+  const rect = document.getElementById('graphZone').getBoundingClientRect();
+  const cw = rect.width, ch = rect.height;
+  const cx = cw / 2, cy = ch / 2;
+
+  const upLayers = {}, downLayers = {};
+  let selNode = null;
+
+  nodes.forEach(n => {
+    if (n.depth === 0) { selNode = n; return; }
+    if (n.depth < 0) {
+      const k = -n.depth;
+      if (!upLayers[k]) upLayers[k] = [];
+      upLayers[k].push(n);
+    } else {
+      if (!downLayers[n.depth]) downLayers[n.depth] = [];
+      downLayers[n.depth].push(n);
+    }
+  });
+
+  if (selNode) { selNode.x = cx; selNode.y = cy; }
+
+  const LAYER_WIDTH = Math.min(cw, ch) * 0.20;
+  const NODE_SPACING = 70;
+
+  function placeLayer(layer, colIndex, direction) {
+    const count = layer.length;
+    const totalHeight = (count - 1) * NODE_SPACING;
+    const startY = cy - totalHeight / 2;
+    const xPos = direction === 'left'
+      ? cx - colIndex * LAYER_WIDTH
+      : cx + colIndex * LAYER_WIDTH;
+
+    layer.forEach((n, i) => {
+      n.x = xPos;
+      n.y = startY + i * NODE_SPACING;
+    });
+  }
+
+  Object.keys(upLayers).map(Number).sort().forEach(k =>
+    placeLayer(upLayers[k], k, 'left')
+  );
+  Object.keys(downLayers).map(Number).sort().forEach(k =>
+    placeLayer(downLayers[k], k, 'right')
+  );
+}
+
+document.getElementById('detailPanel').addEventListener('change', (e) => {
+  if (e.target.id === 'formulaToggle') {
+    const isExpanded = e.target.checked;
+    document.querySelectorAll('#mview-gps .pill-col').forEach(pill => {
+      const formula = pill.querySelector('.formula-full');
+      if (formula) {
+        if (isExpanded) {
+          pill.classList.add('expanded');
+          formula.style.display = 'block';
+        } else {
+          pill.classList.remove('expanded');
+          formula.style.display = 'none';
+        }
+      }
+    });
+  }
+});
+
+function renderGraph(id) {
+  const g = buildGraph(id);
+  gNodes = g.nodes;
+  gEdges = g.edges;
+  layoutGraph(gNodes);
+  panX = 0; panY = 0;
+
+  if (gNodes.length > 1) {
+    const rect = document.getElementById('graphZone').getBoundingClientRect();
+    const xs = gNodes.map(n=>n.x), ys = gNodes.map(n=>n.y);
+    const minX = Math.min(...xs)-60, maxX = Math.max(...xs)+60;
+    const minY = Math.min(...ys)-40, maxY = Math.max(...ys)+40;
+    const scaleX = rect.width  / (maxX - minX);
+    const scaleY = rect.height / (maxY - minY);
+    zoom = Math.min(scaleX, scaleY, 1.2);
+    panX = (rect.width  - (maxX + minX) * zoom) / 2;
+    panY = (rect.height - (maxY + minY) * zoom) / 2;
+  } else {
+    zoom = 1;
+  }
+
+  document.getElementById('graphLegend').style.display = gNodes.length > 1 ? 'flex' : 'none';
+  drawGraph();
+}
+
+function drawGraph() {
+  if(animFrame) cancelAnimationFrame(animFrame);
+  animFrame = requestAnimationFrame(_drawGraph);
+}
+
+function _drawGraph() {
+  const rect = document.getElementById('graphZone').getBoundingClientRect();
+  const cw = rect.width, ch = rect.height;
+  ctx.clearRect(0,0,cw,ch);
+  ctx.save();
+  ctx.translate(panX, panY);
+  ctx.scale(zoom, zoom);
+
+  const nodeMap = {};
+  gNodes.forEach(n => nodeMap[n.id] = n);
+
+  gEdges.forEach(e => {
+    const from = nodeMap[e.from], to = nodeMap[e.to];
+    if(!from || !to) return;
+    ctx.beginPath();
+    const mx = (from.x + to.x) / 2;
+    ctx.moveTo(from.x, from.y);
+    ctx.bezierCurveTo(mx, from.y, mx, to.y, to.x, to.y);
+    ctx.strokeStyle = 'rgba(56,189,248,.12)';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    const angle = Math.atan2(to.y - from.y, to.x - from.x);
+    const ax = to.x - Math.cos(angle)*16, ay = to.y - Math.sin(angle)*16;
+    ctx.beginPath();
+    ctx.moveTo(ax + Math.cos(angle)*8,   ay + Math.sin(angle)*8);
+    ctx.lineTo(ax + Math.cos(angle+2.6)*5, ay + Math.sin(angle+2.6)*5);
+    ctx.lineTo(ax + Math.cos(angle-2.6)*5, ay + Math.sin(angle-2.6)*5);
+    ctx.fillStyle = 'rgba(56,189,248,.25)';
+    ctx.fill();
+  });
+
+  gNodes.forEach(n => {
+    const isHov = hoveredNode === n.id;
+    let col;
+    if(n.isSel)         col = GCOL_SEL;
+    else if(n.role==='up')   col = GCOL_UP;
+    else                col = GCOL_DOWN;
+
+    const r = n.isSel ? 14 : (isHov ? 12 : 10);
+
+    if(n.isSel) {
+      ctx.beginPath(); ctx.arc(n.x, n.y, 24, 0, Math.PI*2);
+      const grd = ctx.createRadialGradient(n.x,n.y,8,n.x,n.y,24);
+      grd.addColorStop(0, col+'33'); grd.addColorStop(1,'transparent');
+      ctx.fillStyle = grd; ctx.fill();
+    }
+
+    ctx.beginPath(); ctx.arc(n.x, n.y, r, 0, Math.PI*2);
+    if(n.isSel) {
+      ctx.fillStyle = col;
+    } else {
+      ctx.fillStyle = (n.tag==='test'||n.tag==='old') ? col+'33' : col+'66';
+    }
+    ctx.fill();
+
+    ctx.strokeStyle = n.isSel ? col : col+'55';
+    ctx.lineWidth   = n.isSel ? 2 : 1;
+    ctx.stroke();
+
+    const rect2 = document.getElementById('graphZone').getBoundingClientRect();
+    ctx.font      = `${n.isSel?'600':'400'} ${n.isSel?11:10}px 'IBM Plex Mono',monospace`;
+    ctx.fillStyle = n.isSel ? '#fff' : (isHov ? '#fff' : '#8896aa');
+    const label = n.id.length > 26 ? n.id.substring(0,24)+'..' : n.id;
+    if (n.isSel) {
+      ctx.textAlign = 'center';
+      ctx.fillText(label, n.x, n.y + r + 14);
+    } else {
+      const cxApprox = rect2.width / 2;
+      if (n.x < cxApprox - 20) {
+        ctx.textAlign = 'right';
+        ctx.fillText(label, n.x - r - 4, n.y + 3);
+      } else if (n.x > cxApprox + 20) {
+        ctx.textAlign = 'left';
+        ctx.fillText(label, n.x + r + 4, n.y + 3);
+      } else {
+        ctx.textAlign = 'center';
+        ctx.fillText(label, n.x, n.y + r + 14);
+      }
+    }
+
+    if(n.isSel || isHov) {
+      ctx.font      = '500 9px Outfit,sans-serif';
+      ctx.fillStyle = n.isSel ? '#0b0f19' : '#fff';
+      ctx.fillText(n.acts, n.x, n.y + 3.5);
+    }
+  });
+
+  ctx.restore();
+}
+
+cv.onwheel = e => {
+  e.preventDefault();
+  zoom = Math.max(0.3, Math.min(3, zoom * (e.deltaY > 0 ? 0.9 : 1.1)));
+  drawGraph();
+};
+cv.onmousedown = e => {
+  dragging=true; dragStart={x:e.clientX,y:e.clientY}; panStart={x:panX,y:panY};
+  cv.style.cursor='grabbing';
+};
+cv.onmousemove = e => {
+  if(dragging) {
+    panX = panStart.x + (e.clientX - dragStart.x);
+    panY = panStart.y + (e.clientY - dragStart.y);
+    drawGraph(); return;
+  }
+  const rect = cv.getBoundingClientRect();
+  const mx = (e.clientX - rect.left - panX) / zoom;
+  const my = (e.clientY - rect.top  - panY) / zoom;
+  let found = null;
+  for(const n of gNodes) { if(Math.hypot(n.x-mx,n.y-my)<16){found=n.id;break;} }
+  if(found !== hoveredNode) {
+    hoveredNode = found;
+    cv.style.cursor = found ? 'pointer' : 'grab';
+    drawGraph();
+  }
+};
+cv.onmouseup = e => {
+  if(dragging && Math.hypot(e.clientX-dragStart.x,e.clientY-dragStart.y)<5 && hoveredNode) selectWf(hoveredNode);
+  dragging=false; cv.style.cursor = hoveredNode?'pointer':'grab';
+};
+
+const resizeH = document.getElementById('resizeH');
+let resizing=false, startY=0, startH=0;
+resizeH.onmousedown = e => {
+  resizing=true; startY=e.clientY;
+  startH=document.getElementById('detailPanel').offsetHeight;
+  document.body.style.cursor='ns-resize'; e.preventDefault();
+};
+document.onmousemove = e => {
+  if(!resizing) return;
+  document.getElementById('detailPanel').style.height = Math.max(100, startH-(e.clientY-startY))+'px';
+  resizeCanvas(); drawGraph();
+};
+document.onmouseup = () => { resizing=false; document.body.style.cursor=''; };
+
+renderList();
+cv.style.cursor = 'grab';
+</script>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PORTAL LOGIC (unchanged from original)
+     ═══════════════════════════════════════════════════════════════ -->
+<script>
+/* PORTAL_LOGIC_PLACEHOLDER */
+</script>
+
+</body>
+</html>
