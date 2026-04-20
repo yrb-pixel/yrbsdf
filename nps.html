@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EMEA NPS Detractor Deep-Dive - FY26 H1+</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0f1419;
+    --ink-soft: #3a4453;
+    --ink-mute: #6b7688;
+    --paper: #fbf9f4;
+    --paper-soft: #f3efe6;
+    --rule: #d9d3c4;
+    --rule-soft: #e8e3d6;
+    --accent: #8a2a2a;
+    --accent-soft: #d4b5b5;
+    --accent-bg: #f5ecec;
+    --gold: #9a7b2c;
+    --teal: #1f4e5f;
+    --green: #3a6b3e;
+    --flag: #c85a1e;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Inter Tight', -apple-system, sans-serif; font-size: 15px; line-height: 1.55; color: var(--ink); background: var(--paper); font-feature-settings: 'ss01', 'cv11'; }
+  .display { font-family: 'Fraunces', Georgia, serif; font-optical-sizing: auto; font-variation-settings: "opsz" 96; }
+  .mono    { font-family: 'JetBrains Mono', monospace; }
+  .masthead { border-bottom: 1px solid var(--ink); padding: 28px 48px 18px; background: var(--paper); }
+  .masthead-top { display: flex; justify-content: space-between; align-items: baseline; padding-bottom: 14px; border-bottom: 1px solid var(--rule); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-soft); }
+  .masthead-top .pub { font-weight: 600; color: var(--ink); }
+  .masthead h1 { font-family: 'Fraunces', serif; font-weight: 500; font-size: clamp(36px, 5vw, 60px); line-height: 1.02; margin-top: 22px; letter-spacing: -0.015em; font-variation-settings: "opsz" 144, "SOFT" 30; }
+  .masthead h1 em { font-style: italic; color: var(--accent); font-weight: 400; }
+  .deck { font-family: 'Fraunces', serif; font-style: italic; font-size: 20px; color: var(--ink-soft); margin-top: 14px; line-height: 1.4; }
+  .byline { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--rule); display: flex; gap: 32px; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-mute); }
+  .byline span strong { color: var(--ink); font-weight: 600; letter-spacing: 0.04em; }
+  .wrap { max-width: 1320px; margin: 0 auto; padding: 0 48px 80px; }
+  nav.toc { position: sticky; top: 0; background: var(--paper); border-bottom: 1px solid var(--rule); padding: 12px 48px; z-index: 100; display: flex; gap: 0; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; overflow-x: auto; }
+  nav.toc a { color: var(--ink-soft); text-decoration: none; padding: 8px 18px; border-right: 1px solid var(--rule-soft); white-space: nowrap; transition: color 0.15s; }
+  nav.toc a:first-child { padding-left: 0; }
+  nav.toc a:last-child { border-right: none; }
+  nav.toc a:hover { color: var(--accent); }
+  nav.toc a.active { color: var(--ink); font-weight: 600; }
+  section { padding-top: 56px; scroll-margin-top: 70px; }
+  .section-label { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; font-weight: 600; }
+  .section-title { font-family: 'Fraunces', serif; font-size: 36px; font-weight: 500; line-height: 1.1; letter-spacing: -0.01em; margin-bottom: 10px; }
+  .section-intro { font-family: 'Fraunces', serif; font-style: italic; font-size: 18px; color: var(--ink-soft); margin-bottom: 36px; line-height: 1.5; }
+  .subsection-h { margin: 40px 0 18px; padding-bottom: 10px; border-bottom: 1px solid var(--rule); display: flex; align-items: baseline; gap: 14px; }
+  .subsection-h .num { font-family: 'Fraunces', serif; font-style: italic; font-size: 14px; color: var(--accent); font-weight: 500; }
+  .subsection-h h3 { font-family: 'Fraunces', serif; font-size: 24px; font-weight: 500; letter-spacing: -0.005em; color: var(--ink); }
+  .subsection-lede { font-family: 'Fraunces', serif; font-style: italic; font-size: 16px; color: var(--ink-soft); margin-bottom: 22px; line-height: 1.5; }
+  .tldr { margin-top: 48px; border-top: 2px solid var(--ink); border-bottom: 1px solid var(--rule); padding: 28px 0 32px; }
+  .tldr-label { font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; color: var(--accent); font-weight: 600; margin-bottom: 18px; }
+  .tldr-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px; }
+  .tldr-item { border-left: 2px solid var(--accent); padding-left: 16px; }
+  .tldr-item .num { font-family: 'Fraunces', serif; font-size: 42px; font-weight: 500; line-height: 1; letter-spacing: -0.02em; }
+  .tldr-item .num .unit { font-size: 20px; color: var(--ink-mute); margin-left: 4px; }
+  .tldr-item .lbl { font-size: 12px; color: var(--ink-soft); margin-top: 8px; line-height: 1.35; }
+  .card { background: #fff; border: 1px solid var(--rule); padding: 28px; margin-bottom: 24px; }
+  .card-h { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid var(--rule-soft); }
+  .card-h h3 { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 500; letter-spacing: -0.005em; }
+  .card-h .meta { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-mute); }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; }
+  .pullquote { border-left: 4px solid var(--accent); padding: 8px 0 8px 24px; margin: 28px 0; font-family: 'Fraunces', serif; font-style: italic; font-size: 22px; line-height: 1.4; color: var(--ink); }
+  .pullquote cite { display: block; font-family: 'Inter Tight', sans-serif; font-style: normal; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-mute); margin-top: 10px; }
+  .prose p { margin-bottom: 14px; }
+  .prose p.lead { font-size: 17px; color: var(--ink); }
+  .prose strong { font-weight: 600; }
+  .prose .fn { font-size: 12px; color: var(--ink-mute); border-top: 1px solid var(--rule-soft); padding-top: 10px; margin-top: 16px; font-style: italic; }
+  .bars { display: flex; flex-direction: column; gap: 6px; }
+  .bar-row { display: grid; grid-template-columns: 180px 1fr 50px 50px; align-items: center; gap: 12px; font-size: 13px; padding: 5px 0; cursor: pointer; transition: background 0.1s; }
+  .bar-row:hover { background: var(--paper-soft); }
+  .bar-row .name { color: var(--ink); font-weight: 500; }
+  .bar-row .track { background: var(--rule-soft); height: 18px; position: relative; }
+  .bar-row .fill { background: var(--accent); height: 100%; transition: width 0.6s cubic-bezier(0.2, 0.8, 0.2, 1); }
+  .bar-row .fill.dim { background: var(--ink-soft); }
+  .bar-row .val { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+  .bar-row .score { text-align: right; font-variant-numeric: tabular-nums; color: var(--ink-mute); font-size: 12px; }
+  .histo { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; height: 260px; padding: 30px 0 36px; align-items: end; }
+  .histo .bar-wrap { position: relative; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; }
+  .histo .bar { width: 100%; background: var(--ink); position: relative; transition: height 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); min-height: 4px; }
+  .histo .bar.bad { background: var(--accent); }
+  .histo .bar.mid { background: var(--ink-soft); }
+  .histo .cnt { font-variant-numeric: tabular-nums; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--ink); }
+  .histo .lbl { font-size: 14px; font-family: 'Fraunces', serif; color: var(--ink-soft); margin-top: 8px; }
+  .histo-legend { margin-top: 40px; display: flex; gap: 24px; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-mute); padding-top: 14px; border-top: 1px solid var(--rule-soft); }
+  .histo-legend .dot { display: inline-block; width: 10px; height: 10px; margin-right: 6px; vertical-align: middle; }
+  .monthly { position: relative; }
+  .monthly svg { width: 100%; display: block; }
+  .heatmap { width: 100%; border-collapse: collapse; font-size: 12px; font-variant-numeric: tabular-nums; }
+  .heatmap th, .heatmap td { padding: 8px 10px; text-align: center; border: 1px solid var(--rule-soft); }
+  .heatmap th { background: var(--paper-soft); font-weight: 600; color: var(--ink-soft); font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; }
+  .heatmap th.rowlbl, .heatmap td.rowlbl { text-align: left; font-weight: 500; background: var(--paper-soft); white-space: nowrap; }
+  .verb-controls { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; padding-bottom: 18px; border-bottom: 1px solid var(--rule-soft); align-items: center; }
+  .verb-controls input[type=text] { flex: 1; min-width: 240px; padding: 10px 14px; border: 1px solid var(--rule); background: var(--paper); font-family: inherit; font-size: 14px; color: var(--ink); }
+  .verb-controls input[type=text]:focus { outline: none; border-color: var(--ink); }
+  .chip { display: inline-block; padding: 5px 11px; font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; border: 1px solid var(--rule); background: #fff; cursor: pointer; transition: all 0.1s; color: var(--ink-soft); font-weight: 500; }
+  .chip:hover { border-color: var(--ink-soft); }
+  .chip.on { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .verbatim { padding: 20px 0; border-bottom: 1px solid var(--rule-soft); display: grid; grid-template-columns: 60px 1fr 220px; gap: 24px; align-items: flex-start; }
+  .verbatim .score-cell { font-family: 'Fraunces', serif; font-size: 34px; font-weight: 500; line-height: 1; color: var(--accent); }
+  .verbatim .score-cell.mid { color: var(--ink-soft); }
+  .verbatim .quote { font-family: 'Fraunces', serif; font-size: 17px; line-height: 1.45; color: var(--ink); font-style: italic; }
+  .verbatim .quote::before { content: '“'; color: var(--accent); }
+  .verbatim .quote::after { content: '”'; color: var(--accent); }
+  .verbatim .meta-cell { font-size: 11px; letter-spacing: 0.05em; color: var(--ink-mute); line-height: 1.6; }
+  .verbatim .meta-cell strong { color: var(--ink); font-weight: 500; }
+  .verbatim .tags { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 4px; }
+  .verbatim .tag { font-size: 10px; padding: 2px 6px; background: var(--accent-bg); color: var(--accent); text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600; }
+  .verb-empty { padding: 40px 0; text-align: center; font-family: 'Fraunces', serif; font-style: italic; color: var(--ink-mute); }
+  .verb-count { font-size: 12px; color: var(--ink-mute); letter-spacing: 0.08em; text-transform: uppercase; margin-left: auto; }
+  .acc-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .acc-table th, .acc-table td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--rule-soft); }
+  .acc-table th { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-mute); font-weight: 600; border-bottom: 1px solid var(--ink); }
+  .acc-table td.num { text-align: right; font-variant-numeric: tabular-nums; font-weight: 500; }
+  .acc-table tr:hover td { background: var(--paper-soft); }
+  .score-pill { display: inline-block; min-width: 36px; text-align: center; padding: 3px 10px; font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .score-pill.crit { background: var(--accent); color: var(--paper); }
+  .score-pill.warn { background: var(--flag); color: var(--paper); }
+  .score-pill.mid  { background: var(--ink-soft); color: var(--paper); }
+  .reco { background: var(--ink); color: var(--paper); padding: 40px 48px; margin-top: 60px; }
+  .reco h2 { font-family: 'Fraunces', serif; font-size: 32px; font-weight: 500; margin-bottom: 8px; color: var(--paper); }
+  .reco .section-label { color: var(--accent-soft); }
+  .reco-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px; margin-top: 32px; }
+  .reco-item { border-top: 2px solid var(--accent-soft); padding-top: 16px; }
+  .reco-item .tag { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent-soft); font-weight: 600; margin-bottom: 8px; }
+  .reco-item h4 { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 500; margin-bottom: 10px; color: var(--paper); line-height: 1.25; }
+  .reco-item p { font-size: 14px; line-height: 1.55; color: #c9c4b8; }
+  footer { margin-top: 60px; padding: 28px 48px; border-top: 1px solid var(--rule); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-mute); display: flex; justify-content: space-between; }
+  /* Data badge */
+  .data-badge { position: fixed; bottom: 16px; right: 20px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.08em; padding: 5px 10px; background: var(--ink); color: #6b7688; z-index: 999; pointer-events: none; transition: color 0.3s; }
+  .data-badge.ok    { color: #7ec87e; }
+  .data-badge.local { color: #9a7b2c; }
+  @media (max-width: 900px) {
+    .masthead, .wrap, nav.toc, .reco, footer { padding-left: 24px; padding-right: 24px; }
+    .tldr-grid { grid-template-columns: repeat(2, 1fr) !important; }
+    .reco-grid { grid-template-columns: 1fr !important; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .verbatim { grid-template-columns: 50px 1fr; }
+    .verbatim .meta-cell { grid-column: 1 / -1; padding-left: 74px; padding-top: 4px; }
+    .bar-row { grid-template-columns: 120px 1fr 40px 40px; font-size: 12px; }
+  }
+  @media print { nav.toc { position: static; } .card, section { break-inside: avoid; } }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="masthead-top">
+    <span class="pub">FactSet · EMEA Consulting</span>
+    <span> </span><span> </span>
+  </div>
+  <h1>What is driving EMEA <em>NPS Detractor</em> scores</h1>
+  <p class="deck">An examination of 273 detractor NPS across EMEA in FY26 to date - what clients actually wrote, where pressure is highest, and where the follow-up operation is holding or breaking.</p>
+  <div class="byline">
+    <span>Data as of <strong>15 April 2026</strong></span>
+    <span>Coverage <strong>FY26 YTD</strong> (Sep 2025 - Apr 2026)</span>
+  </div>
+</header>
+
+<nav class="toc">
+  <a href="#summary">Summary</a>
+  <a href="#scope">Part 01 · Scope</a>
+  <a href="#voice">Part 02 · Voice of the client</a>
+  <a href="#concentration">Part 03 · Where it concentrates</a>
+  <a href="#december">Part 04 · The December effect</a>
+  <a href="#loop">Part 05 · Closing the loop</a>
+  <a href="#reco">Part 06 · Where to focus</a>
+</nav>
+
+<div class="wrap">
+
+  <section id="summary">
+    <div class="tldr">
+      <div class="tldr-label">Five numbers that frame the conversation</div>
+      <div class="tldr-grid" style="grid-template-columns: repeat(5, 1fr);">
+        <div class="tldr-item"><div class="num">273</div><div class="lbl">Detractor NPS follow-up logged FY26 YTD, after removing 7 user-error cases.</div></div>
+        <div class="tldr-item"><div class="num">2.47<span class="unit">/10</span></div><div class="lbl">Mean score across detractors - pressure is broad, not just in the 0-tail.</div></div>
+        <div class="tldr-item"><div class="num">52<span class="unit">%</span></div><div class="lbl">Of all EMEA NPS detractor originate from the <strong>United Kingdom</strong> team alone.</div></div>
+        <div class="tldr-item"><div class="num">47<span class="unit">%</span></div><div class="lbl">Of the 59 written comments name <strong>UX &amp; navigation</strong>. It dwarfs every other theme.</div></div>
+        <div class="tldr-item"><div class="num">14<span class="unit">%</span></div><div class="lbl">Of detractor accounts received <strong>zero meetings and zero calls</strong> across the full period.</div></div>
+      </div>
+    </div>
+    <div class="prose" style="margin-top: 44px;">
+      <p class="lead">Four findings drive everything that follows.</p>
+      <p><strong>One — the pain is linguistic, not technical.</strong> The most frequent word in verbatims is not "bug" or "data." It is some variation of <em>clunky, not intuitive, hard to find, complicated</em>. Data-quality and performance complaints exist, but they trail UX by a factor of three. When clients can articulate what they dislike, they are describing the <em>feeling</em> of using the workstation.</p>
+      <p><strong>Two — the damage concentrates, and it is not random.</strong> Half of all Detractor NPS sit with the United Kingdom team. Within that pool, a handful of enterprise relationships generate the bulk of the volume: Raymond James alone accounts for 24 Detractor NPS, UBS for 16, abrdn and Lombard for 11 each, Citigroup for 9. These are not fringe accounts — they are some of the largest EMEA relationships.</p>
+      <p><strong>Three — January's collapse follows a December we under-invested in.</strong> The mean score fell to 1.44 in January 2026, the worst month in the series. The preceding month carried the only material engagement dip: meetings per working day dropped 19% from the autumn average. Proactive touchpoints took the bigger hit — Client Entertainment fell 50% from its November peak, New User Training halved in December. By January, calls and "Dissatisfied Client" meetings were at their peak — the region was firefighting — but the score had already landed. The lagged correlation between engagement and the next month's NPS is moderate (+0.53), not deterministic, but the directional pattern is consistent across all three indicators.</p>
+      <p><strong>Four — a meaningful share of Detractor NPS go unresolved.</strong> 30% of Detractor NPS have <em>no resolution logged</em>; a further 20% close with "client did not respond." Together that is exactly half the book where the voice-of-client signal never closes into a learning loop. The hours logged per case (median 15 minutes) raise a separate question about whether the follow-up motion is calibrated for the stakes involved.</p>
+      <p class="fn">A note on the data: this report analyses follow-up NPS cases generated by NPS responses of 0–6. It is by construction a detractor-only dataset — there are no passives or promoters here. Readings of "NPS performance" should not be drawn from this file. What it <em>does</em> tell us, with precision, is where EMEA is bleeding sentiment and why.</p>
+    </div>
+  </section>
+
+  <section id="scope">
+    <div class="section-label">Part 01 · Scope &amp; method</div>
+    <h2 class="section-title">Reading this file for what it is.</h2>
+    <p class="section-intro">The NPS follow-up case dataset is a mirror of unhappiness, not a measure of health. Calibrating the lens before drawing conclusions.</p>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-h"><h3>What the data contains</h3><span class="meta">280 raw · 273 analysed</span></div>
+        <div class="prose">
+          <p>The file captures every detractor NPS generated in FY26 YTD in response to an NPS score of 0–6 across EMEA — the follow-up motion that consultants own when a detractor surfaces. It is comprehensive for detractors and blind to everyone else.</p>
+          <p><strong>Exclusions applied for this analysis.</strong> Seven NPS were removed as confirmed user errors — clients who later told the consultant they had clicked the wrong number, or dismissed a pop-up by mistake, and who were in fact satisfied. Keeping them would have distorted the tail.</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-h"><h3>Score distribution across detractors</h3><span class="meta">Count of NPS by score</span></div>
+        <div class="histo" id="histo"></div>
+        <div class="histo-legend">
+          <span><span class="dot" style="background:var(--accent)"></span>0–3 · Hard detractors (179)</span>
+          <span><span class="dot" style="background:var(--ink-soft)"></span>4–6 · Soft detractors (93)</span>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-h"><h3>Monthly trajectory</h3><span class="meta">NPS cases volume · mean score · Sep-25 to Apr-26</span></div>
+      <div class="monthly" id="monthly"></div>
+      <p class="fn" style="margin-top: 16px;">Volume is relatively stable between 22–49 NPS/month. The mean score dipped sharply in January 2026 (1.44) — a pattern Part 04 traces back to December's engagement gap.</p>
+    </div>
+  </section>
+
+  <section id="voice">
+    <div class="section-label">Part 02 · Voice of the client</div>
+    <h2 class="section-title">What clients actually wrote.</h2>
+    <p class="section-intro">Only 59 of 273 detractors left a written comment — but the signal in those lines is remarkably consistent, and worth reading in full.</p>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-h"><h3>Theme frequency</h3><span class="meta">Mentions across 59 comments</span></div>
+        <div class="bars" id="themeBars"></div>
+        <p class="fn" style="margin-top: 14px;">A single comment can carry multiple themes. "Bloomberg is much better" is tagged both as <em>UX</em> and as <em>Bloomberg comparison</em>.</p>
+      </div>
+      <div class="card">
+        <div class="card-h"><h3>The three sentences that keep recurring</h3><span class="meta">Paraphrased clusters</span></div>
+        <div class="pullquote">It is clunky, slow, and hard to find what I am looking for.<cite>— 14 distinct verbatims, across UK, France, Germany, MEA</cite></div>
+        <div class="pullquote">Bloomberg is better.<cite>— 7 explicit mentions. One client has been with FactSet since 1996.</cite></div>
+        <div class="pullquote">The data quality is not what I expect at this price.<cite>— Recurring pairing across 9 data-quality and 4 pricing comments.</cite></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-h" style="cursor:pointer; user-select:none;" id="verbatimToggle">
+        <h3>Verbatim explorer</h3>
+        <span class="meta" style="display:flex; align-items:center; gap:10px;">All 59 commented Detractor NPS · filterable <span id="verbatimChevron" style="font-size:16px; transition:transform 0.25s; display:inline-block; transform:rotate(0deg);">▼</span></span>
+      </div>
+      <div id="verbatimBody" style="display:none;">
+        <div class="verb-controls">
+          <input type="text" id="verbSearch" placeholder="Search comment, account, team…">
+          <span class="verb-count" id="verbCount"></span>
+        </div>
+        <div class="verb-controls" id="themeChips" style="border-bottom:none; padding-bottom:0;"></div>
+        <div id="verbList"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="concentration">
+    <div class="section-label">Part 03 · Where it concentrates</div>
+    <h2 class="section-title">The pain is distributed in different regions, over-represented in some.</h2>
+    <p class="section-intro">If Part 02 told us <em>what</em> clients are saying, this part answers <em>where</em> they are saying it. The signal concentrates at three nested levels — one team, one firm-type combination, one user tier — and each lens narrows the picture.</p>
+    <div class="subsection-h"><span class="num">i.</span><h3>By consulting team — the United Kingdom outlier</h3></div>
+    <p class="subsection-lede">Detractor share against client-base share is the cleanest test we have for whether a team is over- or under-indexing on dissatisfaction.</p>
+    <div class="card">
+      <div class="card-h"><h3>Detractor NPS by consulting team</h3><span class="meta">Volume · mean score · over-index vs. client base</span></div>
+      <div id="teamBarsUnified"></div>
+      <p class="fn" style="margin-top: 14px;">Each dot sits on a plane where the diagonal = parity. Everything above the line over-indexes; everything below under-indexes. Dot size encodes volume. UK is the structural outlier — 52% of EMEA detractors from 28% of the client base (1.85×).</p>
+    </div>
+    <div class="subsection-h"><span class="num">ii.</span><h3>By firm type — Wealth × Core is the hot cell</h3></div>
+    <p class="subsection-lede"></p>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-h"><h3>Volume &amp; intensity by Firm Type</h3><span class="meta">% hard detractors (0–2) · mean score</span></div>
+        <div class="bars" id="firmTypeBars"></div>
+        <p class="fn" style="margin-top:14px;">The mean score conceals the spread: Dealmakers (2.36) and Wealth (2.39) look similar on average, but 59% and 56% of their cases respectively score 0–2.</p>
+      </div>
+      <div class="card">
+        <div class="card-h"><h3>Firm Type × Segment matrix</h3><span class="meta">Mean score · (n cases)</span></div>
+        <table class="heatmap" id="firmSegMatrix"></table>
+        <p class="fn" style="margin-top:10px;"><strong>Wealth × Core</strong> is the most critical combination: mean 1.89, 18 zeros out of 38 cases.</p>
+      </div>
+    </div>
+    <div class="subsection-h"><span class="num">iii.</span><h3>By segment, tier &amp; power grade — the operators are the loudest</h3></div>
+    <p class="subsection-lede">Zooming in one final level: dissatisfaction sits with our largest accounts and our most intensive daily users.</p>
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-h"><h3>By Account Segment</h3><span class="meta"></span></div>
+        <div class="bars" id="segBars"></div>
+        <p class="fn" style="margin-top:10px;">Strategic accounts generate 53% of all detractor NPS — the largest single bucket.</p>
+      </div>
+      <div class="card">
+        <div class="card-h"><h3>By User Tier</h3><span class="meta"></span></div>
+        <div class="bars" id="tierBars"></div>
+        <p class="fn" style="margin-top:10px;">Tier 3 users — intensive daily operators — generate the majority of complaints and the lowest mean score.</p>
+      </div>
+      <div class="card">
+        <div class="card-h"><h3>By Account Power Grade</h3><span class="meta"></span></div>
+        <div class="bars" id="gradeBars"></div>
+        <p class="fn" style="margin-top:10px;">Detractor volume is spread across the grade spectrum — unhappiness is not a low-engagement phenomenon.</p>
+      </div>
+    </div>
+    <p class="prose" style="margin-top: 28px; font-family: 'Fraunces', serif; font-style: italic; font-size: 17px; color: var(--ink-soft);">Three lenses, one composite picture: the modal detractor is a Tier-3 operator at a Strategic Wealth account, covered by the UK team.</p>
+  </section>
+
+  <section id="december">
+    <div class="section-label">Part 04 · The December effect</div>
+    <h2 class="section-title">What December cost us — and the coverage gap that costs us every month.</h2>
+    <p class="section-intro">We now know <em>what</em> clients are saying and <em>where</em>. The remaining question is <em>when</em> the signal worsened, and what — if anything — the region could have done about it.</p>
+    <div class="card">
+      <div class="card-h"><h3>Engagement intensity vs. detractor scores</h3><span class="meta">All 8 EMEA teams · Sep-25 → Apr-26</span></div>
+      <div class="monthly" id="engagementChart"></div>
+      <p class="fn" style="margin-top: 16px;">December was the only month where meetings per working day fell materially — 96.5 versus a Sep-Nov average of 128 (−27% from the November peak). January's mean NPS score then collapsed to 1.44. The lagged correlation between engagement intensity in month <em>N</em> and NPS score in month <em>N+1</em> is <strong>+0.53</strong>.</p>
+    </div>
+    <div class="card">
+      <div class="card-h"><h3>The coverage gap</h3><span class="meta">Engagement silence at detractor accounts</span></div>
+      <div class="prose">
+        <p class="lead">Across the 188 distinct detractor accounts in FY26 YTD — over eight months of data across all EMEA teams:</p>
+        <p>— <strong>26%</strong> received no meetings at all.</p>
+        <p>— <strong>21%</strong> received no connected calls at all.</p>
+        <p>— <strong>14% (27 accounts) received neither a meeting nor a connected call — zero touchpoints in eight months</strong>, despite having logged at least one NPS score of 0–6.</p>
+        <p>This is the most actionable number in the report. A detractor account with zero engagement is a churn risk we are not managing.</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-h"><h3>Caveats on this read</h3><span class="meta"></span></div>
+      <div class="prose">
+        <p><strong>Correlation, not causation.</strong> The +0.53 lagged correlation indicates a directional relationship but does not isolate cause. December's meeting dip may itself be a symptom of a quieter market (year-end, vendor budget cycles) rather than a lever the region controls independently.</p>
+        <p><strong>Small monthly samples.</strong> The NPS panel ranges from 22 to 49 per month — statistically noisy. Readers should focus on the broad pattern, not on any single month's precision.</p>
+        <p><strong>What we still cannot see.</strong> These datasets capture activity volume, not quality. A 30-minute troubleshooting call resolving a real pain point is not the same data point as a 5-minute drive-by.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="loop">
+    <div class="section-label">Part 05 · Closing the loop</div>
+    <h2 class="section-title">Once the signal arrives, what do we do with it?</h2>
+    <p class="section-intro">A detractor NPS is the beginning of a conversation, not the end of one. The operational answer, at regional level, is that we are not closing that conversation reliably.</p>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-h"><h3>Resolution status of the 273 Detractor NPS</h3><span class="meta"></span></div>
+        <div class="bars" id="resBars"></div>
+        <p class="fn" style="margin-top:16px;"><strong>30%</strong> of Detractor NPS have no resolution text logged. A further <strong>20%</strong> close with the client not responding. Exactly half the book never becomes a learning loop.</p>
+      </div>
+      <div class="card">
+        <div class="card-h"><h3>Open-case ageing</h3><span class="meta">As of 15 Apr 2026</span></div>
+        <div class="prose">
+          <p><strong>81 Detractor NPS are still open</strong>. Of those, <strong>42 have been open for more than 60 days</strong> and <strong>35 for more than 90 days</strong>. The oldest opened on 2 Sep 2025.</p>
+          <p>Open-case ageing on a detractor follow-up workflow is a leading indicator of churn exposure. A client who scored 0, was contacted late or not at all, and never heard a closure — that is an account that will not score 0 again; they will not respond at all next cycle.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="reco" class="reco">
+    <div class="section-label">Part 06 · Where to focus</div>
+    <h2>Four moves that would change the number.</h2>
+    <p style="font-family:'Fraunces',serif; font-style:italic; color:#c9c4b8; font-size:17px; margin-top:10px; max-width:780px;">Not a remediation plan — a framing of where the highest-leverage work sits, so the operating teams can scope it with their own ownership.</p>
+    <div class="reco-grid">
+      <div class="reco-item">
+        <div class="tag">Move 01 · Product · maps to Part 02</div>
+        <h4>Treat the UX narrative as a strategic priority, not a support issue.</h4>
+        <p>47% of written complaints are about navigation, search and intuitiveness. This is a brand-perception risk against Bloomberg, and it will not be resolved through case-level follow-up.</p>
+      </div>
+      <div class="reco-item">
+        <div class="tag">Move 02 · Account strategy · maps to Part 03</div>
+        <h4>Escalate the five zero-mean enterprises to senior leadership.</h4>
+        <p>Lazard, Canaccord, LGT, Nomura. Sixteen Detractor NPS between them, mean scores at or below 1.0. These relationships cannot be defended at consultant level.</p>
+      </div>
+      <div class="reco-item">
+        <div class="tag">Move 03 · Engagement floor · maps to Part 04</div>
+        <h4>Close the 27-account coverage gap, then set a minimum engagement floor.</h4>
+        <p>Twenty-seven detractor accounts received zero meetings and zero calls across eight months. That is a closeable gap in a CS ops sprint.</p>
+      </div>
+      <div class="reco-item">
+        <div class="tag">Move 04 · Operating rigor · maps to Part 05</div>
+        <h4>Close the feedback loop — every case, every month.</h4>
+        <p>A 30% no-resolution rate and 35 Detractor NPS open past 90 days point to an operating standard that needs tightening.</p>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  <span>Prepared on data as of 15 Apr 2026</span>
+</footer>
+
+<div class="data-badge" id="dataBadge">· loading data.json…</div>
+
+<script>
+
+  const DATA = {"generated_at":"2026-04-16","filter_context":"Current FY (9/1/2025 to 8/31/2026) — EMEA region — All detractor cases (NPS 0-6)","totals":{"total_raw":268,"false_negatives":7,"total_analyzed":273,"with_comment":59,"mean_score":2.47,"median_score":2,"zero_scorers":90,"low_0_3":172},"score_distribution":{"0.0":90,"1.0":16,"2.0":35,"3.0":31,"4.0":16,"5.0":37,"6.0":36},"monthly":[{"Month":"2025-09","n":48,"avg":2.79},{"Month":"2025-10","n":37,"avg":2.89},{"Month":"2025-11","n":38,"avg":2.5},{"Month":"2025-12","n":32,"avg":2.19},{"Month":"2026-01","n":25,"avg":1.44},{"Month":"2026-02","n":24,"avg":2.79},{"Month":"2026-03","n":36,"avg":2.33},{"Month":"2026-04","n":21,"avg":2.43}],"by_team":[{"Consulting Team":"United Kingdom Client Consulting","cases":137,"avg_score":2.23},{"Consulting Team":"France Client Consulting","cases":31,"avg_score":2.94},{"Consulting Team":"Southern Europe Client Consulting","cases":12,"avg_score":2.83},{"Consulting Team":"EMEA Customer Experience","cases":30,"avg_score":2.33},{"Consulting Team":"Germany Client Consulting","cases":28,"avg_score":1.82},{"Consulting Team":"MEA Client Consulting","cases":13,"avg_score":3.92},{"Consulting Team":"Nordic Client Consulting","cases":8,"avg_score":3.0},{"Consulting Team":"Benelux Client Consulting","cases":7,"avg_score":5.0},{"Consulting Team":"EMEA SP&A Client Consulting","cases":5,"avg_score":2.6},{"Consulting Team":"EMEA ex UK CSDP","cases":1,"avg_score":0.0},{"Consulting Team":"United Kingdom Middle Markets GBB Sales","cases":1,"avg_score":3.0}],"by_segment":[{"Account Segment":"Strategic","cases":135,"avg_score":2.5},{"Account Segment":"Core","cases":84,"avg_score":2.31},{"Account Segment":"SMB","cases":28,"avg_score":2.64},{"Account Segment":"SMB Growth","cases":11,"avg_score":3.0}],"by_tier":[{"User Tier":"Tier 3","cases":141,"avg_score":2.34},{"User Tier":"Tier 2","cases":62,"avg_score":2.55},{"User Tier":"Tier 1","cases":22,"avg_score":2.55},{"User Tier":"Tier 4","cases":22,"avg_score":2.55},{"User Tier":"Tier 5","cases":3,"avg_score":2.33}],"by_grade":[{"Grade_Clean":"B+","cases":39,"avg_score":2.92},{"Grade_Clean":"C+","cases":38,"avg_score":2.68},{"Grade_Clean":"B","cases":36,"avg_score":2.22},{"Grade_Clean":"B-","cases":35,"avg_score":2.14},{"Grade_Clean":"A-","cases":33,"avg_score":2.7},{"Grade_Clean":"A","cases":19,"avg_score":2.21},{"Grade_Clean":"A+","cases":18,"avg_score":2.44},{"Grade_Clean":"C","cases":15,"avg_score":1.93},{"Grade_Clean":"D+","cases":14,"avg_score":2.0},{"Grade_Clean":"C-","cases":12,"avg_score":2.83},{"Grade_Clean":"D","cases":1,"avg_score":6.0},{"Grade_Clean":"F","cases":1,"avg_score":1.0}],"by_firm_type":[{"Firm Type":"Institutional Buy-Side","cases":104,"avg_score":2.72,"pct_hard":47.1},{"Firm Type":"Wealth","cases":98,"avg_score":2.39,"pct_hard":56.1},{"Firm Type":"Dealmakers","cases":73,"avg_score":2.36,"pct_hard":58.9}],"firm_segment_matrix":{"labels_row":["Core","SMB","SMB Growth","Strategic"],"rows":[{"name":"Dealmakers","scores":[1.93,2.0,3.0,2.81],"counts":[27,9,4,32]},{"name":"Inst. Buy-Side","scores":[3.15,3.46,2.6,2.31],"counts":[27,13,5,58]},{"name":"Wealth","scores":[1.89,3.0,4.0,2.68],"counts":[38,4,2,53]},{"name":"Partnerships","scores":[null,2.0,null,null],"counts":[0,3,0,1]}]},"theme_counts":{"UX & Navigation":26,"Data quality":11,"Performance / speed":9,"Bloomberg comparison":7,"Other vendor comparison":7,"Search & discoverability":6,"Support & service":6,"Pricing":4,"Charting":3,"Documentation":3,"Authentication":1},"top_main_accounts":[{"Account Name":"Banque Lombard Odier & Cie SA (Main) - Geneva (7247)","cases":6,"avg_score":1.83,"team":"France Client Consulting"},{"Account Name":"aberdeen - London (6140)","cases":6,"avg_score":2.17,"team":"United Kingdom Client Consulting"},{"Account Name":"UBS Asset Management - London (7288)","cases":5,"avg_score":2.4,"team":"United Kingdom Client Consulting"},{"Account Name":"Raymond James Wealth Management Limited - London (988938)","cases":5,"avg_score":3.8,"team":"United Kingdom Client Consulting"},{"Account Name":"aberdeen (Main) - Edinburgh, Scotland (3669)","cases":5,"avg_score":2.0,"team":"United Kingdom Client Consulting"},{"Account Name":"EFG Bank - Zurich (1427817)","cases":4,"avg_score":1.0,"team":"Germany Client Consulting"},{"Account Name":"UBS Global Asset Management - Zurich (476634)","cases":4,"avg_score":1.5,"team":"Germany Client Consulting"},{"Account Name":"Raymond James Wealth Management Limited - Bournemouth (2930375)","cases":4,"avg_score":0.5,"team":"United Kingdom Client Consulting"},{"Account Name":"Comgest S.A. (Main) - Paris (97591)","cases":4,"avg_score":2.25,"team":"France Client Consulting"},{"Account Name":"Citigroup Private Bank (London, 33 Canada Sq) - London (846297)","cases":3,"avg_score":0.67,"team":"United Kingdom Client Consulting"},{"Account Name":"JPMorgan Chase & Co. (Bank Street) - London (4719)","cases":3,"avg_score":1.67,"team":"United Kingdom Client Consulting"},{"Account Name":"Canaccord Genuity Wealth Limited (Main) - London (604561)","cases":3,"avg_score":0.0,"team":"United Kingdom Client Consulting"},{"Account Name":"Berner Kantonalbank AG (Main) - Bern (165900)","cases":3,"avg_score":2.0,"team":"Germany Client Consulting"},{"Account Name":"Citi Private Bank - Canada Square - London (595130)","cases":3,"avg_score":2.67,"team":"United Kingdom Client Consulting"},{"Account Name":"Nomura International PLC (Main) - London (489595)","cases":3,"avg_score":1.0,"team":"United Kingdom Client Consulting"},{"Account Name":"Marchant MC Ltd (Main) - London (674302)","cases":3,"avg_score":2.0,"team":"EMEA Customer Experience"},{"Account Name":"Rathbones Group Plc (Main) - London (4258)","cases":3,"avg_score":0.0,"team":"United Kingdom Client Consulting"},{"Account Name":"Raymond James Wealth Management Limited - Edinburgh (1035849)","cases":3,"avg_score":1.33,"team":"United Kingdom Client Consulting"},{"Account Name":"UBS - London, GB - London (7438)","cases":3,"avg_score":1.0,"team":"United Kingdom Client Consulting"},{"Account Name":"LGT Wealth Management UK LLP (Main) - London (492558)","cases":3,"avg_score":0.67,"team":"United Kingdom Client Consulting"}],"top_enterprises":[{"Enterprise Account":"Raymond James Financial, Inc. (ENTERPRISE - 1895922)","cases":24,"avg_score":2.33},{"Enterprise Account":"UBS (ENTERPRISE - 1073313)","cases":16,"avg_score":2.25},{"Enterprise Account":"abrdn (ENTERPRISE - 1073352)","cases":11,"avg_score":2.09},{"Enterprise Account":"Lombard (ENTERPRISE - 1073323)","cases":10,"avg_score":2.3},{"Enterprise Account":"Citigroup (ENTERPRISE - 1073301)","cases":9,"avg_score":2.33},{"Enterprise Account":"Rathbones (ENTERPRISE - 3158832)","cases":7,"avg_score":3.29},{"Enterprise Account":"Rothschild (ENTERPRISE-1648332)","cases":6,"avg_score":3.17},{"Enterprise Account":"LGT Group (ENTERPRISE - 1901046)","cases":6,"avg_score":0.83},{"Enterprise Account":"JP Morgan (ENTERPRISE - 1073308)","cases":6,"avg_score":2.67},{"Enterprise Account":"Credit Agricole (ENTERPRISE - 1073351)","cases":6,"avg_score":4.0},{"Enterprise Account":"BNP Paribas (ENTERPRISE - 1073273)","cases":5,"avg_score":4.4},{"Enterprise Account":"EFG Bank (ENTERPRISE - 1675999)","cases":5,"avg_score":1.4},{"Enterprise Account":"Canaccord Genuity Group (ENTERPRISE - 2771741)","cases":4,"avg_score":0.75},{"Enterprise Account":"Nomura (ENTERPRISE - 1073280)","cases":3,"avg_score":1.0},{"Enterprise Account":"Franklin Templeton (ENTERPRISE - 1073305)","cases":3,"avg_score":1.67}],"resolution_breakdown":{"Substantive follow-up":133,"No resolution logged":77,"Client did not respond":52},"open_cases":{"total_open":81,"over_60d":42,"over_90d":35},"verbatims":[{"score":6,"comment":"Search function very bad, difficult to find relevant market data. Offset by positive experiences with PA reports","account":"Univest Company B.V. (Main) - Rotterdam (100881)","team":"Benelux Client Consulting","segment":"Core","tier":"Tier 1","grade":"B","themes":["Search & discoverability"],"date":"2025-10"},{"score":2,"comment":"Many technical bugs. Significantly less user friendly than Bloomberg","account":"Comgest S.A. (Main) - Paris (97591)","team":"France Client Consulting","segment":"Strategic","tier":"Tier 2","grade":"A-","themes":["UX & Navigation","Bloomberg comparison"],"date":"2026-03"},{"score":0,"comment":"complicated, especially compared to Bloomberg, hard to find stuff, no logical search function","account":"Banque Lombard Odier & Cie SA (Main) - Geneva (7247)","team":"France Client Consulting","segment":"Core","tier":"Tier 3","grade":"D+","themes":["UX & Navigation","Bloomberg comparison","Search & discoverability"],"date":"2025-10"},{"score":0,"comment":"much worse and less intuitive than bloomberg","account":"JPM Private Bank - Chemin de la Voie-Creuse - Geneva (1706726)","team":"France Client Consulting","segment":"Strategic","tier":"Tier 3","grade":"D+","themes":["UX & Navigation","Bloomberg comparison"],"date":"2026-03"},{"score":0,"comment":"poor quality","account":"Berner Kantonalbank AG (Main) - Bern (165900)","team":"Germany Client Consulting","segment":"Core","tier":"Tier 3","grade":"B","themes":[],"date":"2026-01"},{"score":3,"comment":"data quality issues. many data points cost extra","account":"UBS Global Asset Management  - Zurich (476634)","team":"Germany Client Consulting","segment":"Strategic","tier":"Tier 2","grade":"A","themes":["Data quality","Pricing"],"date":"2025-12"},{"score":0,"comment":"Bloomberg is better (e.g. charting function etc.)","account":"UBS Global Asset Management  - Zurich (476634)","team":"Germany Client Consulting","segment":"Strategic","tier":"Tier 2","grade":"A","themes":["Bloomberg comparison","Charting"],"date":"2025-10"},{"score":0,"comment":"Super legacy, no documentation on how to use. Good data and analytics. Excel add-in could be improved","account":"Nordic Capital Advisory GmbH - Frankfurt (589036)","team":"Germany Client Consulting","segment":"Core","tier":"Tier 3","grade":"D+","themes":["Documentation"],"date":"2026-01"},{"score":2,"comment":"The platform is extremely slow and not user friendly in terms of speed","account":"First Abu Dhabi Bank (Main) - Abu Dhabi (325249)","team":"MEA Client Consulting","segment":"Core","tier":"Tier 4","grade":"B-","themes":["UX & Navigation","Performance / speed"],"date":"2025-09"},{"score":6,"comment":"not very intuitive, still learning, difficult to just 'pull up' info upon request.","account":"DBS Bank Dubai - Dubai (672420)","team":"MEA Client Consulting","segment":"Strategic","tier":"Tier 4","grade":"D","themes":["UX & Navigation","Documentation"],"date":"2026-04"},{"score":2,"comment":"Factset is hard work","account":"Old Mutual MacroSolutions - Cape Town (999187)","team":"MEA Client Consulting","segment":"Strategic","tier":"Tier 2","grade":"A-","themes":[],"date":"2026-03"},{"score":5,"comment":"Your charting tool is very difficult to use. I used to use bloomberg and Factset is not easy to use","account":"Harmony Gold Mining Company Ltd (Main) - Johannesburg (2143834)","team":"MEA Client Consulting","segment":"SMB Growth","tier":"Tier 3","grade":"C-","themes":["UX & Navigation","Bloomberg comparison","Charting"],"date":"2026-02"},{"score":6,"comment":"Inconsistent and inaccurate data classifications, lack of granularity","account":"Kiltearn Partners LLP (Main) - Edinburgh (599269)","team":"United Kingdom Client Consulting","segment":"Core","tier":"Tier 3","grade":"A-","themes":["Data quality"],"date":"2026-04"},{"score":3,"comment":"difficult to navigate around","account":"Raymond James Wealth Management Limited - London (988938)","team":"United Kingdom Client Consulting","segment":"Strategic","tier":"Tier 3","grade":"B+","themes":["UX & Navigation"],"date":"2026-03"},{"score":0,"comment":"clunky and difficult to use and find information","account":"Navera Investment Management Limited (Main) - London (808037)","team":"United Kingdom Client Consulting","segment":"Core","tier":"Tier 3","grade":"A","themes":["UX & Navigation","Search & discoverability"],"date":"2026-02"},{"score":0,"comment":"The workstation never works","account":"Nomura International PLC (Main) - London (489595)","team":"United Kingdom Client Consulting","segment":"Strategic","tier":"Tier 4","grade":"C+","themes":["Performance / speed"],"date":"2026-01"},{"score":0,"comment":"Always this multifactor authentication ... wastes my time...if I am on a call and have to get in quickly it is BAD.","account":"Nomura International PLC (Main) - London (489595)","team":"United Kingdom Client Consulting","segment":"Strategic","tier":"Tier 4","grade":"C+","themes":["Authentication"],"date":"2025-11"},{"score":0,"comment":"I rather use Yahoo Finance","account":"Fiera Capital (UK) Limited  (Main) - London (111108)","team":"United Kingdom Client Consulting","segment":"Strategic","tier":"Tier 3","grade":"A-","themes":["Other vendor comparison"],"date":"2026-02"},{"score":5,"comment":"poor customer service + clunky charts","account":"Mondrian Investment Partners Limited (Main) - London (207207)","team":"United Kingdom Client Consulting","segment":"Core","tier":"Tier 2","grade":"B+","themes":["UX & Navigation","Support & service"],"date":"2025-11"},{"score":5,"comment":"New updates step backwards.","account":"Panmure Liberum (Main) - London (462434)","team":"United Kingdom Client Consulting","segment":"Core","tier":"Tier 2","grade":"B+","themes":[],"date":"2025-11"},{"score":0,"comment":"It is useless","account":"Raymond James Investment Services Limited (Main) - London (587653)","team":"United Kingdom Client Consulting","segment":"Strategic","tier":"Tier 3","grade":"B","themes":["UX & Navigation"],"date":"2025-11"},{"score":0,"comment":"Slow, often has inaccuracies, and clunky to use. Bloomberg is much better.","account":"Longview Partners (Main) - London (461759)","team":"United Kingdom Client Consulting","segment":"Core","tier":"Tier 3","grade":"A-","themes":["UX & Navigation","Bloomberg comparison","Performance / speed"],"date":"2025-11"},{"score":4,"comment":"Having been a client since 1996, sad to say Bloomberg is now better!","account":"Kuwait Investment Office (KIO) (Main) - London (1498)","team":"United Kingdom Client Consulting","segment":"Core","tier":"Tier 1","grade":"C-","themes":["Bloomberg comparison"],"date":"2026-01"},{"score":4,"comment":"mismatching in data and dont have start and %changes in most graphs - only showed the trend and end value makes it not that user-friendly","account":"aberdeen - London (6140)","team":"United Kingdom Client Consulting","segment":"Strategic","tier":"Tier 3","grade":"B-","themes":["UX & Navigation"],"date":"2026-03"},{"score":0,"comment":"Can't find basic features like YTD share price change","account":"aberdeen - London (6140)","team":"United Kingdom Client Consulting","segment":"Strategic","tier":"Tier 2","grade":"B-","themes":["Search & discoverability","Pricing"],"date":"2026-01"},{"score":3,"comment":"lack of fixed income data, complicated support model","account":"aberdeen (Main) - Edinburgh, Scotland (3669)","team":"United Kingdom Client Consulting","segment":"Strategic","tier":"Tier 3","grade":"B-","themes":["UX & Navigation","Data quality","Support & service"],"date":"2026-03"},{"score":0,"comment":"No comment  Charting reverts to the default template live fund is not live","account":"aberdeen (Main) - Edinburgh, Scotland (3669)","team":"United Kingdom Client Consulting","segment":"Strategic","tier":"Tier 2","grade":"B-","themes":["Charting"],"date":"2026-02"},{"score":6,"comment":"Very laggy and slow","account":"Greenhill London - London (1650)","team":"United Kingdom Client Consulting","segment":"Strategic","tier":"Tier 4","grade":"C+","themes":["Performance / speed"],"date":"2025-09"},{"score":0,"comment":"never works","account":"JPMorgan Chase & Co. (Bank Street) - London (4719)","team":"United Kingdom Client Consulting","segment":"N/A","tier":"N/A","grade":"B-","themes":["Performance / speed"],"date":"2025-09"},{"score":0,"comment":"Over priced, unstable and lacking in key data sets","account":"Jefferies International Limited - London (274509)","team":"United Kingdom Client Consulting","segment":"Strategic","tier":"Tier 2","grade":"A-","themes":["Data quality","Pricing"],"date":"2025-10"},{"score":2,"comment":"Support is poor, particularly the chat function","account":"The Vanguard Group, Inc. - London (618110)","team":"United Kingdom Client Consulting","segment":"Strategic","tier":"Tier 3","grade":"C+","themes":["Support & service"],"date":"2025-11"},{"score":3,"comment":"ongoing slowness and navigation issues","account":"Citi Private Bank - Canada Square - London (595130)","team":"United Kingdom Client Consulting","segment":"Strategic","tier":"Tier 3","grade":"C","themes":["UX & Navigation","Performance / speed"],"date":"2025-11"},{"score":0,"comment":"it is worse than the CNBC app","account":"Citigroup Private Bank (London, 33 Canada Sq) - London (846297)","team":"United Kingdom Client Consulting","segment":"Strategic","tier":"Tier 1","grade":"C","themes":["Other vendor comparison"],"date":"2025-09"},{"score":0,"comment":"it is worse than the CNBC app","account":"Citigroup Private Bank (London, 33 Canada Sq) - London (846297)","team":"United Kingdom Client Consulting","segment":"Strategic","tier":"Tier 1","grade":"C","themes":["Other vendor comparison"],"date":"2025-09"},{"score":3,"comment":"it's too hard, too slow, things are not where I'm expecting, and I have no idea how to construct a system that makes it work for what I need.","account":"Canaccord Genuity - London (1035251)","team":"United Kingdom Client Consulting","segment":"Core","tier":"Tier 3","grade":"A-","themes":["UX & Navigation","Performance / speed"],"date":"2025-09"},{"score":2,"comment":"Difficult to navigate at times","account":"Raymond James Wealth Management Limited - Edinburgh (1035849)","team":"United Kingdom Client Consulting","segment":"Strategic","tier":"Tier 3","grade":"B","themes":["UX & Navigation"],"date":"2025-10"},{"score":0,"comment":"we all have it","account":"Atlas Infrastructure UK - London (1238585)","team":"United Kingdom Client Consulting","segment":"Core","tier":"Tier 2","grade":"B+","themes":[],"date":"2026-01"},{"score":0,"comment":"not at all intuitive, not user friendly","account":"The Capital Group Ltd.  - London (1923746)","team":"United Kingdom Client Consulting","segment":"Strategic","tier":"Tier 3","grade":"C+","themes":["UX & Navigation"],"date":"2026-03"},{"score":0,"comment":"difficult to use, expensive, other offerings to choose from. Factset doesn't seem interested in solving any of its issues. I have never been contacted by a rep to make sure things are ok.","account":"Oakmount Capital (Main) - London (2387161)","team":"United Kingdom Client Consulting","segment":"SMB Growth","tier":"Tier 2","grade":"A+","themes":["UX & Navigation","Other vendor comparison","Pricing","Support & service"],"date":"2026-01"},{"score":0,"comment":"Because its not very easy to find what you are looking for and its clunky to use compared other systems that are available. Putting Alarms on Charts is not straight forward; some Investment Trusts are missing altogether; Cant see i...","account":"Raymond James Wealth Management Limited - Tunbridge Wells (2895874)","team":"United Kingdom Client Consulting","segment":"Strategic","tier":"Tier 3","grade":"A","themes":["UX & Navigation","Other vendor comparison","Data quality","Search & discoverability"],"date":"2025-11"},{"score":1,"comment":"I don't trust the prices shown and the charts are unreliable, and my screen lags and I need to 'reload' each page I visit.","account":"Raymond James Wealth Management Limited - Bournemouth (2930375)","team":"United Kingdom Client Consulting","segment":"Strategic","tier":"Tier 3","grade":"A-","themes":["Data quality"],"date":"2026-03"},{"score":0,"comment":"poor data, poor interface, poor support","account":"Raymond James Wealth Management Limited - Bournemouth (2930375)","team":"United Kingdom Client Consulting","segment":"Strategic","tier":"Tier 3","grade":"A-","themes":["UX & Navigation","Data quality","Support & service"],"date":"2025-12"},{"score":0,"comment":"Too complicated","account":"Raymond James Monument - Newcastle (2935344)","team":"United Kingdom Client Consulting","segment":"Strategic","tier":"Tier 3","grade":"B","themes":["UX & Navigation"],"date":"2025-12"},{"score":6,"comment":"SA is great but a seemingly closed system.  Dow Jones and Reuters NOT available news feeds.","account":"UBS Wealth Management - Dallas (Wire Code - 1r) (3004141)","team":"United Kingdom Client Consulting","segment":"Strategic","tier":"Tier 3","grade":"B","themes":["Other vendor comparison"],"date":"2025-09"},{"score":3,"comment":"user interface is poor","account":"UniCredit Markets and Invesment Banking - London (531932)","team":"United Kingdom Middle Markets GBB Sales","segment":"Strategic","tier":"Tier 2","grade":"B-","themes":["UX & Navigation"],"date":"2025-09"},{"score":2,"comment":"UX","account":"Moody's Investors Service - Paris (494082)","team":"EMEA SP&A Client Consulting","segment":"Strategic","tier":"Tier 3","grade":"C","themes":[],"date":"2026-03"},{"score":0,"comment":"It is not user-friendly and information available on one part of the site is not shown on other parts of the site.","account":"MT Newswires - Spain (2846027)","team":"EMEA SP&A Client Consulting","segment":"SMB","tier":"Tier 2","grade":"C-","themes":["UX & Navigation"],"date":"2026-02"},{"score":6,"comment":"The search of Identifiers and Key ratios is not so good as by other vendors","account":"Wiener Stadtwerke Holding (Main) - Wien (895743)","team":"EMEA Customer Experience","segment":"SMB","tier":"Tier 2","grade":"B","themes":["Other vendor comparison","Search & discoverability"],"date":"2025-09"},{"score":3,"comment":"FactSet remains an over-engineered black box with poor customer service (not the help desk although they need more training/knowledge but account managers have zero accountability in general and turnover is high)","account":"Marchant MC Ltd (Main) - London (674302)","team":"EMEA Customer Experience","segment":"SMB","tier":"Tier 3","grade":"A+","themes":["Support & service","Documentation"],"date":"2025-09"},{"score":0,"comment":"poor quality of data, very slow","account":"Petrus Advisers (Main) - London (1053066)","team":"EMEA Customer Experience","segment":"SMB","tier":"Tier 3","grade":"A+","themes":["Performance / speed","Data quality"],"date":"2025-09"},{"score":3,"comment":"Data quality for company financials is poor, at least as available in the API. Really bad.","account":"BWM AG (Main) - Wilen b. Wollerau (517929)","team":"EMEA Customer Experience","segment":"SMB","tier":"Tier 2","grade":"A-","themes":["Data quality"],"date":"2026-02"},{"score":0,"comment":"System isn't working well today, glitchy and some functionality missing","account":"Arbrook Investors (Main) - Esher (1312405)","team":"EMEA Customer Experience","segment":"Core","tier":"Tier 3","grade":"A","themes":["Data quality"],"date":"2025-12"},{"score":2,"comment":"clunky, 80% of the dats/information it provides is noise and not relevant","account":"Fyrkloever-Invest - Helsinki (1746161)","team":"EMEA Customer Experience","segment":"Core","tier":"Tier 3","grade":"A+","themes":["UX & Navigation","Data quality"],"date":"2026-04"},{"score":0,"comment":"really bad interface; very unintuitive, difficult to navigate","account":"GuardCap Asset Management (Main) - London (1850157)","team":"EMEA Customer Experience","segment":"SMB Growth","tier":"Tier 3","grade":"A-","themes":["UX & Navigation"],"date":"2026-04"},{"score":0,"comment":"old technology, complex user interface","account":"Stefan Hartmann Consulting (Main) - Koenigstein (2067916)","team":"EMEA Customer Experience","segment":"SMB","tier":"Tier 3","grade":"A","themes":["UX & Navigation"],"date":"2025-12"},{"score":1,"comment":"While a lot of good data, the application breaks down all the time, and takes ages to load.","account":"Bonnier Capital AB (Main) - Stockholm (2272399)","team":"EMEA Customer Experience","segment":"SMB Growth","tier":"Tier 2","grade":"D+","themes":["Performance / speed"],"date":"2025-11"},{"score":1,"comment":"Nothing works","account":"Bonnier Capital AB (Main) - Stockholm (2272399)","team":"EMEA Customer Experience","segment":"SMB Growth","tier":"Tier 2","grade":"D+","themes":[],"date":"2025-10"}],"by_team_firmtype":{"All EMEA":{"by_firm_type":[{"Firm Type":"Institutional Buy-Side","cases":104,"avg_score":2.72,"pct_hard":47.1},{"Firm Type":"Wealth","cases":98,"avg_score":2.39,"pct_hard":56.1},{"Firm Type":"Dealmakers","cases":73,"avg_score":2.36,"pct_hard":58.9},{"Firm Type":"Partnerships","cases":4,"avg_score":2.0,"pct_hard":75.0}],"firm_segment_matrix":{"labels_row":["Core","SMB","SMB Growth","Strategic"],"rows":[{"name":"Dealmakers","scores":[1.93,2.0,3.0,2.81],"counts":[27,9,4,32]},{"name":"Institutional Buy-Side","scores":[3.15,3.46,2.6,2.31],"counts":[27,13,5,58]},{"name":"Partnerships","scores":[null,2.0,null,2.0],"counts":[0,3,0,1]},{"name":"Wealth","scores":[1.89,3.0,4.0,2.68],"counts":[38,4,2,53]}]}},"UK":{"by_firm_type":[{"Firm Type":"Institutional Buy-Side","cases":48,"avg_score":2.12,"pct_hard":58.3},{"Firm Type":"Wealth","cases":55,"avg_score":2.27,"pct_hard":58.2},{"Firm Type":"Dealmakers","cases":37,"avg_score":2.49,"pct_hard":51.4}],"firm_segment_matrix":{"labels_row":["Core","SMB","SMB Growth","Strategic"],"rows":[{"name":"Institutional Buy-Side","scores":[2.43,null,1.0,2.06],"counts":[14,0,2,32]},{"name":"Wealth","scores":[1.38,null,null,2.61],"counts":[13,0,0,41]},{"name":"Dealmakers","scores":[2.29,null,null,2.62],"counts":[14,0,1,21]}]}},"France":{"by_firm_type":[{"Firm Type":"Institutional Buy-Side","cases":12,"avg_score":2.92,"pct_hard":50.0},{"Firm Type":"Wealth","cases":16,"avg_score":2.5,"pct_hard":56.2},{"Firm Type":"Dealmakers","cases":5,"avg_score":3.4,"pct_hard":40.0}],"firm_segment_matrix":{"labels_row":["Core","SMB","SMB Growth","Strategic"],"rows":[{"name":"Institutional Buy-Side","scores":[null,null,null,2.64],"counts":[0,0,0,11]},{"name":"Wealth","scores":[2.33,null,null,3.0],"counts":[12,0,0,4]},{"name":"Dealmakers","scores":[null,3.0,null,3.67],"counts":[0,2,0,3]}]}},"Germany":{"by_firm_type":[{"Firm Type":"Institutional Buy-Side","cases":9,"avg_score":1.89,"pct_hard":55.6},{"Firm Type":"Wealth","cases":14,"avg_score":1.43,"pct_hard":71.4},{"Firm Type":"Dealmakers","cases":5,"avg_score":2.8,"pct_hard":60.0}],"firm_segment_matrix":{"labels_row":["Core","SMB","SMB Growth","Strategic"],"rows":[{"name":"Institutional Buy-Side","scores":[null,null,null,1.89],"counts":[0,0,0,9]},{"name":"Wealth","scores":[1.6,null,null,1.0],"counts":[10,0,0,4]},{"name":"Dealmakers","scores":[2.5,null,null,3.0],"counts":[2,0,0,3]}]}},"Southern Europe":{"by_firm_type":[{"Firm Type":"Institutional Buy-Side","cases":4,"avg_score":2.25,"pct_hard":50.0},{"Firm Type":"Wealth","cases":3,"avg_score":2.33,"pct_hard":66.7},{"Firm Type":"Dealmakers","cases":4,"avg_score":3.0,"pct_hard":50.0}],"firm_segment_matrix":{"labels_row":["Core","SMB","SMB Growth","Strategic"],"rows":[{"name":"Institutional Buy-Side","scores":[1.0,null,null,4.0],"counts":[3,1,0,0]},{"name":"Wealth","scores":[2.0,null,null,3.67],"counts":[1,0,0,2]},{"name":"Dealmakers","scores":[0.5,null,null,5.0],"counts":[2,0,0,2]}]}},"EMEA Customer Experience":{"by_firm_type":[{"Firm Type":"Institutional Buy-Side","cases":12,"avg_score":2.5,"pct_hard":41.7},{"Firm Type":"Wealth","cases":6,"avg_score":3.33,"pct_hard":50.0},{"Firm Type":"Dealmakers","cases":12,"avg_score":1.67,"pct_hard":83.3}],"firm_segment_matrix":{"labels_row":["Core","SMB","SMB Growth","Strategic"],"rows":[{"name":"Institutional Buy-Side","scores":[null,2.78,2.5,null],"counts":[1,9,2,0]},{"name":"Wealth","scores":[null,3.0,4.0,null],"counts":[0,4,2,0]},{"name":"Dealmakers","scores":[1.0,1.71,1.0,null],"counts":[2,7,2,1]}]}},"MEA":{"by_firm_type":[{"Firm Type":"Institutional Buy-Side","cases":8,"avg_score":4.0,"pct_hard":25.0},{"Firm Type":"Dealmakers","cases":3,"avg_score":3.33,"pct_hard":33.3}],"firm_segment_matrix":{"labels_row":["Core","SMB","SMB Growth","Strategic"],"rows":[{"name":"Institutional Buy-Side","scores":[4.25,4.0,null,3.5],"counts":[4,2,0,2]},{"name":"Dealmakers","scores":[null,null,null,null],"counts":[1,0,1,1]}]}},"Nordic":{"by_firm_type":[{"Firm Type":"Institutional Buy-Side","cases":4,"avg_score":5.0,"pct_hard":0.0},{"Firm Type":"Dealmakers","cases":5,"avg_score":1.8,"pct_hard":80.0}],"firm_segment_matrix":{"labels_row":["Core","SMB","SMB Growth","Strategic"],"rows":[{"name":"Institutional Buy-Side","scores":[5.5,null,null,null],"counts":[2,0,1,1]},{"name":"Dealmakers","scores":[1.8,null,null,null],"counts":[5,0,0,0]}]}},"Benelux":{"by_firm_type":[{"Firm Type":"Institutional Buy-Side","cases":6,"avg_score":5.17,"pct_hard":0.0},{"Firm Type":"Wealth","cases":2,"avg_score":4.5,"pct_hard":0.0}],"firm_segment_matrix":{"labels_row":["Core","SMB","SMB Growth","Strategic"],"rows":[{"name":"Institutional Buy-Side","scores":[5.25,null,null,5.0],"counts":[4,0,0,2]},{"name":"Wealth","scores":[4.5,null,null,null],"counts":[2,0,0,0]}]}},"EMEA SP&A Client Consulting":{"by_firm_type":[{"Firm Type":"Partnerships","cases":4,"avg_score":2.0,"pct_hard":75.0}],"firm_segment_matrix":{"labels_row":["Core","SMB","SMB Growth","Strategic"],"rows":[{"name":"Partnerships","scores":[null,1.33,null,2.0],"counts":[0,3,0,1]}]}}}};
+  const ENGAGEMENT = {"monthly":[{"month":"2025-09","meetings_wd":120.1,"calls_wd":73.8,"nps_avg":2.78,"dissatisfied":17,"troubleshooting":57,"entertainment":66,"new_user_training":244},{"month":"2025-10","meetings_wd":131.6,"calls_wd":90.4,"nps_avg":2.98,"dissatisfied":13,"troubleshooting":64,"entertainment":79,"new_user_training":216},{"month":"2025-11","meetings_wd":133.0,"calls_wd":92.6,"nps_avg":2.49,"dissatisfied":16,"troubleshooting":59,"entertainment":87,"new_user_training":190},{"month":"2025-12","meetings_wd":96.5,"calls_wd":73.2,"nps_avg":2.21,"dissatisfied":18,"troubleshooting":52,"entertainment":80,"new_user_training":118},{"month":"2026-01","meetings_wd":117.6,"calls_wd":95.1,"nps_avg":1.44,"dissatisfied":22,"troubleshooting":70,"entertainment":43,"new_user_training":235},{"month":"2026-02","meetings_wd":132.3,"calls_wd":91.6,"nps_avg":2.74,"dissatisfied":21,"troubleshooting":52,"entertainment":52,"new_user_training":185},{"month":"2026-03","meetings_wd":122.6,"calls_wd":78.2,"nps_avg":2.33,"dissatisfied":18,"troubleshooting":59,"entertainment":58,"new_user_training":181},{"month":"2026-04","meetings_wd":85.9,"calls_wd":48.8,"nps_avg":2.32,"dissatisfied":5,"troubleshooting":23,"entertainment":25,"new_user_training":66}]};
+
+// ========== FETCH ./data.json ON LOAD ==========
+(function() {
+  fetch('./data.json')
+    .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(parsed => {
+      const newData = parsed.DATA || parsed;
+      const newEng  = parsed.ENGAGEMENT || null;
+      Object.assign(DATA, newData);
+      if (newEng) Object.assign(ENGAGEMENT, newEng);
+      const badge = document.getElementById('dataBadge');
+      if (badge) { badge.textContent = '⟳ data.json loaded'; badge.classList.add('ok'); }
+      rebuildAll();
+    })
+    .catch(err => {
+      const badge = document.getElementById('dataBadge');
+      if (badge) { badge.textContent = '· embedded data'; badge.classList.add('local'); }
+      console.info('data.json not found — using embedded data.', err.message);
+    });
+})();
+
+// ========== REBUILD ORCHESTRATOR ==========
+function rebuildAll() {
+  ['histo','monthly','themeBars','segBars','tierBars','gradeBars',
+   'resBars','teamBarsUnified','firmTypeBars','engagementChart','firmSegMatrix'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = '';
+  });
+  const oldFb = document.querySelector('.firmtype-filter-bar');
+  if (oldFb) oldFb.remove();
+  buildHisto();
+  buildMonthly();
+  buildThemeBars();
+  buildSegBars();
+  buildTierBars();
+  buildGradeBars();
+  buildResBars();
+  buildTeamLollipop();
+  buildEngagementChart();
+  buildFirmTypeSection();
+  const chipEl = document.getElementById('themeChips');
+  if (chipEl) chipEl.innerHTML = '';
+  const vl = document.getElementById('verbList');
+  if (vl) vl.innerHTML = '';
+  initVerbatims();
+}
+
+// ========== ENGAGEMENT CHART ==========
+function buildEngagementChart() {
+    const el = document.getElementById('engagementChart');
+    if (!el) return;
+    const data = ENGAGEMENT.monthly;
+    const W = 1100, H = 380, pad = { l: 60, r: 80, t: 80, b: 50 };
+    const innerW = W - pad.l - pad.r;
+    const innerH = H - pad.t - pad.b;
+    const maxMeet = 150;
+    const maxNps  = 4;
+    const x  = i => pad.l + (i / (data.length - 1)) * innerW;
+    const yM = v => pad.t + innerH - (v / maxMeet) * innerH;
+    const yN = v => pad.t + innerH - (v / maxNps)  * innerH;
+
+    let svg = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" font-family="Inter Tight, sans-serif">`;
+    for (let i = 0; i <= 4; i++) {
+      const y = pad.t + (i / 4) * innerH;
+      svg += `<line x1="${pad.l}" y1="${y}" x2="${W - pad.r}" y2="${y}" stroke="#e8e3d6" stroke-width="1"/>`;
+    }
+    const x3 = x(3), x4 = x(4);
+    svg += `<rect x="${x3 - 36}" y="${pad.t - 10}" width="${x4 - x3 + 72}" height="${innerH + 10}" fill="#f5ecec" rx="2"/>`;
+    svg += `<text x="${(x3 + x4) / 2}" y="${pad.t - 18}" text-anchor="middle" font-size="10" fill="#8a2a2a" font-weight="700" letter-spacing="0.14em">THE DECEMBER → JANUARY SEQUENCE</text>`;
+    const callPts = data.map((d, i) => `${x(i)},${yM(d.calls_wd)}`).join(' ');
+    svg += `<polyline points="${callPts}" fill="none" stroke="#9a7b2c" stroke-width="1.5" stroke-dasharray="4,4" opacity="0.6"/>`;
+    data.forEach((d, i) => { svg += `<circle cx="${x(i)}" cy="${yM(d.calls_wd)}" r="3" fill="#9a7b2c" opacity="0.6"/>`; });
+    const meetPts = data.map((d, i) => `${x(i)},${yM(d.meetings_wd)}`).join(' ');
+    svg += `<polyline points="${meetPts}" fill="none" stroke="#1f4e5f" stroke-width="2.5"/>`;
+    data.forEach((d, i) => {
+      svg += `<circle cx="${x(i)}" cy="${yM(d.meetings_wd)}" r="4" fill="#1f4e5f"/>`;
+      const showLabel = [0, 3, 4, 7].includes(i);
+      if (showLabel) {
+        const prevMeet = i > 0 ? data[i-1].meetings_wd : null;
+        const delta = prevMeet !== null ? ((d.meetings_wd - prevMeet) / prevMeet * 100).toFixed(0) : null;
+        const deltaStr = delta !== null ? ` (${delta > 0 ? '+' : ''}${delta}%)` : '';
+        const labelColor = delta !== null && delta < 0 ? '#8a2a2a' : '#1f4e5f';
+        const ly = yM(d.meetings_wd) - 13;
+        svg += `<text x="${x(i)}" y="${ly}" text-anchor="middle" font-size="11" fill="${labelColor}" font-weight="700">${d.meetings_wd.toFixed(0)}${deltaStr}</text>`;
+      }
+    });
+    const npsPts = data.map((d, i) => `${x(i)},${yN(d.nps_avg)}`).join(' ');
+    svg += `<polyline points="${npsPts}" fill="none" stroke="#8a2a2a" stroke-width="3"/>`;
+    data.forEach((d, i) => {
+      const npsY  = yN(d.nps_avg);
+      const meetY = yM(d.meetings_wd);
+      const callY = yM(d.calls_wd);
+      const tooClose = Math.abs(npsY - meetY) < 28 || Math.abs(npsY - callY) < 22;
+      const oy = tooClose ? 22 : -14;
+      svg += `<circle cx="${x(i)}" cy="${npsY}" r="4.5" fill="#8a2a2a"/>`;
+      svg += `<text x="${x(i)}" y="${npsY + oy}" text-anchor="middle" font-size="11" font-family="Fraunces, Georgia, serif" font-style="italic" fill="#8a2a2a" font-weight="700">${d.nps_avg.toFixed(2)}</text>`;
+    });
+    const janX = x(4), janNpsY = yN(data[4].nps_avg);
+    svg += `<line x1="${janX}" y1="${janNpsY + 8}" x2="${janX}" y2="${janNpsY + 38}" stroke="#8a2a2a" stroke-width="1.2"/>`;
+    svg += `<text x="${janX}" y="${janNpsY + 52}" text-anchor="middle" font-size="10" fill="#8a2a2a" font-weight="700" letter-spacing="0.06em">NPS FLOOR</text>`;
+    const decX = x(3), arrowY = pad.t + innerH - 18;
+    svg += `<defs><marker id="arr" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#8a2a2a"/></marker></defs>`;
+    svg += `<text x="${(decX + janX) / 2}" y="${arrowY - 8}" text-anchor="middle" font-size="10" fill="#8a2a2a" font-style="italic">engagement drop → score drop (lagged)</text>`;
+    svg += `<line x1="${decX + 10}" y1="${arrowY}" x2="${janX - 10}" y2="${arrowY}" stroke="#8a2a2a" stroke-width="1.5" marker-end="url(#arr)"/>`;
+    data.forEach((d, i) => {
+      const [yr, mo] = d.month.split('-');
+      const mName = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][parseInt(mo) - 1];
+      svg += `<text x="${x(i)}" y="${H - pad.b + 22}" text-anchor="middle" font-size="11" fill="#6b7688">${mName} ${yr.slice(2)}</text>`;
+    });
+    svg += `<g transform="translate(${pad.l}, 22)">
+      <line x1="0" y1="0" x2="20" y2="0" stroke="#1f4e5f" stroke-width="2.5"/>
+      <circle cx="10" cy="0" r="3.5" fill="#1f4e5f"/>
+      <text x="26" y="4" font-size="11" fill="#3a4453">Meetings / working day</text>
+      <line x1="210" y1="0" x2="230" y2="0" stroke="#9a7b2c" stroke-width="1.5" stroke-dasharray="4,4"/>
+      <circle cx="220" cy="0" r="3" fill="#9a7b2c" opacity="0.7"/>
+      <text x="236" y="4" font-size="11" fill="#3a4453">Calls / working day</text>
+      <line x1="390" y1="0" x2="410" y2="0" stroke="#8a2a2a" stroke-width="3"/>
+      <circle cx="400" cy="0" r="4" fill="#8a2a2a"/>
+      <text x="416" y="4" font-size="11" fill="#3a4453">Mean NPS score (axis 0-4)</text>
+    </g>`;
+    svg += '</svg>';
+    el.innerHTML = svg;
+}
+buildEngagementChart();
+
+// ========== HISTOGRAM ==========
+function buildHisto() {
+const el = document.getElementById('histo');
+if (!el || !DATA || !DATA.score_distribution) return;
+const src = DATA.score_distribution;
+const dist = {0:0,1:0,2:0,3:0,4:0,5:0,6:0};
+for (const [k, v] of Object.entries(src)) {
+const bucket = Math.max(0, Math.min(6, Math.round(parseFloat(k))));
+dist[bucket] = (dist[bucket] || 0) + Number(v || 0);
+}
+const scores = [0,1,2,3,4,5,6];
+const max = Math.max(...scores.map(s => dist[s]));
+const maxPx = 200;
+el.innerHTML = '';
+scores.forEach(s => {
+const cnt = dist[s];
+const h = Math.max(4, Math.round((cnt / (max || 1)) * maxPx));
+const wrap = document.createElement('div');
+wrap.className = 'bar-wrap';
+wrap.innerHTML = `<div class="cnt">${cnt}</div><div class="bar ${s <= 3 ? 'bad' : 'mid'}" data-h="${h}" style="height:4px;"></div><div class="lbl">${s}</div>`;
+el.appendChild(wrap);
+});
+setTimeout(() => {
+el.querySelectorAll('.bar').forEach(b => { b.style.height = b.dataset.h + 'px'; });
+}, 50);
+}
+buildHisto();
+
+// ========== MONTHLY LINE CHART ==========
+function buildMonthly() {
+  const el = document.getElementById('monthly');
+  if (!el) return;
+  const data = DATA.monthly;
+  const W = 1100, H = 280, pad = { l: 50, r: 70, t: 50, b: 40 };
+  const innerW = W - pad.l - pad.r;
+  const innerH = H - pad.t - pad.b;
+  const maxN = Math.max(...data.map(d => d.n));
+  const maxAvg = 4;
+  const x = i => pad.l + (i / (data.length - 1)) * innerW;
+  const yN = v => pad.t + innerH - (v / maxN) * innerH;
+  const yA = v => pad.t + innerH - (v / maxAvg) * innerH;
+  const barW = innerW / data.length * 0.55;
+  let svg = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">`;
+  for (let i = 0; i <= 4; i++) {
+    const y = pad.t + (i/4) * innerH;
+    svg += `<line x1="${pad.l}" y1="${y}" x2="${W-pad.r}" y2="${y}" stroke="#e8e3d6" stroke-width="1"/>`;
+  }
+  data.forEach((d, i) => {
+    const h = (d.n / maxN) * innerH;
+    svg += `<rect x="${x(i) - barW/2}" y="${yN(d.n)}" width="${barW}" height="${h}" fill="#d9d3c4"/>`;
+    svg += `<text x="${x(i)}" y="${yN(d.n) - 6}" text-anchor="middle" font-size="11" font-family="Inter Tight" fill="#3a4453" font-weight="600">${d.n}</text>`;
+  });
+  const linePts = data.map((d,i) => `${x(i)},${yA(d.avg)}`).join(' ');
+  svg += `<polyline points="${linePts}" fill="none" stroke="#8a2a2a" stroke-width="2.5"/>`;
+  data.forEach((d,i) => {
+    const offsetY = Math.abs(yA(d.avg) - yN(d.n)) < 25 ? -22 : -12;
+    svg += `<circle cx="${x(i)}" cy="${yA(d.avg)}" r="4" fill="#8a2a2a"/>`;
+    svg += `<text x="${x(i)}" y="${yA(d.avg) + offsetY}" text-anchor="middle" font-size="11" font-family="Fraunces" font-style="italic" fill="#8a2a2a">${d.avg.toFixed(1)}</text>`;
+  });
+  data.forEach((d,i) => {
+    const [yr, mo] = d.Month.split('-');
+    const monthName = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][parseInt(mo)-1];
+    svg += `<text x="${x(i)}" y="${H - pad.b + 22}" text-anchor="middle" font-size="11" font-family="Inter Tight" fill="#6b7688">${monthName} ${yr.slice(2)}</text>`;
+  });
+  svg += `<g transform="translate(${pad.l}, 18)">
+    <rect x="0" y="0" width="12" height="12" fill="#d9d3c4"/>
+    <text x="18" y="10" font-size="11" fill="#3a4453" font-family="Inter Tight">New Detractor NPS</text>
+    <line x1="130" y1="6" x2="150" y2="6" stroke="#8a2a2a" stroke-width="2.5"/>
+    <circle cx="140" cy="6" r="3" fill="#8a2a2a"/>
+    <text x="158" y="10" font-size="11" fill="#3a4453" font-family="Inter Tight">Mean NPS score (axis 0-4)</text>
+  </g>`;
+  svg += '</svg>';
+  el.innerHTML = svg;
+}
+buildMonthly();
+
+  // ========== THEME BARS ==========
+  function buildThemeBars() {
+    const el = document.getElementById('themeBars');
+    if (!el) return;
+    el.innerHTML = '';
+    const themes = Object.entries(DATA.theme_counts).sort((a,b) => b[1] - a[1]);
+    const max = Math.max(...themes.map(t => t[1]));
+    themes.forEach(([name, cnt]) => {
+      const pct = (cnt / max) * 100;
+      const row = document.createElement('div');
+      row.className = 'bar-row';
+      row.innerHTML = `<div class="name">${name}</div><div class="track"><div class="fill" style="width:0%"></div></div><div class="val">${cnt}</div><div class="score">${((cnt/59)*100).toFixed(0)}%</div>`;
+      el.appendChild(row);
+      requestAnimationFrame(() => { row.querySelector('.fill').style.width = pct + '%'; });
+    });
+  }
+  buildThemeBars();
+
+  // ========== SEG / TIER / GRADE BARS ==========
+  function renderBars(elId, data, nameKey, color) {
+    const el = document.getElementById(elId);
+    const max = Math.max(...data.map(d => d.cases));
+    data.forEach(d => {
+      const pct = (d.cases / max) * 100;
+      const row = document.createElement('div');
+      row.className = 'bar-row';
+      row.style.gridTemplateColumns = '80px 1fr 40px 50px';
+      row.innerHTML = `<div class="name">${d[nameKey]}</div><div class="track"><div class="fill ${color==='dim'?'dim':''}" style="width:0%"></div></div><div class="val">${d.cases}</div><div class="score">${d.avg_score.toFixed(2)}</div>`;
+      el.appendChild(row);
+      requestAnimationFrame(() => { row.querySelector('.fill').style.width = pct + '%'; });
+    });
+  }
+  function buildSegBars(){document.getElementById('segBars').innerHTML='';renderBars('segBars', DATA.by_segment, 'Account Segment', 'accent');}
+  function buildTierBars(){document.getElementById('tierBars').innerHTML='';renderBars('tierBars', DATA.by_tier, 'User Tier', 'dim');}
+  function buildGradeBars(){document.getElementById('gradeBars').innerHTML='';renderBars('gradeBars', DATA.by_grade, 'Grade_Clean', 'dim');}
+  buildSegBars(); buildTierBars(); buildGradeBars();
+
+  // ========== RESOLUTION BARS ==========
+  function buildResBars() {
+    const el = document.getElementById('resBars');
+    if (!el) return;
+    el.innerHTML = '';
+    const data = Object.entries(DATA.resolution_breakdown).sort((a,b) => b[1] - a[1]);
+    const total = data.reduce((s,[,v]) => s+v, 0);
+    const max = Math.max(...data.map(d => d[1]));
+    data.forEach(([name, cnt]) => {
+      const pct = (cnt / max) * 100;
+      const pctTotal = ((cnt / total) * 100).toFixed(0);
+      const row = document.createElement('div');
+      row.className = 'bar-row';
+      row.style.gridTemplateColumns = '200px 1fr 50px 50px';
+      const isBad = name.includes('did not respond') || name.includes('No resolution');
+      row.innerHTML = `<div class="name">${name}</div><div class="track"><div class="fill ${isBad?'':'dim'}" style="width:0%"></div></div><div class="val">${cnt}</div><div class="score">${pctTotal}%</div>`;
+      el.appendChild(row);
+      requestAnimationFrame(() => { row.querySelector('.fill').style.width = pct + '%'; });
+    });
+  }
+  buildResBars();
+
+  // ========== VERBATIM EXPLORER ==========
+  function initVerbatims() {
+    const allThemes = Object.keys(DATA.theme_counts).sort((a,b) => DATA.theme_counts[b] - DATA.theme_counts[a]);
+    const chipEl = document.getElementById('themeChips');
+    if (!chipEl) return;
+    let activeThemes = new Set();
+    const allChip = document.createElement('span');
+    allChip.className = 'chip on';
+    allChip.textContent = 'All themes';
+    allChip.onclick = () => { activeThemes.clear(); updateChips(); renderVerbs(); };
+    chipEl.appendChild(allChip);
+    allThemes.forEach(t => {
+      const c = document.createElement('span');
+      c.className = 'chip';
+      c.textContent = t + ' · ' + DATA.theme_counts[t];
+      c.dataset.theme = t;
+      c.onclick = () => {
+        if (activeThemes.has(t)) activeThemes.delete(t); else activeThemes.add(t);
+        updateChips(); renderVerbs();
+      };
+      chipEl.appendChild(c);
+    });
+    function updateChips() {
+      chipEl.querySelectorAll('.chip').forEach(c => {
+        if (!c.dataset.theme) { c.classList.toggle('on', activeThemes.size === 0); }
+        else { c.classList.toggle('on', activeThemes.has(c.dataset.theme)); }
+      });
+    }
+    const searchEl = document.getElementById('verbSearch');
+    const listEl = document.getElementById('verbList');
+    const countEl = document.getElementById('verbCount');
+    if (!searchEl || !listEl || !countEl) return;
+    searchEl.addEventListener('input', renderVerbs);
+    function renderVerbs() {
+      const q = searchEl.value.toLowerCase().trim();
+      const filtered = DATA.verbatims.filter(v => {
+        const themeMatch = activeThemes.size === 0 || v.themes.some(t => activeThemes.has(t));
+        const textMatch = !q || v.comment.toLowerCase().includes(q) || v.account.toLowerCase().includes(q) || v.team.toLowerCase().includes(q);
+        return themeMatch && textMatch;
+      });
+      countEl.textContent = filtered.length + ' of ' + DATA.verbatims.length + ' verbatims';
+      if (filtered.length === 0) { listEl.innerHTML = '<div class="verb-empty">No verbatims match these filters.</div>'; return; }
+      filtered.sort((a,b) => a.score - b.score);
+      listEl.innerHTML = filtered.map(v => {
+        const accClean = v.account.replace(/\s*\([^)]*\)\s*$/, '');
+        const teamClean = v.team.replace(' Client Consulting','').replace('United Kingdom','UK');
+        const scoreClass = v.score <= 3 ? '' : 'mid';
+        const tags = v.themes.map(t => `<span class="tag">${t}</span>`).join('');
+        return `<div class="verbatim"><div class="score-cell ${scoreClass}">${v.score}</div><div><div class="quote">${v.comment}</div><div class="tags">${tags}</div></div><div class="meta-cell"><strong>${accClean}</strong><br>${teamClean} · ${v.segment} · ${v.tier}<br>Grade ${v.grade} · ${v.date}</div></div>`;
+      }).join('');
+    }
+    renderVerbs();
+    const toggle = document.getElementById('verbatimToggle');
+    const body = document.getElementById('verbatimBody');
+    const chevron = document.getElementById('verbatimChevron');
+    if (toggle && !toggle._bound) {
+      toggle._bound = true;
+      toggle.addEventListener('click', () => {
+        const isOpen = body.style.display !== 'none';
+        body.style.display = isOpen ? 'none' : 'block';
+        chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
+      });
+    }
+  }
+  initVerbatims();
+
+// ========== TEAM LOLLIPOP CHART ==========
+function buildTeamLollipop() {
+  const el = document.getElementById('teamBarsUnified');
+  if (!el) return;
+  const clientShares = {
+    'United Kingdom Client Consulting': 40.76,'France Client Consulting': 14.18,
+    'EMEA Customer Experience': 6.36,'Germany Client Consulting': 10.63,
+    'MEA Client Consulting': 5.38,'Nordic Client Consulting': 5.98,
+    'Benelux Client Consulting': 3.91,'EMEA SP&A Client Consulting': 4.83,
+    'Southern Europe Client Consulting': 7.64,
+  };
+  const total = DATA.by_team.reduce((s, t) => s + t.cases, 0);
+  const maxCases = Math.max(...DATA.by_team.map(t => t.cases));
+  const rows = DATA.by_team
+    .filter(t => clientShares[t['Consulting Team']] !== undefined)
+    .map(t => {
+      const share = clientShares[t['Consulting Team']];
+      const pctDet = (t.cases / total) * 100;
+      const ratio = pctDet / share;
+      return { name: t['Consulting Team'].replace(' Client Consulting','').replace('United Kingdom','UK').replace('EMEA Customer Experience','EMEA CX'), cases: t.cases, pctDet: pctDet.toFixed(1), pctClient: share, ratio };
+    })
+    .sort((a, b) => b.ratio - a.ratio);
+  const W = 820, H = 52 * rows.length + 60;
+  const pad = { l: 110, r: 180, t: 40, b: 52 };
+  const iW = W - pad.l - pad.r; const iH = H - pad.t - pad.b;
+  const maxRatio = 2.2;
+  const xS = v => pad.l + (v / maxRatio) * iW;
+  const rowH = iH / rows.length;
+  let svg = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" font-family="Inter Tight, sans-serif">`;
+  const x1px = xS(1);
+  svg += `<rect x="${x1px}" y="${pad.t - 10}" width="${xS(maxRatio) - x1px}" height="${iH + 10}" fill="#8a2a2a" opacity="0.04" rx="2"/>`;
+  [0.5, 1.0, 1.5, 2.0].forEach(v => {
+    const gx = xS(v);
+    svg += `<line x1="${gx}" y1="${pad.t - 10}" x2="${gx}" y2="${pad.t + iH}" stroke="${v === 1.0 ? '#0f1419' : '#e8e3d6'}" stroke-width="${v === 1.0 ? 1.5 : 1}" stroke-dasharray="${v === 1.0 ? '4,3' : 'none'}" opacity="${v === 1.0 ? 0.4 : 1}"/>`;
+    svg += `<text x="${gx}" y="${pad.t - 15}" text-anchor="middle" font-size="10" fill="${v === 1.0 ? '#0f1419' : '#9aa0aa'}" font-weight="${v === 1.0 ? '700' : '400'}">${v.toFixed(1)}x</text>`;
+  });
+  svg += `<text x="${xS(1)}" y="${pad.t + iH + 38}" text-anchor="middle" font-size="9" fill="#6b7688" letter-spacing="0.06em" font-style="italic">benchmark line - each team's expected share of NPS</text>`;
+  svg += `<text x="${xS(0.3)}" y="${pad.t - 14}" text-anchor="middle" font-size="9" fill="#3a6b3e" letter-spacing="0.1em" font-weight="600">UNDER-INDEX</text>`;
+  svg += `<text x="${xS(1.7)}" y="${pad.t - 14}" text-anchor="middle" font-size="9" fill="#8a2a2a" letter-spacing="0.1em" font-weight="600">OVER-INDEX</text>`;
+  rows.forEach((r, i) => {
+    const cy = pad.t + rowH * i + rowH / 2;
+    const cx = xS(r.ratio);
+    const isOver = r.ratio >= 1.0; const isStrong = r.ratio >= 1.5;
+    const color = isStrong ? '#8a2a2a' : isOver ? '#c85a1e' : '#3a6b3e';
+    const dotR = 6 + (r.cases / maxCases) * 13;
+    if (i % 2 === 0) { svg += `<rect x="${pad.l - 100}" y="${cy - rowH / 2}" width="${iW + 280}" height="${rowH}" fill="#f9f7f2" opacity="0.5"/>`; }
+    svg += `<text x="${pad.l - 12}" y="${cy + 4}" text-anchor="end" font-size="12" font-weight="600" fill="#0f1419">${r.name}</text>`;
+    svg += `<line x1="${xS(1)}" y1="${cy}" x2="${cx}" y2="${cy}" stroke="${color}" stroke-width="1.5" opacity="0.35"/>`;
+    svg += `<line x1="${xS(1)}" y1="${cy - 5}" x2="${xS(1)}" y2="${cy + 5}" stroke="#6b7688" stroke-width="1" opacity="0.4"/>`;
+    svg += `<circle cx="${cx}" cy="${cy}" r="${dotR}" fill="${color}" opacity="0.15"/>`;
+    svg += `<circle cx="${cx}" cy="${cy}" r="${dotR * 0.62}" fill="${color}" opacity="0.9"/>`;
+    svg += `<circle cx="${cx}" cy="${cy}" r="${dotR * 0.62}" fill="none" stroke="#fff" stroke-width="1.5"/>`;
+    const labelOutside = dotR * 0.62 < 10;
+    const labelX = labelOutside ? cx + dotR * 0.62 + 8 : cx;
+    const labelAnchor = labelOutside ? 'start' : 'middle';
+    const labelFill = labelOutside ? color : '#fff';
+    svg += `<text x="${labelX}" y="${cy + 3.5}" text-anchor="${labelAnchor}" font-size="9" fill="${labelFill}" font-weight="700">${r.ratio.toFixed(1)}x</text>`;
+    svg += `<text x="${W - pad.r + 14}" y="${cy - 3}" font-size="11" fill="#0f1419" font-weight="600">${r.cases} NPS</text>`;
+    svg += `<text x="${W - pad.r + 14}" y="${cy + 9}" font-size="10" fill="#9aa0aa">${r.pctDet}% of EMEA detractor NPS</text>`;
+    svg += `<text x="${W - pad.r + 14}" y="${cy + 21}" font-size="10" fill="#9aa0aa">${r.pctClient}% of EMEA client base</text>`;
+  });
+  svg += `<line x1="${pad.l}" y1="${pad.t + iH}" x2="${pad.l + iW}" y2="${pad.t + iH}" stroke="#d9d3c4" stroke-width="1"/>`;
+  svg += `</svg>`;
+  el.innerHTML = svg;
+}
+buildTeamLollipop();
+
+  // ========== NAV ACTIVE STATE ==========
+  (function() {
+    const links = document.querySelectorAll('nav.toc a');
+    const sections = Array.from(document.querySelectorAll('section[id]'));
+    function onScroll() {
+      const y = window.scrollY + 120;
+      let active = sections[0].id;
+      for (const s of sections) { if (s.offsetTop <= y) active = s.id; }
+      links.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + active));
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+  })();
+
+// ========== FIRM TYPE SECTION ==========
+function buildFirmTypeSection() {
+  const teams = Object.keys(DATA.by_team_firmtype);
+  const firmBars = document.getElementById('firmTypeBars');
+  if (!firmBars) return;
+  const grid = firmBars.closest('.grid-2');
+  if (!grid) return;
+  if (grid.previousElementSibling && grid.previousElementSibling.classList.contains('firmtype-filter-bar')) return;
+  const filterBar = document.createElement('div');
+  filterBar.className = 'firmtype-filter-bar';
+  filterBar.style.cssText = 'display:flex; flex-wrap:wrap; gap:8px; margin-bottom:18px;';
+  let activeTeam = 'All EMEA';
+  function renderChips() {
+    filterBar.innerHTML = '';
+    teams.forEach(t => {
+      const chip = document.createElement('span');
+      chip.className = 'chip' + (t === activeTeam ? ' on' : '');
+      chip.textContent = t;
+      chip.onclick = () => { activeTeam = t; renderChips(); renderFirmType(); };
+      filterBar.appendChild(chip);
+    });
+  }
+  grid.parentNode.insertBefore(filterBar, grid);
+  function renderFirmType() {
+    const d = DATA.by_team_firmtype[activeTeam];
+    const barEl = document.getElementById('firmTypeBars');
+    barEl.innerHTML = '';
+    const maxHard = Math.max(...d.by_firm_type.map(x => x.pct_hard));
+    d.by_firm_type.forEach(ft => {
+      const pct = (ft.pct_hard / (maxHard || 1)) * 100;
+      const row = document.createElement('div');
+      row.className = 'bar-row';
+      row.style.gridTemplateColumns = '180px 1fr 50px 60px';
+      row.innerHTML = `<div class="name">${ft['Firm Type']}</div><div class="track" style="position:relative;"><div class="fill" style="width:0%"></div><div style="position:absolute;right:4px;top:50%;transform:translateY(-50%);font-size:10px;color:#fff;font-weight:700;">${ft.pct_hard}% hard</div></div><div class="val">${ft.cases}</div><div class="score">${ft.avg_score.toFixed(2)}</div>`;
+      barEl.appendChild(row);
+      requestAnimationFrame(() => { row.querySelector('.fill').style.width = pct + '%'; });
+    });
+    const matEl = document.getElementById('firmSegMatrix');
+    const { labels_row, rows } = d.firm_segment_matrix;
+    function cellColor(score, n) {
+      if (score === null || !n || n < 2) return '#f3efe6';
+      if (score <= 2.0) return '#f5ecec';
+      if (score <= 2.5) return '#fdf0e8';
+      return '#f0f5f0';
+    }
+    let html = '<thead><tr><th class="rowlbl">Firm Type</th>';
+    labels_row.forEach(l => html += `<th>${l}</th>`);
+    html += '</tr></thead><tbody>';
+    rows.forEach(r => {
+      html += `<tr><td class="rowlbl">${r.name}</td>`;
+      r.scores.forEach((s, i) => {
+        const n = r.counts[i];
+        const bg = cellColor(s, n);
+        const display = (s !== null && n >= 2) ? `${s.toFixed(2)}<br><span style="color:var(--ink-mute);font-size:10px;">(n=${n})</span>` : `<span style="color:var(--ink-mute)">-</span>`;
+        html += `<td style="background:${bg};">${display}</td>`;
+      });
+      html += '</tr>';
+    });
+    html += '</tbody>';
+    matEl.innerHTML = html;
+  }
+  renderChips();
+  renderFirmType();
+}
+buildFirmTypeSection();
+
+</script>
+</body>
+</html>
