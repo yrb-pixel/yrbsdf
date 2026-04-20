@@ -802,76 +802,50 @@ buildTeamLollipop();
 // ========== FIRM TYPE SECTION ==========
 function buildFirmTypeSection() {
   const firmBars = document.getElementById('firmTypeBars');
-  if (!firmBars || !DATA.by_team_firmtype) return;
-  
-  const teams = Object.keys(DATA.by_team_firmtype);
-  const grid = firmBars.closest('.grid-2');
-  if (!grid) return;
+  if (!firmBars || !DATA.by_firm_type || !DATA.firm_segment_matrix) return;
 
-  // Supprimer l'ancien filterBar s'il existe
+  // Remove old filterBar if present (from previous rebuildAll)
   const oldFb = document.querySelector('.firmtype-filter-bar');
   if (oldFb) oldFb.remove();
 
-  const filterBar = document.createElement('div');
-  filterBar.className = 'firmtype-filter-bar';
-  filterBar.style.cssText = 'display:flex; flex-wrap:wrap; gap:8px; margin-bottom:18px;';
-  grid.parentNode.insertBefore(filterBar, grid);
+  // --- Bars: Volume & intensity by Firm Type ---
+  firmBars.innerHTML = '';
+  const maxHard = Math.max(...DATA.by_firm_type.map(x => x.pct_hard));
+  DATA.by_firm_type.forEach(ft => {
+    const pct = (ft.pct_hard / (maxHard || 1)) * 100;
+    const row = document.createElement('div');
+    row.className = 'bar-row';
+    row.style.gridTemplateColumns = '180px 1fr 50px 60px';
+    row.innerHTML = `<div class="name">${ft['Firm Type']}</div><div class="track" style="position:relative;"><div class="fill" style="width:0%"></div><div style="position:absolute;right:4px;top:50%;transform:translateY(-50%);font-size:10px;color:#fff;font-weight:700;">${ft.pct_hard}% hard</div></div><div class="val">${ft.cases}</div><div class="score">${ft.avg_score.toFixed(2)}</div>`;
+    firmBars.appendChild(row);
+    requestAnimationFrame(() => { row.querySelector('.fill').style.width = pct + '%'; });
+  });
 
-  let activeTeam = teams[0]; // 'All EMEA' ou le premier disponible
-
-  function renderFirmType() {
-    const d = DATA.by_team_firmtype[activeTeam];
-    if (!d) return;
-    const barEl = document.getElementById('firmTypeBars');
-    barEl.innerHTML = '';
-    const maxHard = Math.max(...d.by_firm_type.map(x => x.pct_hard));
-    d.by_firm_type.forEach(ft => {
-      const pct = (ft.pct_hard / (maxHard || 1)) * 100;
-      const row = document.createElement('div');
-      row.className = 'bar-row';
-      row.style.gridTemplateColumns = '180px 1fr 50px 60px';
-      row.innerHTML = `<div class="name">${ft['Firm Type']}</div><div class="track" style="position:relative;"><div class="fill" style="width:0%"></div><div style="position:absolute;right:4px;top:50%;transform:translateY(-50%);font-size:10px;color:#fff;font-weight:700;">${ft.pct_hard}% hard</div></div><div class="val">${ft.cases}</div><div class="score">${ft.avg_score.toFixed(2)}</div>`;
-      barEl.appendChild(row);
-      requestAnimationFrame(() => { row.querySelector('.fill').style.width = pct + '%'; });
-    });
-    const matEl = document.getElementById('firmSegMatrix');
-    const { labels_row, rows } = d.firm_segment_matrix;
-    function cellColor(score, n) {
-      if (score === null || !n || n < 2) return '#f3efe6';
-      if (score <= 2.0) return '#f5ecec';
-      if (score <= 2.5) return '#fdf0e8';
-      return '#f0f5f0';
-    }
-    let html = '<thead><tr><th class="rowlbl">Firm Type</th>';
-    labels_row.forEach(l => html += `<th>${l}</th>`);
-    html += '</tr></thead><tbody>';
-    rows.forEach(r => {
-      html += `<tr><td class="rowlbl">${r.name}</td>`;
-      r.scores.forEach((s, i) => {
-        const n = r.counts[i];
-        const bg = cellColor(s, n);
-        const display = (s !== null && n >= 2) ? `${s.toFixed(2)}<br><span style="color:var(--ink-mute);font-size:10px;">(n=${n})</span>` : `<span style="color:var(--ink-mute)">-</span>`;
-        html += `<td style="background:${bg};">${display}</td>`;
-      });
-      html += '</tr>';
-    });
-    html += '</tbody>';
-    matEl.innerHTML = html;
+  // --- Matrix: Firm Type x Segment ---
+  const matEl = document.getElementById('firmSegMatrix');
+  if (!matEl) return;
+  const { labels_row, rows } = DATA.firm_segment_matrix;
+  function cellColor(score, n) {
+    if (score === null || !n || n < 2) return '#f3efe6';
+    if (score <= 2.0) return '#f5ecec';
+    if (score <= 2.5) return '#fdf0e8';
+    return '#f0f5f0';
   }
-
-  function renderChips() {
-    filterBar.innerHTML = '';
-    teams.forEach(t => {
-      const chip = document.createElement('span');
-      chip.className = 'chip' + (t === activeTeam ? ' on' : '');
-      chip.textContent = t;
-      chip.onclick = () => { activeTeam = t; renderChips(); renderFirmType(); };
-      filterBar.appendChild(chip);
+  let matHtml = '<thead><tr><th class="rowlbl">Firm Type</th>';
+  labels_row.forEach(l => matHtml += `<th>${l}</th>`);
+  matHtml += '</tr></thead><tbody>';
+  rows.forEach(r => {
+    matHtml += `<tr><td class="rowlbl">${r.name}</td>`;
+    r.scores.forEach((s, i) => {
+      const n = r.counts[i];
+      const bg = cellColor(s, n);
+      const display = (s !== null && n >= 2) ? `${s.toFixed(2)}<br><span style="color:var(--ink-mute);font-size:10px;">(n=${n})</span>` : `<span style="color:var(--ink-mute)">-</span>`;
+      matHtml += `<td style="background:${bg};">${display}</td>`;
     });
-  }
-
-  renderChips();
-  renderFirmType(); // ← clé du fix : appel explicite ici, pas seulement via chip click
+    matHtml += '</tr>';
+  });
+  matHtml += '</tbody>';
+  matEl.innerHTML = matHtml;
 }
 buildFirmTypeSection();
 
