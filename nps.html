@@ -801,29 +801,27 @@ buildTeamLollipop();
 
 // ========== FIRM TYPE SECTION ==========
 function buildFirmTypeSection() {
-  const teams = Object.keys(DATA.by_team_firmtype);
   const firmBars = document.getElementById('firmTypeBars');
-  if (!firmBars) return;
+  if (!firmBars || !DATA.by_team_firmtype) return;
+  
+  const teams = Object.keys(DATA.by_team_firmtype);
   const grid = firmBars.closest('.grid-2');
   if (!grid) return;
-  if (grid.previousElementSibling && grid.previousElementSibling.classList.contains('firmtype-filter-bar')) return;
+
+  // Supprimer l'ancien filterBar s'il existe
+  const oldFb = document.querySelector('.firmtype-filter-bar');
+  if (oldFb) oldFb.remove();
+
   const filterBar = document.createElement('div');
   filterBar.className = 'firmtype-filter-bar';
   filterBar.style.cssText = 'display:flex; flex-wrap:wrap; gap:8px; margin-bottom:18px;';
-  let activeTeam = 'All EMEA';
-  function renderChips() {
-    filterBar.innerHTML = '';
-    teams.forEach(t => {
-      const chip = document.createElement('span');
-      chip.className = 'chip' + (t === activeTeam ? ' on' : '');
-      chip.textContent = t;
-      chip.onclick = () => { activeTeam = t; renderChips(); renderFirmType(); };
-      filterBar.appendChild(chip);
-    });
-  }
   grid.parentNode.insertBefore(filterBar, grid);
+
+  let activeTeam = teams[0]; // 'All EMEA' ou le premier disponible
+
   function renderFirmType() {
     const d = DATA.by_team_firmtype[activeTeam];
+    if (!d) return;
     const barEl = document.getElementById('firmTypeBars');
     barEl.innerHTML = '';
     const maxHard = Math.max(...d.by_firm_type.map(x => x.pct_hard));
@@ -860,8 +858,20 @@ function buildFirmTypeSection() {
     html += '</tbody>';
     matEl.innerHTML = html;
   }
+
+  function renderChips() {
+    filterBar.innerHTML = '';
+    teams.forEach(t => {
+      const chip = document.createElement('span');
+      chip.className = 'chip' + (t === activeTeam ? ' on' : '');
+      chip.textContent = t;
+      chip.onclick = () => { activeTeam = t; renderChips(); renderFirmType(); };
+      filterBar.appendChild(chip);
+    });
+  }
+
   renderChips();
-  renderFirmType();
+  renderFirmType(); // ← clé du fix : appel explicite ici, pas seulement via chip click
 }
 buildFirmTypeSection();
 
