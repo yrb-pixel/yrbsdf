@@ -1,760 +1,586 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EFG QNT — Workflow GPS</title>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NPS Playbook — FactSet EMEA CS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet"/>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap');
+html,body{all:initial!important;display:block!important;height:100%!important;width:100%!important;margin:0!important;padding:0!important;font-family:'DM Sans',sans-serif!important;background:#faf7f2!important;color:#1a1612!important;overflow:hidden!important;}
+*,*::before,*::after{box-sizing:border-box!important;margin:0!important;padding:0!important;}
+#app{display:flex!important;flex-direction:column!important;height:100vh!important;width:100vw!important;background:#faf7f2!important;color:#1a1612!important;font-family:'DM Sans',sans-serif!important;overflow:hidden!important;font-size:14px!important;line-height:1.5!important;}
+#topbar{height:52px!important;min-height:52px!important;flex-shrink:0!important;background:#1a1612!important;display:flex!important;align-items:center!important;padding:0 2rem!important;gap:1.25rem!important;border-bottom:2px solid #c9a84c!important;}
+.t-wordmark{font-family:'Cormorant Garamond',serif!important;font-weight:600!important;font-size:18px!important;letter-spacing:0.05em!important;color:#faf7f2!important;display:flex!important;align-items:center!important;gap:10px!important;}
+.t-mark{width:26px!important;height:26px!important;background:#c9a84c!important;border-radius:4px!important;display:flex!important;align-items:center!important;justify-content:center!important;font-size:12px!important;font-weight:700!important;color:#1a1612!important;font-family:'DM Sans',sans-serif!important;flex-shrink:0!important;}
+.t-sep{width:1px!important;height:18px!important;background:rgba(255,255,255,0.15)!important;}
+.t-path{font-size:12px!important;color:rgba(250,247,242,0.45)!important;letter-spacing:0.03em!important;}
+.t-path strong{color:rgba(250,247,242,0.75)!important;font-weight:400!important;}
+.t-right{margin-left:auto!important;display:flex!important;align-items:center!important;gap:10px!important;}
+.t-badge{font-family:'DM Sans',sans-serif!important;font-size:10px!important;font-weight:500!important;padding:3px 9px!important;border-radius:99px!important;border:1px solid rgba(201,168,76,0.5)!important;color:#c9a84c!important;background:rgba(201,168,76,0.08)!important;letter-spacing:0.05em!important;text-transform:uppercase!important;}
+.t-avatar{width:28px!important;height:28px!important;border-radius:50%!important;background:rgba(255,255,255,0.08)!important;border:1px solid rgba(201,168,76,0.35)!important;display:flex!important;align-items:center!important;justify-content:center!important;font-size:10px!important;font-weight:600!important;color:#c9a84c!important;font-family:'DM Sans',sans-serif!important;}
+#layout{flex:1!important;display:flex!important;overflow:hidden!important;background:#faf7f2!important;}
+#sidebar{width:210px!important;flex-shrink:0!important;background:#f4efe7!important;border-right:1px solid #e8dfc8!important;display:flex!important;flex-direction:column!important;overflow-y:auto!important;padding:1.5rem 0!important;}
+.s-section{padding:0 1.25rem 0.35rem!important;font-size:9px!important;font-weight:500!important;letter-spacing:0.12em!important;text-transform:uppercase!important;color:#9e8c6a!important;margin-top:1rem!important;font-family:'DM Sans',sans-serif!important;}
+.s-section:first-child{margin-top:0!important;}
+.nav-btn{all:unset!important;display:flex!important;align-items:center!important;gap:9px!important;padding:8px 1.25rem!important;width:100%!important;cursor:pointer!important;font-size:13px!important;color:#5c4f38!important;border-left:2px solid transparent!important;transition:all 0.15s!important;font-family:'DM Sans',sans-serif!important;box-sizing:border-box!important;}
+.nav-btn:hover{background:rgba(201,168,76,0.06)!important;color:#1a1612!important;}
+.nav-btn.active{background:rgba(201,168,76,0.1)!important;color:#1a1612!important;border-left-color:#c9a84c!important;font-weight:500!important;}
+.nav-icon{width:16px!important;height:16px!important;display:flex!important;align-items:center!important;justify-content:center!important;font-size:13px!important;flex-shrink:0!important;opacity:0.7!important;}
+.s-mini{margin:1.25rem 1rem 0!important;background:linear-gradient(135deg,rgba(201,168,76,0.12),rgba(201,168,76,0.04))!important;border:1px solid rgba(201,168,76,0.25)!important;border-radius:8px!important;padding:0.85rem!important;}
+.s-mini-title{font-size:9px!important;font-weight:500!important;letter-spacing:0.1em!important;text-transform:uppercase!important;color:#c9a84c!important;margin-bottom:0.6rem!important;font-family:'DM Sans',sans-serif!important;}
+.s-mini-row{display:flex!important;justify-content:space-between!important;align-items:center!important;padding:3px 0!important;}
+.s-mini-l{font-size:11px!important;color:#9e8c6a!important;}
+.s-mini-v{font-size:12px!important;font-weight:500!important;color:#1a1612!important;}
+#main{flex:1!important;display:flex!important;flex-direction:column!important;overflow:hidden!important;}
+#pheader{padding:1rem 2rem 0.9rem!important;border-bottom:1px solid #e8dfc8!important;background:#faf7f2!important;display:flex!important;align-items:flex-end!important;justify-content:space-between!important;flex-shrink:0!important;}
+#ptitle{font-family:'Cormorant Garamond',serif!important;font-size:22px!important;font-weight:600!important;color:#1a1612!important;letter-spacing:-0.01em!important;line-height:1.1!important;}
+#psub{font-size:12px!important;color:#9e8c6a!important;margin-top:2px!important;letter-spacing:0.01em!important;}
+#content{flex:1!important;overflow-y:auto!important;padding:1.5rem 2rem!important;}
+.section{display:none!important;}
+.section.visible{display:block!important;}
 
-:root {
-  --bg:#0b0f19; --s1:#111827; --s2:#1a2236; --s3:#243044;
-  --bd:#2a3650; --tx:#e2e8f0; --tx2:#7b8ba3; --tx3:#4a5568;
-  --acc:#38bdf8; --acc2:#818cf8; --grn:#34d399; --red:#f87171;
-  --org:#fb923c; --ylw:#fbbf24; --pnk:#f472b6; --cyn:#22d3ee;
-  --eq:#60a5fa; --fi:#4ade80; --etf:#c084fc; --mf:#facc15;
-  --esg:#2dd4bf; --feed:#fb7185; --ref:#a78bfa; --recon:#fbbf24;
-}
-*{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--tx);height:100vh;overflow:hidden;}
+/* Search */
+.search-wrap{position:relative!important;margin-bottom:0.85rem!important;}
+.search-inp{all:unset!important;width:100%!important;padding:9px 12px 9px 36px!important;font-size:13px!important;border-radius:6px!important;border:1px solid #ddd3ba!important;background:#fff!important;color:#1a1612!important;font-family:'DM Sans',sans-serif!important;box-sizing:border-box!important;transition:border-color 0.15s!important;}
+.search-inp:focus{border-color:#c9a84c!important;outline:none!important;}
+.search-inp::placeholder{color:#b0a088!important;}
+.search-icon{position:absolute!important;left:11px!important;top:50%!important;transform:translateY(-50%)!important;font-size:13px!important;opacity:0.45!important;pointer-events:none!important;}
 
-.topbar{
-  height:64px; display:flex; align-items:center; gap:20px;
-  padding:0 28px; border-bottom:1px solid var(--bd);
-  background:linear-gradient(180deg,#10162088,var(--bg));
-}
-.topbar .logo{font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:600;color:var(--acc);letter-spacing:-.5px;white-space:nowrap;}
-.topbar .logo span{color:var(--tx2);font-weight:400;}
+/* Pills */
+.pill-row{display:flex!important;gap:6px!important;flex-wrap:wrap!important;margin-bottom:1.25rem!important;}
+.pill{all:unset!important;padding:5px 13px!important;border-radius:99px!important;font-size:12px!important;cursor:pointer!important;border:1px solid #ddd3ba!important;color:#9e8c6a!important;background:transparent!important;transition:all 0.15s!important;font-family:'DM Sans',sans-serif!important;box-sizing:border-box!important;}
+.pill:hover{border-color:#c9a84c!important;color:#7a6435!important;}
+.pill.active{background:#c9a84c!important;color:#faf7f2!important;border-color:#c9a84c!important;font-weight:500!important;}
+.pill-ct{font-size:10px!important;opacity:0.7!important;margin-left:4px!important;}
 
-.search-wrap{flex:1;max-width:560px;position:relative;}
-.search-wrap input{
-  width:100%;height:40px;padding:0 16px 0 40px;border-radius:10px;
-  border:1.5px solid var(--bd);background:var(--s1);color:var(--tx);
-  font-family:'Outfit',sans-serif;font-size:15px;font-weight:400;
-  outline:none;transition:border .15s;
-}
-.search-wrap input:focus{border-color:var(--acc);background:var(--s2);}
-.search-wrap input::placeholder{color:var(--tx3);}
-.search-wrap .icon{position:absolute;left:12px;top:10px;color:var(--tx3);font-size:18px;pointer-events:none;}
-.search-wrap .hint{position:absolute;right:12px;top:10px;font-size:11px;color:var(--tx3);font-family:'IBM Plex Mono',monospace;}
+/* Tips grid */
+#tips-grid{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(300px,1fr))!important;gap:10px!important;}
+.tip-card{all:unset!important;background:#fff!important;border:1px solid #e8dfc8!important;border-radius:8px!important;padding:1rem 1.15rem!important;cursor:pointer!important;transition:border-color 0.15s,box-shadow 0.15s,transform 0.1s!important;display:block!important;width:100%!important;box-sizing:border-box!important;font-family:'DM Sans',sans-serif!important;color:#1a1612!important;}
+.tip-card:hover{border-color:#c9a84c!important;box-shadow:0 2px 12px rgba(201,168,76,0.12)!important;transform:translateY(-1px)!important;}
+.tip-card.open{border-color:#c9a84c!important;box-shadow:0 2px 16px rgba(201,168,76,0.15)!important;grid-column:1/-1!important;}
+.tip-card.pending-tip{border-style:dashed!important;opacity:0.8!important;}
+.tip-top{display:flex!important;align-items:flex-start!important;justify-content:space-between!important;gap:0.75rem!important;margin-bottom:0.5rem!important;}
+.tip-title{font-size:13.5px!important;font-weight:500!important;color:#1a1612!important;line-height:1.4!important;}
+.tip-tag{font-size:9px!important;font-weight:600!important;padding:2px 7px!important;border-radius:99px!important;text-transform:uppercase!important;letter-spacing:0.07em!important;white-space:nowrap!important;flex-shrink:0!important;font-family:'DM Sans',sans-serif!important;}
+.tag-speed{background:#f0f9ec!important;color:#4a8c2a!important;border:1px solid #c8e6b4!important;}
+.tag-stability{background:#fef6ec!important;color:#9a6020!important;border:1px solid #f5dda8!important;}
+.tag-recovery{background:#fdf0f0!important;color:#9c3535!important;border:1px solid #f5c0c0!important;}
+.tag-ux{background:#f0f0fd!important;color:#4040a8!important;border:1px solid #c0c0f0!important;}
+.tip-meta{display:flex!important;align-items:center!important;gap:7px!important;font-size:11px!important;color:#b0a088!important;}
+.tip-stars{color:#c9a84c!important;letter-spacing:-1px!important;}
+.tip-expand{display:none!important;margin-top:0.85rem!important;padding-top:0.85rem!important;border-top:1px solid #f0e8d5!important;}
+.tip-card.open .tip-expand{display:block!important;}
+.tip-expand-body{font-size:13px!important;color:#5c4f38!important;line-height:1.7!important;}
+.tip-close{margin-top:0.65rem!important;font-size:11px!important;color:#b0a088!important;cursor:pointer!important;display:inline-flex!important;align-items:center!important;gap:4px!important;font-family:'DM Sans',sans-serif!important;}
+.tip-close:hover{color:#7a6435!important;}
+.no-results{padding:48px 0!important;text-align:center!important;font-family:'Cormorant Garamond',serif!important;font-style:italic!important;color:#b0a088!important;font-size:17px!important;}
 
-/* OR mode indicator */
-.or-badge{
-  display:none;position:absolute;right:32px;top:9px;
-  font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;
-  background:rgba(251,146,60,.15);color:var(--org);border:1px solid rgba(251,146,60,.3);
-  font-family:'IBM Plex Mono',monospace;
-}
-.or-badge.visible{display:block;}
+/* Agent */
+.agent-wrap{max-width:700px!important;}
+.agent-box{background:#fff!important;border:1px solid #e8dfc8!important;border-radius:8px!important;overflow:hidden!important;margin-bottom:0.75rem!important;}
+.agent-hdr{background:#f4efe7!important;padding:0.85rem 1.25rem!important;display:flex!important;align-items:center!important;gap:10px!important;border-bottom:1px solid #e8dfc8!important;}
+.a-dot{width:7px!important;height:7px!important;border-radius:50%!important;background:#b0a088!important;flex-shrink:0!important;}
+.a-title{font-family:'Cormorant Garamond',serif!important;font-size:15px!important;font-weight:600!important;color:#1a1612!important;}
+.a-sub{font-size:11px!important;color:#b0a088!important;margin-left:auto!important;}
+.agent-body{padding:1.15rem!important;}
+.agent-placeholder{padding:32px 0!important;text-align:center!important;}
+.agent-placeholder .pl-icon{font-size:28px!important;margin-bottom:12px!important;opacity:0.3!important;}
+.agent-placeholder p{font-size:13px!important;color:#b0a088!important;line-height:1.6!important;max-width:340px!important;margin:0 auto!important;}
+.agent-placeholder .pl-label{font-size:9px!important;font-weight:500!important;letter-spacing:0.12em!important;text-transform:uppercase!important;color:#c9a84c!important;margin-bottom:8px!important;}
 
-.pills{display:flex;gap:6px;flex-wrap:nowrap;}
-.pill{
-  padding:4px 12px;border-radius:20px;font-size:12px;font-weight:500;
-  cursor:pointer;border:1px solid var(--bd);background:transparent;
-  color:var(--tx2);transition:all .12s;white-space:nowrap;
-  font-family:'Outfit',sans-serif;
-}
-.pill:hover{border-color:var(--tx2);color:var(--tx);}
-.pill.on{border-color:var(--acc);background:var(--acc);color:var(--bg);font-weight:600;}
+/* Form */
+.form-wrap{max-width:560px!important;}
+.f-card{background:#fff!important;border:1px solid #e8dfc8!important;border-radius:8px!important;overflow:hidden!important;}
+.f-hdr{background:#f4efe7!important;padding:0.85rem 1.25rem!important;border-bottom:1px solid #e8dfc8!important;font-family:'Cormorant Garamond',serif!important;font-size:16px!important;font-weight:600!important;color:#1a1612!important;}
+.f-hdr-sub{font-size:11px!important;color:#9e8c6a!important;font-family:'DM Sans',sans-serif!important;font-weight:400!important;margin-top:2px!important;}
+.f-body{padding:1.25rem!important;display:flex!important;flex-direction:column!important;gap:0.85rem!important;}
+.f-row{display:flex!important;flex-direction:column!important;gap:4px!important;}
+.f-label{font-size:11.5px!important;font-weight:500!important;color:#7a6435!important;letter-spacing:0.02em!important;}
+.f-label span{font-weight:400!important;color:#b0a088!important;}
+.f-ctrl{all:unset!important;padding:8px 11px!important;font-size:13px!important;border-radius:6px!important;border:1px solid #ddd3ba!important;background:#faf7f2!important;color:#1a1612!important;font-family:'DM Sans',sans-serif!important;width:100%!important;box-sizing:border-box!important;transition:border-color 0.15s!important;}
+.f-ctrl:focus{border-color:#c9a84c!important;outline:none!important;}
+.f-ctrl::placeholder{color:#b0a088!important;}
+textarea.f-ctrl{resize:vertical!important;min-height:90px!important;line-height:1.5!important;}
+.f-hint{font-size:11px!important;color:#b0a088!important;font-style:italic!important;}
+.f-actions{display:flex!important;align-items:center!important;gap:10px!important;flex-wrap:wrap!important;}
+.btn-gold{all:unset!important;padding:8px 18px!important;font-size:12px!important;font-weight:500!important;border-radius:6px!important;background:#1a1612!important;color:#faf7f2!important;cursor:pointer!important;font-family:'DM Sans',sans-serif!important;box-sizing:border-box!important;letter-spacing:0.03em!important;transition:background 0.15s!important;}
+.btn-gold:hover{background:#c9a84c!important;color:#1a1612!important;}
+.f-ok{display:none!important;font-size:12px!important;color:#4a8c2a!important;background:#f0f9ec!important;border:1px solid #c8e6b4!important;border-radius:6px!important;padding:7px 11px!important;}
+.f-ok.on{display:block!important;}
+.f-err{display:none!important;font-size:12px!important;color:#9c3535!important;background:#fdf0f0!important;border:1px solid #f5c0c0!important;border-radius:6px!important;padding:7px 11px!important;}
+.f-err.on{display:block!important;}
+.pending-note{background:rgba(201,168,76,0.06)!important;border:1px solid rgba(201,168,76,0.2)!important;border-radius:6px!important;padding:10px 14px!important;font-size:12px!important;color:#7a6435!important;line-height:1.6!important;margin-top:0.5rem!important;}
 
-.main{display:flex;height:calc(100vh - 64px);}
+/* Stats */
+.stats-grid{display:grid!important;grid-template-columns:repeat(4,1fr)!important;gap:10px!important;margin-bottom:1.5rem!important;}
+.stat-card{background:#fff!important;border:1px solid #e8dfc8!important;border-radius:8px!important;padding:1rem 1.15rem!important;}
+.stat-label{font-size:9px!important;font-weight:500!important;color:#b0a088!important;text-transform:uppercase!important;letter-spacing:0.1em!important;margin-bottom:5px!important;font-family:'DM Sans',sans-serif!important;}
+.stat-value{font-family:'Cormorant Garamond',serif!important;font-size:30px!important;font-weight:600!important;color:#1a1612!important;letter-spacing:-0.02em!important;line-height:1!important;}
+.stat-sub{font-size:11px!important;color:#b0a088!important;margin-top:4px!important;}
+.stat-up{color:#4a8c2a!important;}
+.sec-title{font-size:9px!important;font-weight:500!important;color:#b0a088!important;text-transform:uppercase!important;letter-spacing:0.1em!important;margin-bottom:0.85rem!important;font-family:'DM Sans',sans-serif!important;}
+.bar-chart{display:flex!important;flex-direction:column!important;gap:8px!important;max-width:460px!important;}
+.bar-row-s{display:flex!important;align-items:center!important;gap:10px!important;}
+.bar-label{width:68px!important;font-size:12px!important;color:#7a6435!important;text-align:right!important;flex-shrink:0!important;}
+.bar-track{flex:1!important;height:7px!important;background:#f0e8d5!important;border-radius:4px!important;overflow:hidden!important;}
+.bar-fill{height:7px!important;border-radius:4px!important;transition:width 0.6s ease!important;}
+.bar-count{width:22px!important;font-size:11px!important;color:#b0a088!important;text-align:right!important;}
 
-.results{
-  width:380px;min-width:380px;border-right:1px solid var(--bd);
-  display:flex;flex-direction:column;background:var(--s1);
-}
-.results-header{
-  padding:12px 20px;border-bottom:1px solid var(--bd);
-  font-size:12px;color:var(--tx2);font-weight:500;
-  display:flex;justify-content:space-between;align-items:center;
-}
-.results-list{flex:1;overflow-y:auto;padding:6px 0;}
+/* Leaderboard */
+.lboard{max-width:480px!important;}
+.lb-row{display:flex!important;align-items:center!important;gap:10px!important;padding:10px 0!important;border-bottom:1px solid #f0e8d5!important;}
+.lb-rank{width:22px!important;font-family:'Cormorant Garamond',serif!important;font-size:14px!important;font-weight:600!important;color:#c9a84c!important;text-align:center!important;}
+.lb-rank.s{color:#b0a088!important;}
+.lb-av{width:30px!important;height:30px!important;border-radius:50%!important;background:#f4efe7!important;border:1px solid #e8dfc8!important;display:flex!important;align-items:center!important;justify-content:center!important;font-size:10px!important;font-weight:600!important;color:#7a6435!important;flex-shrink:0!important;}
+.lb-name{flex:1!important;font-size:13px!important;color:#1a1612!important;font-weight:500!important;}
+.lb-bw{width:80px!important;height:3px!important;background:#f0e8d5!important;border-radius:2px!important;}
+.lb-bf{height:3px!important;background:#c9a84c!important;border-radius:2px!important;}
+.lb-c{font-size:11px!important;color:#b0a088!important;width:40px!important;text-align:right!important;}
 
-.wf-card{
-  padding:10px 20px;cursor:pointer;border-left:3px solid transparent;
-  transition:all .1s;
-}
-.wf-card:hover{background:var(--s2);}
-.wf-card.sel{background:var(--s2);border-left-color:var(--acc);}
-.wf-card .name{
-  font-family:'IBM Plex Mono',monospace;font-size:12.5px;font-weight:500;
-  color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-}
-.wf-card .desc{font-size:11.5px;color:var(--tx2);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.wf-card .badges{display:flex;gap:6px;margin-top:5px;align-items:center;flex-wrap:wrap;}
-.badge{font-size:10px;padding:2px 7px;border-radius:4px;font-weight:600;}
-.b-EQ{background:#1e293b;color:var(--eq);} .b-FI{background:#122217;color:var(--fi);}
-.b-ETF{background:#231729;color:var(--etf);} .b-MF{background:#272517;color:var(--mf);}
-.b-ESG{background:#122525;color:var(--esg);} .b-FEED{background:#251717;color:var(--feed);}
-.b-REF{background:#1d1729;color:var(--ref);} .b-RECON{background:#252117;color:var(--ylw);}
-.b-TEST{background:#1a1a1a;color:#888;} .b-OTHER{background:#1a1a1a;color:#888;}
-.b-tag{font-size:9px;text-transform:uppercase;letter-spacing:.3px;}
-.b-prod{background:#0d2818;color:var(--grn);} .b-test{background:#2a1c0d;color:var(--org);}
-.b-shadow{background:#1a0d2a;color:var(--acc2);} .b-old{background:#1a1a1a;color:#666;}
-
-.match-hl{background:rgba(56,189,248,.2);color:var(--acc);border-radius:2px;padding:0 1px;}
-
-.detail-area{flex:1;display:flex;flex-direction:column;overflow:hidden;}
-
-.graph-zone{
-  flex:1;position:relative;overflow:hidden;background:
-    radial-gradient(circle at 50% 50%, #111d2e 0%, var(--bg) 70%);
-}
-.graph-zone canvas{display:block;}
-
-/* Graph legend */
-.graph-legend{
-  position:absolute;bottom:28px;left:16px;
-  display:flex;gap:14px;align-items:center;
-  font-size:10px;color:var(--tx3);font-family:'IBM Plex Mono',monospace;
-  pointer-events:none;
-}
-.gl-item{display:flex;align-items:center;gap:5px;}
-.gl-dot{width:8px;height:8px;border-radius:50%;}
-
-.detail-panel{
-  height:300px;min-height:160px;border-top:1px solid var(--bd);
-  overflow-y:auto;padding:20px 28px;background:var(--s1);
-}
-.dp-name{font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600;color:var(--acc);}
-.dp-desc{font-size:13px;color:var(--tx2);margin:4px 0 12px;}
-.dp-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
-.dp-field{background:var(--s2);border-radius:6px;padding:8px 12px;}
-.dp-field .l{font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px;}
-.dp-field .v{font-size:12px;color:var(--tx);margin-top:2px;word-break:break-all;}
-.dp-field .v code{font-family:'IBM Plex Mono',monospace;font-size:11px;}
-
-.dp-acts-title{font-size:11px;font-weight:600;color:var(--acc);text-transform:uppercase;letter-spacing:.8px;margin:12px 0 6px;}
-.dp-act{
-  display:inline-flex;align-items:center;gap:6px;padding:4px 10px;
-  background:var(--s2);border-radius:5px;border:1px solid var(--bd);
-  margin:2px 3px 2px 0;font-size:11px;
-}
-.dp-act .at{color:var(--cyn);font-weight:500;}
-.dp-act .an{color:var(--tx2);font-family:'IBM Plex Mono',monospace;font-size:10px;}
-
-/* Excel meta pills */
-.pill-col{
-  display:inline-block;font-size:10px;padding:2px 7px;border-radius:4px;
-  background:var(--s3);color:var(--tx2);margin:2px 2px 2px 0;
-}
-.pill-fql{
-  display:inline-block;font-size:10px;padding:2px 7px;border-radius:4px;
-  background:rgba(34,211,238,.08);color:var(--cyn);border:1px solid rgba(34,211,238,.2);
-  margin:2px 2px 2px 0;font-family:'IBM Plex Mono',monospace;
-}
-.pill-ofdb{
-  display:inline-block;font-size:10px;padding:2px 7px;border-radius:4px;
-  background:rgba(129,140,248,.08);color:var(--acc2);border:1px solid rgba(129,140,248,.2);
-  margin:2px 2px 2px 0;font-family:'IBM Plex Mono',monospace;font-size:9px;
-}
-
-.empty-msg{
-  display:flex;align-items:center;justify-content:center;height:100%;
-  color:var(--tx3);font-size:14px;text-align:center;flex-direction:column;gap:8px;
-}
-.empty-msg .em-icon{font-size:40px;opacity:.3;}
-
-.resize-handle{height:4px;cursor:ns-resize;background:var(--bd);transition:background .15s;}
-.resize-handle:hover{background:var(--acc);}
-  /* Toggle switch for formula display */
-.formula-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 11px;
-  color: var(--tx2);
-  margin-left: 12px;
-  cursor: pointer;
-  user-select: none;
-}
-.formula-toggle input {
-  width: 32px;
-  height: 16px;
-  appearance: none;
-  background: var(--s3);
-  border-radius: 8px;
-  position: relative;
-  cursor: pointer;
-  transition: background .2s;
-}
-.formula-toggle input:checked {
-  background: var(--acc);
-}
-.formula-toggle input::before {
-  content: '';
-  position: absolute;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: var(--tx);
-  top: 2px;
-  left: 2px;
-  transition: transform .2s;
-}
-.formula-toggle input:checked::before {
-  transform: translateX(16px);
-}
-
-/* Formula display styles */
-.pill-col.expanded {
-  display: block;
-  max-width: 100%;
-  white-space: normal;
-  word-break: break-all;
-  margin: 4px 0;
-  padding: 6px 10px;
-  background: var(--s2);
-  border-left: 2px solid var(--cyn);
-}
-.pill-col.expanded .formula-full {
-  display: block;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 9px;
-  color: var(--tx3);
-  margin-top: 4px;
-  line-height: 1.4;
-}
-
+#content::-webkit-scrollbar,#sidebar::-webkit-scrollbar{width:4px!important;}
+#content::-webkit-scrollbar-track,#sidebar::-webkit-scrollbar-track{background:transparent!important;}
+#content::-webkit-scrollbar-thumb,#sidebar::-webkit-scrollbar-thumb{background:#e0d5be!important;border-radius:2px!important;}
+.section.visible{animation:fi 0.2s ease!important;}
+@keyframes fi{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.tip-card{animation:ci 0.18s ease both!important;}
+@keyframes ci{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:none}}
 </style>
 </head>
 <body>
+<div id="app">
 
-<div class="topbar">
-  <div class="logo">EFG_QNT <span>/ Workflow GPS</span></div>
-  <div class="search-wrap">
-    <span class="icon">⌕</span>
-    <input id="q" placeholder="Search: display, country | delta, risk | country..." autofocus />
-    <span class="or-badge" id="orBadge">OR</span>
-    <span class="hint">↵</span>
+<div id="topbar">
+  <div class="t-wordmark"><div class="t-mark">F</div>FactSet</div>
+  <div class="t-sep"></div>
+  <div class="t-path">EMEA Customer Success &nbsp;/&nbsp; <strong>NPS Playbook</strong></div>
+  <div class="t-right">
+    <span class="t-badge">Internal</span>
+    <div class="t-avatar">YB</div>
   </div>
-  <div class="pills" id="pills"></div>
 </div>
 
-<div class="main">
-  <div class="results">
-    <div class="results-header">
-      <span id="count">— workflows</span>
-      <span style="font-size:11px;color:var(--tx3)" id="modeLabel">AND mode</span>
+<div id="layout">
+  <nav id="sidebar">
+    <div class="s-section" style="margin-top:0">Knowledge</div>
+    <button class="nav-btn active" onclick="nav('tips',this)"><span class="nav-icon">📖</span> Best practices</button>
+    <button class="nav-btn" onclick="nav('agent',this)"><span class="nav-icon">✦</span> Ask the agent</button>
+    <button class="nav-btn" onclick="nav('submit',this)"><span class="nav-icon">＋</span> Submit a tip</button>
+    <div class="s-section">Analytics</div>
+    <button class="nav-btn" onclick="nav('stats',this)"><span class="nav-icon">◫</span> Dashboard</button>
+    <button class="nav-btn" onclick="nav('leaderboard',this)"><span class="nav-icon">↑</span> Contributors</button>
+    <div class="s-mini">
+      <div class="s-mini-title">Playbook stats</div>
+      <div class="s-mini-row"><span class="s-mini-l">Total tips</span><span class="s-mini-v" id="sb-total">—</span></div>
+      <div class="s-mini-row"><span class="s-mini-l">Pending review</span><span class="s-mini-v" id="sb-pending">—</span></div>
+      <div class="s-mini-row"><span class="s-mini-v" id="sb-top" style="font-size:11px!important;color:#9e8c6a!important;font-weight:400!important"></span></div>
     </div>
-    <div class="results-list" id="list"></div>
-  </div>
-  <div class="detail-area">
-    <div class="graph-zone" id="graphZone">
-      <canvas id="cv"></canvas>
-      <div class="graph-legend" id="graphLegend" style="display:none">
-        <div class="gl-item"><div class="gl-dot" style="background:#60a5fa;opacity:.5"></div>Upstream</div>
-        <div class="gl-item"><div class="gl-dot" style="background:#fff"></div>Selected</div>
-        <div class="gl-item"><div class="gl-dot" style="background:#34d399;opacity:.7"></div>Downstream</div>
-        <div class="gl-item" style="margin-left:8px;color:var(--tx3)">scroll=zoom · drag=pan · click=navigate</div>
+  </nav>
+
+  <div id="main">
+    <div id="pheader">
+      <div>
+        <div id="ptitle">Best practices</div>
+        <div id="psub" id="psub">Loading…</div>
       </div>
     </div>
-    <div class="resize-handle" id="resizeH"></div>
-    <div class="detail-panel" id="detailPanel">
-      <div class="empty-msg"><div class="em-icon">⌕</div>Search or click a workflow to see its dependency graph and details.</div>
+
+    <div id="content">
+
+      <!-- TIPS -->
+      <div class="section visible" id="s-tips">
+        <div class="search-wrap">
+          <span class="search-icon">🔍</span>
+          <input class="search-inp" id="searchInp" placeholder="Search tips, products, situations…" oninput="onSearch(this.value)"/>
+        </div>
+        <div class="pill-row" id="pillRow"></div>
+        <div id="tips-grid"></div>
+      </div>
+
+      <!-- AGENT -->
+      <div class="section" id="s-agent">
+        <div class="agent-wrap">
+          <div class="agent-box">
+            <div class="agent-hdr">
+              <div class="a-dot"></div>
+              <div class="a-title">Playbook agent</div>
+              <div class="a-sub">Coming soon</div>
+            </div>
+            <div class="agent-body">
+              <div class="agent-placeholder">
+                <div class="pl-label">Under construction</div>
+                <div class="pl-icon">✦</div>
+                <p>The AI-powered agent will surface targeted tips and peer benchmarks based on a client's NPS score, usage profile, and firm type.<br><br>For now, browse the <strong>Best practices</strong> library and filter by category.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUBMIT -->
+      <div class="section" id="s-submit">
+        <div class="form-wrap">
+          <div class="f-card">
+            <div class="f-hdr">
+              Share a best practice
+              <div class="f-hdr-sub">Tips are saved locally and visible immediately. Share the exported JSON with the team admin to publish globally.</div>
+            </div>
+            <div class="f-body">
+              <div class="f-row">
+                <label class="f-label">Your name</label>
+                <input class="f-ctrl" id="fname" placeholder="e.g. Younes B."/>
+              </div>
+              <div class="f-row">
+                <label class="f-label">Category</label>
+                <select class="f-ctrl" id="fcat">
+                  <option value="speed">Speed</option>
+                  <option value="stability">Stability / workaround</option>
+                  <option value="recovery">Client recovery</option>
+                  <option value="ux">UX / training</option>
+                </select>
+              </div>
+              <div class="f-row">
+                <label class="f-label">Title <span>— one clear sentence</span></label>
+                <input class="f-ctrl" id="ftit" placeholder="e.g. Schedule PA runs at off-peak hours"/>
+              </div>
+              <div class="f-row">
+                <label class="f-label">What did you do? What was the result?</label>
+                <textarea class="f-ctrl" id="fbod" placeholder="Describe the situation, the exact action taken, and the impact on client satisfaction. Include the client firm type if relevant."></textarea>
+              </div>
+              <div class="f-row">
+                <label class="f-label">Firm type <span>— optional</span></label>
+                <select class="f-ctrl" id="ffirm">
+                  <option value="">Any</option>
+                  <option value="Asset Manager">Asset Manager</option>
+                  <option value="Private Bank / Wealth">Private Bank / Wealth</option>
+                  <option value="Hedge Fund">Hedge Fund</option>
+                  <option value="Insurance">Insurance</option>
+                  <option value="Dealmaker / IB">Dealmaker / IB</option>
+                </select>
+              </div>
+              <div class="f-actions">
+                <button class="btn-gold" onclick="sub()">Submit tip</button>
+                <div class="f-ok" id="fok">✓ Tip saved — visible in Best practices now.</div>
+                <div class="f-err" id="ferr">Please fill in name, title, and description.</div>
+              </div>
+              <div class="pending-note">
+                💡 <strong>How sharing works:</strong> Tips you submit are saved in your browser and visible to you immediately. To share them with the full EMEA team, use the <strong>Export tips</strong> button in the Dashboard and send the file to the playbook admin for global publication.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STATS -->
+      <div class="section" id="s-stats">
+        <div class="stats-grid" id="statsGrid"></div>
+        <div class="sec-title">Tips by category</div>
+        <div class="bar-chart" id="barChart"></div>
+        <div style="margin-top:1.5rem!important;">
+          <div class="sec-title">Actions</div>
+          <div style="display:flex!important;gap:10px!important;flex-wrap:wrap!important;">
+            <button class="btn-gold" onclick="exportTips()">Export submitted tips (JSON)</button>
+            <button class="btn-gold" style="background:#9e8c6a!important;" onclick="clearSubmitted()">Clear my submissions</button>
+          </div>
+          <p style="font-size:11px!important;color:#b0a088!important;margin-top:8px!important;">Export your locally-submitted tips as JSON and send to the team admin to publish them globally.</p>
+        </div>
+      </div>
+
+      <!-- LEADERBOARD -->
+      <div class="section" id="s-leaderboard">
+        <div style="font-size:12px!important;color:#9e8c6a!important;margin-bottom:1rem!important;">Consultants who contributed the most validated tips.</div>
+        <div class="lboard" id="lb"></div>
+      </div>
+
     </div>
   </div>
 </div>
+</div>
 
-<script src="excel_meta.js"></script>
-<script src="workflows.js"></script>
 <script>
+// ─── SEED DATA ────────────────────────────────────────────────
+const TIPS_SEED = [
+  // SPEED
+  {c:'speed', t:'Schedule PA runs during off-peak hours', a:'Mehdi L.', s:5,
+   d:'Coordinate with the client to run heavy Portfolio Analytics calculations before 8:00 AM or after 6:00 PM CET. In practice with strategic accounts, this reduced perceived latency by up to 60% with zero product change. Propose it as a "performance optimisation" — clients receive it as a pro tip, not a workaround.'},
+  {c:'speed', t:'Split grouping hierarchies deeper than 4 levels', a:'Elisa F.', s:5,
+   d:'Grouping hierarchies deeper than 4 levels force full re-computation on any filter change. Split into two separate PA documents linked by a hyperlink in Publisher. The client sees one seamless experience; the engine processes two lighter ones. Especially effective for Wealth clients with complex model portfolio structures.'},
+  {c:'speed', t:'Replace inline FQL columns with pre-computed custom column sets', a:'Zoé L.', s:4,
+   d:'Inline FQL calculated columns re-execute on every page load and filter change. Replace them with pre-computed custom column sets built at the data layer. Eliminates repeated query execution. Most impactful for risk factor columns that are static day-to-day — typical use case is fixed income attribution at IAM accounts.'},
+  {c:'speed', t:'Pre-load the workspace 15 minutes before any client call', a:'Thomas R.', s:5,
+   d:'Open FactSet, load the relevant portfolios, and run the initial PA calculations before the client joins the call. Zero load time during the session changes perception dramatically — clients associate speed with product quality, not with preparation time. This is especially critical for Tier 3 operators who benchmark every second against Bloomberg.'},
+  {c:'speed', t:'Use Publisher scheduled reports for daily client deliveries', a:'Mehdi L.', s:5,
+   d:'For clients who check the same report every morning, set up Publisher to auto-send it at 7:00 AM local time. They receive it before they arrive at the office. Eliminates all "why is it slow this morning" calls and positions the consultant as proactively organised. Set-up time: 20 minutes. Impact: immediate.'},
+  {c:'speed', t:'Reduce date range for exploratory analysis, extend only for final output', a:'Younes B.', s:4,
+   d:'Train clients to start any PA analysis with a 1-year lookback, then extend to 3 or 5 years only when preparing final output. This single behavioural change halved perceived wait time for a Citigroup private banking team. Frame it as "working iteratively" — not as a workaround for performance.'},
+  {c:'speed', t:'Reduce PA universe to regional scope before running global screens', a:'Sasha K.', s:4,
+   d:'When clients complain about slow screening, check if they are running global universes when they only need regional coverage. Narrowing from World to Europe on a stock screener cut load time by 70% for an Aberdeen PM. Ask: "Do you actually need all 45,000 securities in scope for this analysis?"'},
+  {c:'speed', t:'Audit unused data subscriptions causing background load', a:'Anya M.', s:3,
+   d:'Heavy PA slowdowns are sometimes caused by the platform loading data for products the client\'s firm is subscribed to but the individual user never accesses. A data subscription audit with their IT contact can free up loading capacity. Requires coordination with the account team but has produced material speed gains on large enterprise seats.'},
 
-// Enrich search with EXCEL_META
-W.forEach(w => {
-  w.acts.forEach(a => {
-    if (a.t !== "Excel Batch" || !a.d) return;
-    const match = a.d.match(/Template\s+([\w./:$#-]+)/i);
-    if (!match) return;
-    const tplKey = match[1].split('/').pop().toUpperCase();
-    const meta = EXCEL_META[tplKey];
-    if (!meta) return;
-    const extra = [...(meta.cols||[]),...(meta.funcs||[]),...(meta.ofdb||[]),...(meta.vars||[])].join(' ').toLowerCase();
-    w.search += ' ' + extra;
-  });
-});
+  // STABILITY
+  {c:'stability', t:'Excel backup macro: timestamped static snapshot before every live session', a:'Ragavan S.', s:5,
+   d:'Before any live client session involving heavy SPAR or Publisher output, run a VBA macro that saves a timestamped static snapshot of the current output to a shared folder. If the session crashes mid-demo, open the snapshot — the client never notices. Share the macro with the client post-session as a "free tool". Particularly valuable for Wealth clients who present to end-investors live.'},
+  {c:'stability', t:'Postmortem email within 24 hours of any system failure', a:'Jennifer W.', s:4,
+   d:'After any system failure during a client interaction, send a structured postmortem email within 24 hours: (1) what happened, (2) client impact, (3) root cause if known, (4) next steps with ETA. This transforms a negative experience into a trust-building moment. Clients remember how you communicated, not only that it failed.'},
+  {c:'stability', t:'Switch to browser-based Workstation instantly when Excel add-in fails', a:'Max D.', s:5,
+   d:'When the Excel add-in is misbehaving before a critical session, pivot to the browser-based Workstation immediately. Same data, zero dependency on local Office configuration. Walk the client through the pivot as "here is how we can access this from anywhere" — it doubles as a useful product demo rather than an emergency workaround.'},
+  {c:'stability', t:'Record a screen capture when reporting a client-facing bug', a:'Jennifer W.', s:4,
+   d:'When a client reports a bug, ask them to share their screen and record the reproduction steps with Loom or equivalent. FactSet Support triages significantly faster with a recording than with a text description. Include the recording link in the support ticket. In practice this has cut support resolution time roughly in half for complex, hard-to-reproduce issues.'},
+  {c:'stability', t:'Keep an offline PDF backup of the previous week\'s key reports', a:'Elisa F.', s:4,
+   d:'Save a PDF snapshot of the previous week\'s key deliverables in a shared folder accessible offline. If connectivity fails during a client call, you can still walk through last week\'s numbers and pivot to strategic discussion. Positions the outage as a non-event rather than a lost hour.'},
+  {c:'stability', t:'Maintain a second browser profile pre-loaded with FactSet for client meetings', a:'Ragavan S.', s:3,
+   d:'Set up a dedicated Chrome profile with FactSet pre-authenticated and key tabs pre-loaded. If your primary setup develops issues mid-session, swap to this profile in seconds. Clients do not notice. Takes 10 minutes to configure; eliminates one category of meeting-day risk entirely.'},
 
-const IDX = {}; W.forEach((w,i) => IDX[w.id]=i);
-const SILO = {EQ:'Equity',FI:'Fixed Income',ETF:'ETF',MF:'Mutual Funds',ESG:'ESG',FEED:'Data Feeds',REF:'Reference',RECON:'Recon',TEST:'Test',OTHER:'Other'};
-const SCOL = {EQ:'#60a5fa',FI:'#4ade80',ETF:'#c084fc',MF:'#facc15',ESG:'#2dd4bf',FEED:'#fb7185',REF:'#a78bfa',RECON:'#fbbf24',TEST:'#666',OTHER:'#666'};
+  // RECOVERY
+  {c:'recovery', t:'Frame the post-NPS outreach as a "working session", not a follow-up call', a:'Max D.', s:5,
+   d:'Do not name the post-detractor outreach a "follow-up call" — call it a "30-minute working session". Arrive with 2–3 prepared solutions to the specific issue they flagged. End the call by asking for a check-in score in 60 days. This resets the emotional state, creates accountability on both sides, and gives the client a concrete reason to re-engage.'},
+  {c:'recovery', t:'Identify satisfied users at the same account and solicit feedback in parallel', a:'Younes B.', s:4,
+   d:'For Strategic accounts with large user bases, identify the 3–4 power users who are clearly satisfied — high engagement, no open cases. Ask them informally if they would be willing to fill in an NPS survey. This raises the average score and creates internal advocates who counterbalance the detractor narrative within the account. Most effective at Tier 3 accounts where one vocal detractor skews the whole picture.'},
+  {c:'recovery', t:'Deliver one concrete quick win within 48 hours of a detractor score', a:'Zoé L.', s:5,
+   d:'Respond to a detractor NPS within 48 hours with one tangible action — not just an acknowledgement. Fix a PA report, deliver a training clip, send a relevant workaround. The speed of the response reshapes the client\'s perception more than the content of it. Clients who feel heard within 48 hours are significantly less likely to churn than those contacted after a week.'},
+  {c:'recovery', t:'Involve the manager within 72 hours on Strategic Tier 3 accounts', a:'Younes B.', s:4,
+   d:'For Tier 3 users at Strategic accounts, loop in your manager within 72 hours of a detractor score, even if the issue seems routine. A manager touchpoint from someone the client has not spoken to before signals organisational commitment beyond the day-to-day relationship. Do not wait for escalation — proactive manager involvement is received very differently from reactive escalation.'},
+  {c:'recovery', t:'Close every recovery call with a named 60-day checkpoint', a:'Jennifer W.', s:5,
+   d:'At the end of every recovery call, say: "I would like to follow up with you in 60 days to see if these changes have made a difference — is that okay?" It creates accountability, signals long-term commitment, and often converts into the next positive NPS score. Clients who agree to a checkpoint are more likely to respond to the next survey cycle.'},
+  {c:'recovery', t:'Review Salesforce usage data before every recovery call', a:'Thomas R.', s:4,
+   d:'Before the recovery call, spend 20 minutes reviewing the client\'s product usage in Salesforce. Know what they actually open, how often, and what they have not touched. When you arrive with recommendations that map to their real workflow — not a generic training catalogue — clients immediately feel understood rather than managed. The gap between what clients think they use and what they actually use is almost always wider than expected.'},
 
-// Graph directional colors
-const GCOL_UP   = '#60a5fa'; // upstream  — cool blue
-const GCOL_SEL  = '#ffffff'; // selected  — white
-const GCOL_DOWN = '#34d399'; // downstream — green
+  // UX
+  {c:'ux', t:'Never defend against Bloomberg directly — replicate the workflow live instead', a:'Elisa F.', s:5,
+   d:'When a client says "Bloomberg does this better", never defend FactSet in the abstract. Ask: "Can you show me the exact Bloomberg workflow you are describing?" Then map every step to the FactSet equivalent in real time, side by side. The gap is almost always discoverability, not capability. End the session with: "Now let\'s build you a shortcut so you are one click away." This exercise resolves the majority of Bloomberg comparison complaints in a single session.'},
+  {c:'ux', t:'Build a personalised navigation cheat sheet for each client role', a:'Mehdi L.', s:4,
+   d:'Create a one-page PDF with the 10 most-used navigation paths for each client role — Portfolio Manager, Risk Analyst, Operations. Use screenshots from their actual workspace, not generic product documentation. Deliver it in the next session. Retention is dramatically higher than generic training because every step maps to their real workflow. Update it annually or after any major UI release.'},
+  {c:'ux', t:'Recreate the client\'s Bloomberg workspace layout in FactSet at migration', a:'Max D.', s:4,
+   d:'If a client is migrating from Bloomberg or has Bloomberg fatigue, ask for a screenshot of their Bloomberg layout or morning routine. Recreate it as closely as possible in a FactSet Workspace and deliver it in the next session. The familiarity reduces "clunkiness" complaints immediately — clients are no longer learning a new tool, they are finding a familiar one in a new place.'},
+  {c:'ux', t:'Treat MFA friction as a UX complaint in disguise — fix the trusted device setup', a:'Anya M.', s:4,
+   d:'A surprising share of "UX is clunky" and "it takes too long to log in" complaints are MFA fatigue in disguise. Walk the client through setting FactSet as a trusted application on their primary device and mobile. Reduces re-authentication friction for daily users immediately. Takes 5 minutes per user and can eliminate an entire category of recurring dissatisfaction.'},
+  {c:'ux', t:'Build role-specific watchlists matching the client\'s morning routine', a:'Mehdi L.', s:5,
+   d:'Work with the client to pre-configure a morning watchlist that mirrors their daily ritual. The PM sees P&L attribution and top movers at a glance; the Risk Analyst sees VaR summary and limit breaches. When FactSet opens to precisely what they need on the first click, "clunky" complaints drop noticeably within the first month. Frame this as a personalisation session, not a training session.'},
+  {c:'ux', t:'Record a 3-minute Loom walkthrough instead of writing instructions', a:'Sasha K.', s:4,
+   d:'When a client asks "how do I find X", do not write a step-by-step email — record a 3-minute Loom screen walkthrough and share the link. Clients can rewatch it at their own pace. In practice this cuts repeat "how do I" questions by roughly 80% and positions the consultant as proactively helpful. The recording doubles as onboarding material for new users at the same account.'},
+  {c:'ux', t:'Use the "mirror training" technique for deep UX complaints', a:'Elisa F.', s:5,
+   d:'Ask the client to share their screen and show you exactly what frustrates them, step by step. Do not interrupt. Then, in a second window, replicate every step in FactSet in real time. Most "FactSet cannot do this" complaints are resolved during this exercise — the client discovers the capability exists and the consultant identifies the discoverability gap. This technique works particularly well for Tier 3 operators who use the product daily and have formed strong mental models.'},
+];
 
-let sel = null, siloF = null, qStr = '';
+// ─── LOCAL STORAGE ────────────────────────────────────────────
+const LS_KEY = 'nps_tips_v1';
 
-// Pills
-const pillsEl = document.getElementById('pills');
-const siloCounts = {};
-W.forEach(w => siloCounts[w.s]=(siloCounts[w.s]||0)+1);
-let ph = '<button class="pill on" data-s="all">All</button>';
-Object.entries(siloCounts).sort((a,b)=>b[1]-a[1]).forEach(([s,c])=>{
-  ph += `<button class="pill" data-s="${s}">${SILO[s]||s} ${c}</button>`;
-});
-pillsEl.innerHTML = ph;
-pillsEl.onclick = e => {
-  const b=e.target.closest('.pill'); if(!b) return;
-  siloF = b.dataset.s==='all'?null:b.dataset.s;
-  pillsEl.querySelectorAll('.pill').forEach(p=>p.classList.remove('on'));
-  b.classList.add('on');
-  renderList();
+function getSubmitted() {
+  try { return JSON.parse(localStorage.getItem(LS_KEY) || '[]'); }
+  catch(e) { return []; }
+}
+function saveSubmitted(arr) {
+  localStorage.setItem(LS_KEY, JSON.stringify(arr));
+}
+function getAllTips() {
+  return [...TIPS_SEED, ...getSubmitted()];
+}
+
+// ─── STATE ────────────────────────────────────────────────────
+let cf = 'all', oi = null, sq = '';
+const CATS = ['speed','stability','recovery','ux'];
+const CAT_LABELS = {speed:'Speed', stability:'Stability', recovery:'Recovery', ux:'UX'};
+const PM = {
+  tips:['Best practices','filterable library'],
+  agent:['Ask the agent','AI assistant — coming soon'],
+  submit:['Submit a tip','Contribute to the playbook'],
+  stats:['Dashboard','Usage & content analytics'],
+  leaderboard:['Contributors','Top contributors'],
 };
 
-// Search — AND by default, | for OR groups
-const qEl = document.getElementById('q');
-const orBadge = document.getElementById('orBadge');
-const modeLabel = document.getElementById('modeLabel');
-
-qEl.oninput = () => { qStr = qEl.value.trim().toLowerCase(); renderList(); };
-
-function parseQuery(raw) {
-  // Split on | to get OR groups; each group is AND terms
-  const groups = raw.split('|').map(g => g.trim().split(/\s+/).filter(t=>t.length>=2));
-  const isOR = groups.length > 1;
-  orBadge.classList.toggle('visible', isOR);
-  modeLabel.textContent = isOR ? 'OR mode' : 'AND mode';
-  return { groups, isOR };
+// ─── RENDER PILLS ─────────────────────────────────────────────
+function renderPills() {
+  const tips = getAllTips();
+  const counts = {all: tips.length};
+  CATS.forEach(c => counts[c] = tips.filter(t => t.c === c).length);
+  const row = document.getElementById('pillRow');
+  const pills = [['all','All'], ...CATS.map(c => [c, CAT_LABELS[c]])];
+  row.innerHTML = pills.map(([val, label]) =>
+    `<button class="pill${cf===val?' active':''}" onclick="ft('${val}',this)">
+      ${label}<span class="pill-ct">${counts[val]}</span>
+    </button>`
+  ).join('');
 }
 
-function matchesQuery(w, groups, isOR) {
-  if (groups.length === 0 || groups.every(g=>g.length===0)) return true;
-  const check = g => g.every(t => w.search.includes(t));
-  return isOR ? groups.some(check) : groups.every(g => check(g));
-}
-
-function score(w, groups, isOR) {
-  const terms = groups.flat();
-  if(!terms.length) return w.tag==='prod' ? 1 : 0;
-  let s = 0;
-  const id = w.id.toLowerCase(), desc = (w.desc||'').toLowerCase();
-  for(const t of terms) {
-    if(id.includes(t)) s += 10;
-    if(desc.includes(t)) s += 5;
-    if(w.search.includes(t)) s += 2;
-  }
-  if(w.tag==='prod') s += .5;
-  return s;
-}
-
-function renderList() {
-  const el = document.getElementById('list');
-  const { groups, isOR } = parseQuery(qStr);
-  const terms = groups.flat();
-
-  let filtered = W.filter(w => {
-    if(siloF && w.s!==siloF) return false;
-    return matchesQuery(w, groups, isOR);
+// ─── RENDER TIPS ─────────────────────────────────────────────
+function renderTips() {
+  const tips = getAllTips();
+  const s = sq.toLowerCase();
+  const list = tips.map((t, i) => ({...t, idx:i})).filter(t => {
+    const mc = cf === 'all' || t.c === cf;
+    const ms = !s || t.t.toLowerCase().includes(s) || t.d.toLowerCase().includes(s) || (t.a||'').toLowerCase().includes(s);
+    return mc && ms;
   });
-  filtered.sort((a,b) => score(b,groups,isOR) - score(a,groups,isOR));
-  document.getElementById('count').textContent = filtered.length + ' workflows';
-
-  el.innerHTML = filtered.slice(0,120).map(w => {
-    let name = w.id, desc = w.desc||'';
-    if(terms.length) {
-      for(const t of terms) {
-        const re = new RegExp(`(${t.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`,'gi');
-        name = name.replace(re,'<span class="match-hl">$1</span>');
-        desc = desc.replace(re,'<span class="match-hl">$1</span>');
-      }
-    }
-    const depCount = (w.up||[]).length + (w.down||[]).length;
-    return `<div class="wf-card ${sel===w.id?'sel':''}" data-id="${w.id}">
-      <div class="name">${name}</div>
-      <div class="desc">${desc||'—'}</div>
-      <div class="badges">
-        <span class="badge b-${w.s}">${SILO[w.s]||w.s}</span>
-        <span class="badge b-tag b-${w.tag}">${w.tag}</span>
-        ${depCount?`<span style="font-size:10px;color:var(--tx3)">⛓ ${depCount}</span>`:''}
-        <span style="font-size:10px;color:var(--tx3)">${w.acts.length} steps</span>
+  const g = document.getElementById('tips-grid');
+  if (!list.length) {
+    g.innerHTML = '<div class="no-results">No tips match your search.</div>';
+    return;
+  }
+  g.innerHTML = '';
+  list.forEach((t, ai) => {
+    const el = document.createElement('div');
+    el.className = 'tip-card' + (oi === t.idx ? ' open' : '') + (t.pending ? ' pending-tip' : '');
+    el.style.animationDelay = (ai * 0.025) + 's';
+    const stars = t.s ? '★'.repeat(t.s) + '☆'.repeat(5 - t.s) : '— pending';
+    const pendingBadge = t.pending ? ' <span style="font-size:9px;color:#9a6020;background:#fef6ec;border:1px solid #f5dda8;border-radius:4px;padding:1px 5px;font-family:\'DM Sans\',sans-serif">pending review</span>' : '';
+    el.innerHTML = `
+      <div class="tip-top">
+        <div class="tip-title">${t.t}${pendingBadge}</div>
+        <span class="tip-tag tag-${t.c}">${CAT_LABELS[t.c]}</span>
       </div>
+      <div class="tip-meta"><span class="tip-stars">${stars}</span>&nbsp;${t.a || 'Anonymous'}</div>
+      <div class="tip-expand">
+        <div class="tip-expand-body">${t.d}</div>
+        ${t.firm ? `<div style="margin-top:8px;font-size:11px;color:#b0a088">Firm type: <strong style="color:#7a6435">${t.firm}</strong></div>` : ''}
+        <span class="tip-close" onclick="event.stopPropagation();closeC()">↑ Collapse</span>
+      </div>`;
+    el.onclick = () => { oi = oi === t.idx ? null : t.idx; renderTips(); };
+    g.appendChild(el);
+  });
+  updateSubHeader(list.length, tips.length);
+}
+
+function updateSubHeader(shown, total) {
+  const pending = getSubmitted().length;
+  let sub = `${total} tips`;
+  if (pending) sub += ` · ${pending} pending review`;
+  if (shown < total) sub += ` · showing ${shown}`;
+  document.getElementById('psub').textContent = sub;
+}
+
+function closeC() { oi = null; renderTips(); }
+
+function ft(f, btn) {
+  cf = f; oi = null;
+  document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  renderTips();
+}
+
+function onSearch(v) {
+  sq = v.trim();
+  oi = null;
+  renderTips();
+}
+
+// ─── SIDEBAR MINI ─────────────────────────────────────────────
+function updateSidebar() {
+  const tips = getAllTips();
+  const pending = getSubmitted().length;
+  const catCounts = {};
+  CATS.forEach(c => catCounts[c] = tips.filter(t => t.c === c).length);
+  const topCat = CATS.reduce((a,b) => catCounts[a] > catCounts[b] ? a : b);
+  document.getElementById('sb-total').textContent = tips.length;
+  document.getElementById('sb-pending').textContent = pending;
+  document.getElementById('sb-top').textContent = `Top: ${CAT_LABELS[topCat]} (${catCounts[topCat]})`;
+}
+
+// ─── SUBMIT ───────────────────────────────────────────────────
+function sub() {
+  const name = document.getElementById('fname').value.trim();
+  const title = document.getElementById('ftit').value.trim();
+  const body = document.getElementById('fbod').value.trim();
+  const cat = document.getElementById('fcat').value;
+  const firm = document.getElementById('ffirm').value;
+  const ok = document.getElementById('fok');
+  const err = document.getElementById('ferr');
+  ok.classList.remove('on'); err.classList.remove('on');
+  if (!name || !title || !body) { err.classList.add('on'); return; }
+  const tip = { c: cat, t: title, a: name, s: 0, d: body, firm: firm || '', pending: true, submittedAt: new Date().toISOString() };
+  const arr = getSubmitted();
+  arr.push(tip);
+  saveSubmitted(arr);
+  document.getElementById('fname').value = '';
+  document.getElementById('ftit').value = '';
+  document.getElementById('fbod').value = '';
+  document.getElementById('ffirm').value = '';
+  ok.classList.add('on');
+  setTimeout(() => ok.classList.remove('on'), 4000);
+  renderPills();
+  updateSidebar();
+}
+
+// ─── STATS ────────────────────────────────────────────────────
+function renderStats() {
+  const tips = getAllTips();
+  const submitted = getSubmitted();
+  const catCounts = {};
+  CATS.forEach(c => catCounts[c] = tips.filter(t => t.c === c).length);
+  const maxCat = Math.max(...Object.values(catCounts));
+  const topCat = CATS.find(c => catCounts[c] === maxCat);
+  document.getElementById('statsGrid').innerHTML = `
+    <div class="stat-card"><div class="stat-label">Total tips</div><div class="stat-value">${tips.length}</div><div class="stat-sub">${TIPS_SEED.length} validated + ${submitted.length} submitted</div></div>
+    <div class="stat-card"><div class="stat-label">Top category</div><div class="stat-value" style="font-size:22px;padding-top:3px">${CAT_LABELS[topCat]}</div><div class="stat-sub">${maxCat} tips</div></div>
+    <div class="stat-card"><div class="stat-label">Contributors</div><div class="stat-value">${buildLeaderboard().length}</div><div class="stat-sub">named consultants</div></div>
+    <div class="stat-card"><div class="stat-label">Pending review</div><div class="stat-value">${submitted.length}</div><div class="stat-sub">locally submitted</div></div>
+  `;
+  const catColors = {speed:'#c9a84c', stability:'#a0a040', recovery:'#dc7a7a', ux:'#7a7adc'};
+  document.getElementById('barChart').innerHTML = CATS.map(c => `
+    <div class="bar-row-s">
+      <div class="bar-label">${CAT_LABELS[c]}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.round(catCounts[c]/tips.length*100)}%;background:${catColors[c]}"></div></div>
+      <div class="bar-count">${catCounts[c]}</div>
+    </div>`).join('');
+}
+
+// ─── LEADERBOARD ─────────────────────────────────────────────
+function buildLeaderboard() {
+  const tips = getAllTips();
+  const counts = {};
+  tips.forEach(t => { if (t.a) counts[t.a] = (counts[t.a] || 0) + 1; });
+  return Object.entries(counts).sort((a,b) => b[1]-a[1]).map(([name, n]) => ({name, n}));
+}
+
+function renderLB() {
+  const lb = buildLeaderboard();
+  const max = lb[0]?.n || 1;
+  document.getElementById('lb').innerHTML = lb.map((l, i) => {
+    const initials = l.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    return `<div class="lb-row">
+      <div class="lb-rank${i>2?' s':''}">${i+1}</div>
+      <div class="lb-av">${initials}</div>
+      <div class="lb-name">${l.name}</div>
+      <div class="lb-bw"><div class="lb-bf" style="width:${Math.round(l.n/max*100)}%"></div></div>
+      <div class="lb-c">${l.n} tip${l.n!==1?'s':''}</div>
     </div>`;
   }).join('');
 }
 
-document.getElementById('list').onclick = e => {
-  const c = e.target.closest('.wf-card'); if(!c) return;
-  selectWf(c.dataset.id);
-};
-
-function selectWf(id) {
-  sel = id;
-  renderList();
-  renderDetail(id);
-  renderGraph(id);
+// ─── EXPORT / CLEAR ───────────────────────────────────────────
+function exportTips() {
+  const arr = getSubmitted();
+  if (!arr.length) { alert('No locally submitted tips to export.'); return; }
+  const blob = new Blob([JSON.stringify(arr, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'nps-tips-submitted.json'; a.click();
+  URL.revokeObjectURL(url);
 }
 
-// Detail panel
-function renderDetail(id) {
-  const dp = document.getElementById('detailPanel');
-  const w = W[IDX[id]]; if(!w) return;
-
-  // Build Excel meta section
-  const xlMeta = w.acts
-    .filter(a => a.t === 'Excel Batch' && a.d)
-    .map(a => {
-      const match = a.d.match(/Template\s+([\w./:$#-]+)/i);
-      if(!match) return null;
-      const key = match[1].split('/').pop().toUpperCase();
-      return EXCEL_META[key] ? {key, meta: EXCEL_META[key]} : null;
-    })
-    .filter(Boolean);
-
-const xlHtml = xlMeta.length ? `
-  <div style="display: flex; align-items: center; margin-top: 16px;">
-    <div class="dp-acts-title" style="margin: 0;">📊 Excel Batch File</div>
-    <label class="formula-toggle">
-      <input type="checkbox" id="formulaToggle">
-      <span>Show full formulas</span>
-    </label>
-  </div>
-` + xlMeta.map(({key, meta}) => {
-    const colMap = meta.col_map || {};
-
-    // Columns: show each col pill with its FQL badge if available
-    const colsHtml = meta.cols.map(c => {
-      const mapped = colMap[c];
-      const fqlBadge = mapped && mapped.fql
-        ? `<span style="font-size:9px;padding:1px 5px;border-radius:3px;background:rgba(34,211,238,.12);color:var(--cyn);margin-left:4px;font-family:'IBM Plex Mono',monospace;vertical-align:middle">${mapped.fql}</span>`
-        : '';
-      const formula = mapped && mapped.formula 
-        ? mapped.formula.replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-        : '';
-      const formulaHtml = formula
-        ? `<span class="formula-full" style="display:none;">${formula}</span>`
-        : '';
-      
-      return `<span class="pill-col" data-col="${c}">${c}${fqlBadge}${formulaHtml}</span>`;
-    }).join('');
-
-    // OFDB paths (unchanged)
-    const ofdbHtml = meta.ofdb.length ? `
-      <div style="margin-top:8px">
-        <div style="font-size:10px;color:var(--acc2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">OFDB Paths</div>
-        <div>${meta.ofdb.map(o=>`<span class="pill-ofdb">${o}</span>`).join('')}</div>
-      </div>` : '';
-
-    return `
-      <div style="margin-top:12px;">
-        <div style="font-size:11px;color:var(--acc);font-weight:600;margin-bottom:6px;">
-          ${key}
-          <span style="font-weight:400;color:var(--tx3);font-size:10px;margin-left:8px">${meta.cols.length} columns · ${Object.keys(colMap).length} mapped · ${meta.ofdb.length} OFDB paths</span>
-        </div>
-        <div style="font-size:10px;color:var(--tx3);margin-bottom:6px;font-style:italic">
-          Toggle above to show/hide full formulas · cyan badge = FQL function
-        </div>
-        <div class="cols-container" style="margin-bottom:6px">${colsHtml}</div>
-        ${ofdbHtml}
-      </div>
-    `;
-  }).join('') : '';
-
-
-  dp.innerHTML = `
-    <div class="dp-name">${w.id}</div>
-    <div class="dp-desc">${w.desc||'No description'}</div>
-    <div class="dp-grid" style="grid-template-columns:1fr 1fr;gap:12px 24px;margin-bottom:16px">
-      <div class="dp-field">
-        <div class="l">Schedule / Trigger</div>
-        <div class="v"><code>${(w.sched||'—').trim()}</code></div>
-      </div>
-      <div class="dp-field">
-        <div class="l">Dependencies</div>
-        <div class="v">${(w.up||[]).length} up · ${(w.down||[]).length} down</div>
-      </div>
-    </div>
-
-    <div class="dp-acts-title">Pipeline — ${w.acts.length} steps</div>
-    <div>${w.acts.map((a,i)=>`<span class="dp-act"><span style="color:var(--tx3)">${i+1}.</span> <span class="at">${a.t}</span> <span class="an">${a.n}</span></span>`).join(' → ')}</div>
-    ${xlHtml}
-  `;
+function clearSubmitted() {
+  if (!confirm('Clear all your locally submitted tips? This cannot be undone.')) return;
+  localStorage.removeItem(LS_KEY);
+  renderPills(); renderTips(); updateSidebar(); renderStats(); renderLB();
 }
 
-// ── GRAPH ──────────────────────────────────────────────
-const cv = document.getElementById('cv');
-const ctx = cv.getContext('2d');
-let gNodes = [], gEdges = [], animFrame = null;
-let panX=0, panY=0, zoom=1, dragging=false, dragStart={x:0,y:0}, panStart={x:0,y:0};
-let hoveredNode = null;
-
-function resizeCanvas() {
-  const rect = document.getElementById('graphZone').getBoundingClientRect();
-  cv.width  = rect.width  * devicePixelRatio;
-  cv.height = rect.height * devicePixelRatio;
-  cv.style.width  = rect.width  + 'px';
-  cv.style.height = rect.height + 'px';
-  ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
-}
-window.addEventListener('resize', () => { resizeCanvas(); drawGraph(); });
-resizeCanvas();
-
-// Build graph with directional tagging
-function buildGraph(id) {
-  const visited = new Set();
-  const nodes = [], edges = [];
-
-  function walk(wid, depth, dir) {
-    if(visited.has(wid) || Math.abs(depth) > 6) return;
-    visited.add(wid);
-    const w = W[IDX[wid]]; if(!w) return;
-    // direction relative to selected: 'up', 'sel', 'down'
-    const role = wid === id ? 'sel' : depth < 0 ? 'up' : 'down';
-    nodes.push({id:wid, s:w.s, role, isSel:wid===id, depth, acts:w.acts.length, tag:w.tag});
-    if(dir !== 'up')   (w.down||[]).forEach(d => { edges.push({from:wid,to:d}); walk(d, depth+1, 'down'); });
-    if(dir !== 'down') (w.up  ||[]).forEach(u => { edges.push({from:u,to:wid}); walk(u, depth-1, 'up');   });
-  }
-  walk(id, 0, 'both');
-  return {nodes, edges};
+// ─── NAV ─────────────────────────────────────────────────────
+function nav(page, el) {
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('visible'));
+  document.getElementById('s-' + page).classList.add('visible');
+  document.getElementById('ptitle').textContent = PM[page][0];
+  document.getElementById('psub').textContent = PM[page][1];
+  if (page === 'stats') renderStats();
+  if (page === 'leaderboard') renderLB();
 }
 
-function layoutGraph(nodes) {
-  const rect = document.getElementById('graphZone').getBoundingClientRect();
-  const cw = rect.width, ch = rect.height;
-  const cx = cw / 2, cy = ch / 2;
-
-  const upLayers = {}, downLayers = {};
-  let selNode = null;
-
-  nodes.forEach(n => {
-    if (n.depth === 0) { selNode = n; return; }
-    if (n.depth < 0) {
-      const k = -n.depth;
-      if (!upLayers[k]) upLayers[k] = [];
-      upLayers[k].push(n);
-    } else {
-      if (!downLayers[n.depth]) downLayers[n.depth] = [];
-      downLayers[n.depth].push(n);
-    }
-  });
-
-  if (selNode) { selNode.x = cx; selNode.y = cy; }
-
-  // --- LAYOUT EN GRILLE (LAYERED) ---
-  const LAYER_WIDTH = Math.min(cw, ch) * 0.20;  // espacement horizontal entre colonnes
-  const NODE_SPACING = 70;                       // espacement vertical entre nodes
-
-  function placeLayer(layer, colIndex, direction) {
-    const count = layer.length;
-    const totalHeight = (count - 1) * NODE_SPACING;
-    const startY = cy - totalHeight / 2;
-    const xPos = direction === 'left' 
-      ? cx - colIndex * LAYER_WIDTH 
-      : cx + colIndex * LAYER_WIDTH;
-
-    layer.forEach((n, i) => {
-      n.x = xPos;
-      n.y = startY + i * NODE_SPACING;
-    });
-  }
-
-  Object.keys(upLayers).map(Number).sort().forEach(k => 
-    placeLayer(upLayers[k], k, 'left')
-  );
-  Object.keys(downLayers).map(Number).sort().forEach(k => 
-    placeLayer(downLayers[k], k, 'right')
-  );
-}
-// Toggle formula display
-document.getElementById('detailPanel').addEventListener('change', (e) => {
-  if (e.target.id === 'formulaToggle') {
-    const isExpanded = e.target.checked;
-    document.querySelectorAll('.pill-col').forEach(pill => {
-      const formula = pill.querySelector('.formula-full');
-      if (formula) {
-        if (isExpanded) {
-          pill.classList.add('expanded');
-          formula.style.display = 'block';
-        } else {
-          pill.classList.remove('expanded');
-          formula.style.display = 'none';
-        }
-      }
-    });
-  }
-});
-
-function renderGraph(id) {
-  const g = buildGraph(id);
-  gNodes = g.nodes;
-  gEdges = g.edges;
-  layoutGraph(gNodes);
-  panX = 0; panY = 0;
-
-  if (gNodes.length > 1) {
-    const rect = document.getElementById('graphZone').getBoundingClientRect();
-    const xs = gNodes.map(n=>n.x), ys = gNodes.map(n=>n.y);
-    const minX = Math.min(...xs)-60, maxX = Math.max(...xs)+60;
-    const minY = Math.min(...ys)-40, maxY = Math.max(...ys)+40;
-    const scaleX = rect.width  / (maxX - minX);
-    const scaleY = rect.height / (maxY - minY);
-    zoom = Math.min(scaleX, scaleY, 1.2);
-    panX = (rect.width  - (maxX + minX) * zoom) / 2;
-    panY = (rect.height - (maxY + minY) * zoom) / 2;
-  } else {
-    zoom = 1;
-  }
-
-  document.getElementById('graphLegend').style.display = gNodes.length > 1 ? 'flex' : 'none';
-  drawGraph();
-}
-
-function drawGraph() {
-  if(animFrame) cancelAnimationFrame(animFrame);
-  animFrame = requestAnimationFrame(_drawGraph);
-}
-
-function _drawGraph() {
-  const rect = document.getElementById('graphZone').getBoundingClientRect();
-  const cw = rect.width, ch = rect.height;
-  ctx.clearRect(0,0,cw,ch);
-  ctx.save();
-  ctx.translate(panX, panY);
-  ctx.scale(zoom, zoom);
-
-  const nodeMap = {};
-  gNodes.forEach(n => nodeMap[n.id] = n);
-
-  // Edges
-  gEdges.forEach(e => {
-    const from = nodeMap[e.from], to = nodeMap[e.to];
-    if(!from || !to) return;
-    ctx.beginPath();
-    const mx = (from.x + to.x) / 2;
-    ctx.moveTo(from.x, from.y);
-    ctx.bezierCurveTo(mx, from.y, mx, to.y, to.x, to.y);
-    ctx.strokeStyle = 'rgba(56,189,248,.12)';
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-    // Arrow head
-    const angle = Math.atan2(to.y - from.y, to.x - from.x);
-    const ax = to.x - Math.cos(angle)*16, ay = to.y - Math.sin(angle)*16;
-    ctx.beginPath();
-    ctx.moveTo(ax + Math.cos(angle)*8,   ay + Math.sin(angle)*8);
-    ctx.lineTo(ax + Math.cos(angle+2.6)*5, ay + Math.sin(angle+2.6)*5);
-    ctx.lineTo(ax + Math.cos(angle-2.6)*5, ay + Math.sin(angle-2.6)*5);
-    ctx.fillStyle = 'rgba(56,189,248,.25)';
-    ctx.fill();
-  });
-
-  // Nodes
-  gNodes.forEach(n => {
-    const isHov = hoveredNode === n.id;
-
-    // Directional color
-    let col;
-    if(n.isSel)        col = GCOL_SEL;
-    else if(n.role==='up')   col = GCOL_UP;
-    else                col = GCOL_DOWN;
-
-    const r = n.isSel ? 14 : (isHov ? 12 : 10);
-
-    // Glow for selected
-    if(n.isSel) {
-      ctx.beginPath(); ctx.arc(n.x, n.y, 24, 0, Math.PI*2);
-      const grd = ctx.createRadialGradient(n.x,n.y,8,n.x,n.y,24);
-      grd.addColorStop(0, col+'33'); grd.addColorStop(1,'transparent');
-      ctx.fillStyle = grd; ctx.fill();
-    }
-
-    // Circle fill
-    ctx.beginPath(); ctx.arc(n.x, n.y, r, 0, Math.PI*2);
-    if(n.isSel) {
-      ctx.fillStyle = col;
-    } else {
-      // dim test/old workflows
-      ctx.fillStyle = (n.tag==='test'||n.tag==='old') ? col+'33' : col+'66';
-    }
-    ctx.fill();
-
-    // Stroke
-    ctx.strokeStyle = n.isSel ? col : col+'55';
-    ctx.lineWidth   = n.isSel ? 2 : 1;
-    ctx.stroke();
-
-// Label — align based on position relative to canvas centre
-    const rect2 = document.getElementById('graphZone').getBoundingClientRect();
-    ctx.font      = `${n.isSel?'600':'400'} ${n.isSel?11:10}px 'IBM Plex Mono',monospace`;
-    ctx.fillStyle = n.isSel ? '#fff' : (isHov ? '#fff' : '#8896aa');
-    const label = n.id.length > 26 ? n.id.substring(0,24)+'..' : n.id;
-    if (n.isSel) {
-      ctx.textAlign = 'center';
-      ctx.fillText(label, n.x, n.y + r + 14);
-    } else {
-      const cxApprox = rect2.width / 2;
-      if (n.x < cxApprox - 20) {
-        ctx.textAlign = 'right';
-        ctx.fillText(label, n.x - r - 4, n.y + 3);
-      } else if (n.x > cxApprox + 20) {
-        ctx.textAlign = 'left';
-        ctx.fillText(label, n.x + r + 4, n.y + 3);
-      } else {
-        ctx.textAlign = 'center';
-        ctx.fillText(label, n.x, n.y + r + 14);
-      }
-    }
-
-    // Step count badge
-    if(n.isSel || isHov) {
-      ctx.font      = '500 9px Outfit,sans-serif';
-      ctx.fillStyle = n.isSel ? '#0b0f19' : '#fff';
-      ctx.fillText(n.acts, n.x, n.y + 3.5);
-    }
-  });
-
-  ctx.restore();
-}
-
-// Pan & Zoom
-cv.onwheel = e => {
-  e.preventDefault();
-  zoom = Math.max(0.3, Math.min(3, zoom * (e.deltaY > 0 ? 0.9 : 1.1)));
-  drawGraph();
-};
-cv.onmousedown = e => {
-  dragging=true; dragStart={x:e.clientX,y:e.clientY}; panStart={x:panX,y:panY};
-  cv.style.cursor='grabbing';
-};
-cv.onmousemove = e => {
-  if(dragging) {
-    panX = panStart.x + (e.clientX - dragStart.x);
-    panY = panStart.y + (e.clientY - dragStart.y);
-    drawGraph(); return;
-  }
-  const rect = cv.getBoundingClientRect();
-  const mx = (e.clientX - rect.left - panX) / zoom;
-  const my = (e.clientY - rect.top  - panY) / zoom;
-  let found = null;
-  for(const n of gNodes) { if(Math.hypot(n.x-mx,n.y-my)<16){found=n.id;break;} }
-  if(found !== hoveredNode) {
-    hoveredNode = found;
-    cv.style.cursor = found ? 'pointer' : 'grab';
-    drawGraph();
-  }
-};
-cv.onmouseup = e => {
-  if(dragging && Math.hypot(e.clientX-dragStart.x,e.clientY-dragStart.y)<5 && hoveredNode) selectWf(hoveredNode);
-  dragging=false; cv.style.cursor = hoveredNode?'pointer':'grab';
-};
-
-// Resize handle
-const resizeH = document.getElementById('resizeH');
-let resizing=false, startY=0, startH=0;
-resizeH.onmousedown = e => {
-  resizing=true; startY=e.clientY;
-  startH=document.getElementById('detailPanel').offsetHeight;
-  document.body.style.cursor='ns-resize'; e.preventDefault();
-};
-document.onmousemove = e => {
-  if(!resizing) return;
-  document.getElementById('detailPanel').style.height = Math.max(100, startH-(e.clientY-startY))+'px';
-  resizeCanvas(); drawGraph();
-};
-document.onmouseup = () => { resizing=false; document.body.style.cursor=''; };
-
-// Init
-renderList();
-cv.style.cursor = 'grab';
+// ─── INIT ─────────────────────────────────────────────────────
+renderPills();
+renderTips();
+updateSidebar();
 </script>
 </body>
 </html>
